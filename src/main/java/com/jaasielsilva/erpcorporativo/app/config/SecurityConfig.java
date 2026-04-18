@@ -7,6 +7,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
@@ -50,6 +51,7 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/login",
                     "/recuperar-senha",
+                    "/webjars/**",
                     "/css/**",
                     "/js/**",
                     "/img/**",
@@ -85,6 +87,7 @@ public class SecurityConfig {
                         apiAuthenticationEntryPoint,
                         new AntPathRequestMatcher("/api/**")
                 )
+                .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
                 .defaultAccessDeniedHandlerFor(
                         apiAccessDeniedHandler,
                         new AntPathRequestMatcher("/api/**")
@@ -93,9 +96,9 @@ public class SecurityConfig {
             .headers(headers -> headers
                 .contentSecurityPolicy(csp -> csp.policyDirectives(
                         "default-src 'self'; " +
-                        "script-src 'self'; " +
-                        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
-                        "font-src 'self' https://fonts.gstatic.com; " +
+                        "script-src 'self' 'unsafe-inline'; " +
+                        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; " +
+                        "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; " +
                         "img-src 'self' data:; " +
                         "object-src 'none'; " +
                         "frame-ancestors 'none'; " +

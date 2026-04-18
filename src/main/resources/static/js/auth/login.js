@@ -2,98 +2,45 @@
     const form = document.getElementById('loginForm');
     if (!form) return;
 
-    const emailEl = document.getElementById('email');
-    const passEl = document.getElementById('password');
-    const submitBtn = document.getElementById('submitBtn');
-    const serverAlert = document.getElementById('serverAlert');
+    const emailEl = document.getElementById('email')
+        || document.getElementById('username')
+        || form.querySelector('input[name="email"]')
+        || form.querySelector('input[name="username"]')
+        || form.querySelector('input[type="email"]');
 
-    const userField = document.getElementById('userField');
-    const passField = document.getElementById('passField');
-    const userError = document.getElementById('userError');
-    const passError = document.getElementById('passError');
-    const capsLockHint = document.getElementById('capsLockHint');
+    const passEl = document.getElementById('password')
+        || form.querySelector('input[name="password"]')
+        || form.querySelector('input[type="password"]');
 
-    const toggle = document.getElementById('togglePass');
+    const submitBtn = form.querySelector('button[type="submit"], input[type="submit"]');
 
-    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const toggleBtn = document.getElementById('togglePassword') || document.getElementById('togglePass');
+    const toggleIcon = document.getElementById('toggleIcon');
 
-    function setFieldError(fieldEl, inputEl, msgEl, msg) {
-        const hasError = Boolean(msg);
-        fieldEl.classList.toggle('is-invalid', hasError);
-        if (hasError) {
-            inputEl.setAttribute('aria-invalid', 'true');
-            msgEl.textContent = msg;
-        } else {
-            inputEl.removeAttribute('aria-invalid');
-            msgEl.textContent = '';
-        }
-    }
-
-    function validateEmail() {
-        const v = (emailEl.value || '').trim();
-        if (!v) return 'Informe o usuário.';
-        if (!EMAIL_RE.test(v)) return 'Informe um e-mail válido.';
-        return '';
-    }
-
-    function validatePassword() {
-        const v = passEl.value || '';
-        if (!v) return 'Informe a senha.';
-        if (v.length < 6) return 'A senha deve ter pelo menos 6 caracteres.';
-        return '';
-    }
-
-    function validateAll() {
-        const eMsg = validateEmail();
-        const pMsg = validatePassword();
-        setFieldError(userField, emailEl, userError, eMsg);
-        setFieldError(passField, passEl, passError, pMsg);
-        return { eMsg, pMsg };
-    }
-
-    emailEl.addEventListener('input', () => setFieldError(userField, emailEl, userError, validateEmail()));
-    passEl.addEventListener('input', () => setFieldError(passField, passEl, passError, validatePassword()));
-
-    function updateCapsLockHint(ev) {
-        if (!capsLockHint) return;
-        const caps = ev.getModifierState && ev.getModifierState('CapsLock');
-        capsLockHint.textContent = caps ? 'Caps Lock está ativado.' : '';
-    }
-
-    passEl.addEventListener('keydown', updateCapsLockHint);
-    passEl.addEventListener('keyup', updateCapsLockHint);
-    passEl.addEventListener('blur', () => {
-        if (capsLockHint) capsLockHint.textContent = '';
-    });
-
-    if (toggle) {
-        toggle.addEventListener('click', () => {
-            const isHidden = passEl.type === 'password';
-            passEl.type = isHidden ? 'text' : 'password';
-            toggle.textContent = isHidden ? 'Ocultar' : 'Mostrar';
-            toggle.setAttribute('aria-pressed', String(isHidden));
-            toggle.setAttribute('aria-label', isHidden ? 'Ocultar senha' : 'Mostrar senha');
+    if (toggleBtn && passEl) {
+        toggleBtn.addEventListener('click', () => {
+            const isPassword = passEl.type === 'password';
+            passEl.type = isPassword ? 'text' : 'password';
+            toggleBtn.setAttribute('aria-label', isPassword ? 'Ocultar senha' : 'Mostrar senha');
+            if (toggleIcon) {
+                toggleIcon.className = isPassword ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
+            }
         });
     }
 
-    form.addEventListener('submit', (ev) => {
-        const { eMsg, pMsg } = validateAll();
-        if (eMsg || pMsg) {
-            ev.preventDefault();
-            if (eMsg) {
-                emailEl.focus();
-            } else {
-                passEl.focus();
-            }
-            return;
+    form.addEventListener('submit', () => {
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.classList.add('is-loading');
         }
 
-        submitBtn.classList.add('is-loading');
-        submitBtn.disabled = true;
-    });
+        if (emailEl) {
+            emailEl.readOnly = true;
+        }
 
-    if (serverAlert && typeof serverAlert.focus === 'function') {
-        window.requestAnimationFrame(() => serverAlert.focus());
-    }
+        if (passEl) {
+            passEl.readOnly = true;
+        }
+    });
 })();
 
