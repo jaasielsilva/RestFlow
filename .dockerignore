@@ -1,0 +1,9 @@
+.git
+.gitignore
+.vscode
+target
+README.md
+HELP.md
+application-local.yml
+application-local.properties
+*.log

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RestFlow | Dashboard do SUPER MASTER</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/shared/admin.css}">
+</head>
+<body class="admin-app">
+    <div class="app-shell">
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="sidebar-brand-mark">RF</div>
+                <div class="sidebar-brand-copy">
+                    <h1>RestFlow</h1>
+                    <p>SaaS de gestao para restaurantes</p>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a class="sidebar-link is-active" th:href="@{/admin}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 13h8V3H3zM13 21h8v-6h-8zM13 11h8V3h-8zM3 21h8v-6H3z"/></svg>
+                    <span>Dashboard</span>
+                </a>
+                <a class="sidebar-link" th:href="@{/admin/restaurants}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 7h16v10H4z"/><path d="M8 7V5h8v2"/><path d="M8 17h8"/></svg>
+                    <span>Restaurantes</span>
+                </a>
+                <a class="sidebar-link" th:href="@{/admin/subscriptions}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 7h16"/><path d="M7 4v6"/><path d="M17 4v6"/><rect x="4" y="7" width="16" height="13" rx="2"/></svg>
+                    <span>Assinaturas</span>
+                </a>
+                <a class="sidebar-link" th:href="@{/admin/payments}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/></svg>
+                    <span>Pagamentos</span>
+                </a>
+                <a class="sidebar-link" th:href="@{/admin/users}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    <span>Usuarios</span>
+                </a>
+                <a class="sidebar-link" th:href="@{/admin/reports}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-7"/></svg>
+                    <span>Relatorios</span>
+                </a>
+                <a class="sidebar-link" th:href="@{/admin/settings}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06A2 2 0 1 1 3.4 16.9l.06-.06A1.65 1.65 0 0 0 3.8 15a1.65 1.65 0 0 0-1.51-1H2.2a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82L3.4 7.12A2 2 0 1 1 6.23 4.3l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06A2 2 0 1 1 20.6 7.1l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H22a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    <span>Configuracoes</span>
+                </a>
+                <form th:action="@{/logout}" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button class="sidebar-link" type="submit">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+                        <span>Logout</span>
+                    </button>
+                </form>
+            </nav>
+
+            <div class="sidebar-footer">
+                <strong>SUPER MASTER</strong>
+                <p>Controle total da operacao SaaS, clientes, receita e escalabilidade.</p>
+            </div>
+        </aside>
+
+        <section class="main-panel">
+            <header class="topbar">
+                <div class="topbar-search">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                    <input type="search" placeholder="Buscar restaurantes, usuarios, assinaturas..." />
+                </div>
+                <div class="topbar-actions">
+                    <button class="icon-button" type="button" aria-label="Notificacoes">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
+                    </button>
+                    <div class="avatar-card">
+                        <div class="avatar-mark">SM</div>
+                        <div class="avatar-copy">
+                            <strong>SUPER MASTER</strong>
+                            <span th:text="${dashboard.email()}"></span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <div class="page-title-block">
+                    <h1>Dashboard SaaS da Plataforma</h1>
+                    <p>Controle total dos restaurantes clientes, receita recorrente, crescimento da base e operacao em escala.</p>
+                </div>
+
+                <section class="admin-grid">
+                    <article class="card-panel metric-card admin-col-3" th:each="metrica : ${dashboard.metricas()}">
+                        <div class="metric-head">
+                            <p class="metric-label" th:text="${metrica.titulo()}"></p>
+                            <span class="metric-icon">
+                                <svg th:if="${metrica.icone() == 'store'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 7h16v10H4z"/><path d="M8 7V5h8v2"/><path d="M8 17h8"/></svg>
+                                <svg th:if="${metrica.icone() == 'sparkles'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m12 3 1.9 4.6L18.5 9l-4.6 1.9L12 15.5l-1.9-4.6L5.5 9l4.6-1.4z"/><path d="M19 14l.9 2.1L22 17l-2.1.9L19 20l-.9-2.1L16 17l2.1-.9z"/><path d="M5 14l.9 2.1L8 17l-2.1.9L5 20l-.9-2.1L2 17l2.1-.9z"/></svg>
+                                <svg th:if="${metrica.icone() == 'wallet'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M16 12h5"/><path d="M18 10v4"/></svg>
+                                <svg th:if="${metrica.icone() == 'chart'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-7"/></svg>
+                            </span>
+                        </div>
+                        <p class="metric-value" th:text="${metrica.valor()}"></p>
+                        <span class="metric-trend" th:classappend="${metrica.positiva()} ? ' is-positive' : ' is-negative'">
+                            <span th:text="${metrica.positiva()} ? '↑' : '↓'"></span>
+                            <span th:text="${metrica.variacao()}"></span>
+                        </span>
+                    </article>
+                </section>
+
+                <section class="admin-grid">
+                    <article class="card-panel admin-col-6">
+                        <div class="section-header">
+                            <div>
+                                <h2 class="section-title">Crescimento de Clientes</h2>
+                                <p class="section-copy">Evolucao da base de restaurantes ao longo dos ultimos meses.</p>
+                            </div>
+                        </div>
+                        <div class="chart-surface">
+                            <svg class="line-chart" viewBox="0 0 480 240" aria-label="Grafico de crescimento">
+                                <polyline
+                                        fill="none"
+                                        stroke="rgba(99,102,241,0.2)"
+                                        stroke-width="1"
+                                        points="40,180 120,150 200,138 280,110 360,96 440,70"/>
+                                <polyline
+                                        fill="none"
+                                        stroke="url(#growthGradient)"
+                                        stroke-width="4"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        points="40,180 120,150 200,138 280,110 360,96 440,70"/>
+                                <defs>
+                                    <linearGradient id="growthGradient" x1="0" x2="1" y1="0" y2="0">
+                                        <stop offset="0%" stop-color="#6366f1"/>
+                                        <stop offset="100%" stop-color="#22d3ee"/>
+                                    </linearGradient>
+                                </defs>
+                                <circle cx="40" cy="180" r="5" fill="#6366f1"/>
+                                <circle cx="120" cy="150" r="5" fill="#6366f1"/>
+                                <circle cx="200" cy="138" r="5" fill="#6366f1"/>
+                                <circle cx="280" cy="110" r="5" fill="#6366f1"/>
+                                <circle cx="360" cy="96" r="5" fill="#22d3ee"/>
+                                <circle cx="440" cy="70" r="5" fill="#22d3ee"/>
+                            </svg>
+                            <div class="chart-bars">
+                                <div class="chart-bar-item" th:each="item : ${dashboard.crescimentoClientes()}">
+                                    <div class="chart-bar" th:style="'height:' + ${item.value()} + 'px'"></div>
+                                    <div class="chart-label" th:text="${item.label()}"></div>
+                                    <div class="chart-value" th:text="${item.value()}"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="card-panel admin-col-6">
+                        <div class="section-header">
+                            <div>
+                                <h2 class="section-title">Receita Mensal</h2>
+                                <p class="section-copy">Projecao recorrente com base nos planos ativos dos restaurantes.</p>
+                            </div>
+                        </div>
+                        <div class="chart-bars">
+                            <div class="chart-bar-item" th:each="item : ${dashboard.receitaMensal()}">
+                                <div class="chart-bar" th:style="'height:' + ${item.value() / 12} + 'px'"></div>
+                                <div class="chart-label" th:text="${item.label()}"></div>
+                                <div class="chart-value" th:text="'R$ ' + ${item.value()}"></div>
+                            </div>
+                        </div>
+                    </article>
+                </section>
+
+                <section class="admin-grid">
+                    <article class="card-panel admin-col-4">
+                        <div class="section-header">
+                            <div>
+                                <h2 class="section-title">Distribuicao de Planos</h2>
+                                <p class="section-copy">Mix atual da carteira de restaurantes.</p>
+                            </div>
+                        </div>
+                        <div class="donut-layout">
+                            <div class="donut-chart"></div>
+                            <div class="legend-list">
+                                <div class="legend-item" th:each="item : ${dashboard.distribuicaoPlanos()}">
+                                    <span class="legend-label">
+                                        <span class="legend-dot" th:classappend="${item.label() == 'Start'} ? ' is-start' : (${item.label() == 'Growth'} ? ' is-growth' : ' is-scale')"></span>
+                                        <span th:text="${item.label()}"></span>
+                                    </span>
+                                    <strong th:text="${item.value()}"></strong>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="card-panel admin-col-8">
+                        <div class="section-header">
+                            <div>
+                                <h2 class="section-title">Visao Executiva</h2>
+                                <p class="section-copy">Painel ideal para controlar onboarding, assinaturas, operacao e saude financeira do RestFlow.</p>
+                            </div>
+                            <a class="table-action-button" th:href="@{/admin/restaurants}">Ver todos os restaurantes</a>
+                        </div>
+                        <div class="list-stack">
+                            <div class="list-item">
+                                <p class="list-title">Produto recomendado</p>
+                                <p class="list-meta">SaaS de gestao de restaurantes com assinatura, operacao por unidade, perfis administrativos e escalabilidade multi-tenant.</p>
+                            </div>
+                            <div class="list-item">
+                                <p class="list-title">Oportunidade de mercado</p>
+                                <p class="list-meta">Restaurantes precisam combinar operacao diaria, financeiro, assinaturas, equipe e crescimento em um unico produto de mercado.</p>
+                            </div>
+                            <div class="list-item">
+                                <p class="list-title">Direcao de produto</p>
+                                <p class="list-meta">Cardapio digital, pedidos, PDV, estoque, financeiro, assinatura e visao executiva para o dono da rede ou unidade.</p>
+                            </div>
+                        </div>
+                    </article>
+                </section>
+
+                <section class="card-panel">
+                    <div class="section-header">
+                        <div>
+                            <h2 class="section-title">Restaurantes Recentes</h2>
+                            <p class="section-copy">Base operacional dos clientes da plataforma com filtros, status visual e acoes do SUPER MASTER.</p>
+                        </div>
+                        <div class="table-actions">
+                            <button class="action-button is-secondary" type="button">Exportar</button>
+                            <button class="action-button" type="button">Novo Restaurante</button>
+                        </div>
+                    </div>
+
+                    <div class="filter-bar">
+                        <select class="filter-control">
+                            <option>Plano: Todos</option>
+                            <option>Start</option>
+                            <option>Growth</option>
+                            <option>Scale</option>
+                        </select>
+                        <select class="filter-control">
+                            <option>Status: Todos</option>
+                            <option>Ativo</option>
+                            <option>Trial</option>
+                            <option>Suspenso</option>
+                        </select>
+                        <input class="filter-control" type="date" />
+                        <input class="filter-control" type="search" placeholder="Pesquisa em tempo real" />
+                        <button class="action-button is-secondary" type="button">Filtrar</button>
+                    </div>
+
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Email</th>
+                                <th>Plano</th>
+                                <th>Status</th>
+                                <th>Data de criacao</th>
+                                <th>Acoes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="restaurant : ${dashboard.restaurantes()}">
+                                <td>
+                                    <div class="restaurant-name">
+                                        <strong th:text="${restaurant.nome()}"></strong>
+                                        <span class="muted-text" th:text="'ID #' + ${restaurant.id()}"></span>
+                                    </div>
+                                </td>
+                                <td th:text="${restaurant.email()}"></td>
+                                <td th:text="${restaurant.plano()}"></td>
+                                <td>
+                                    <span class="status-badge"
+                                          th:classappend="${restaurant.status() == 'Ativo'} ? ' is-active' : (${restaurant.status() == 'Trial'} ? ' is-trial' : ' is-inactive')"
+                                          th:text="${restaurant.status()}"></span>
+                                </td>
+                                <td th:text="${restaurant.criadoEm() != null ? #temporals.format(restaurant.criadoEm(), 'dd/MM/yyyy') : '-'}"></td>
+                                <td>
+                                    <div class="table-actions">
+                                        <a class="table-action-button" href="#">Ver detalhes</a>
+                                        <a class="table-action-button" href="#">Editar</a>
+                                        <a class="table-action-button" href="#">Suspender</a>
+                                        <a class="table-action-button" href="#">Impersonar</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+        </section>
+    </div>
+</body>
+</html>

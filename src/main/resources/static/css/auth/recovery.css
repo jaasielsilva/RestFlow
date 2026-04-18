@@ -1,0 +1,27 @@
+@import "./auth.css";
+
+.auth-card--recovery .auth-title h1 {
+    font-size: 1.25rem;
+}
+
+.recovery {
+    display: grid;
+    gap: 14px;
+}
+
+.recovery-steps {
+    margin: 0;
+    padding-left: 18px;
+    color: var(--auth-text);
+    line-height: 1.55;
+}
+
+.recovery-actions {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.primary--link {
+    text-decoration: none;
+}
+

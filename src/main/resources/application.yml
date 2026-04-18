@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: app
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:localhost}
+  thymeleaf:
+    cache: false
+  jpa:
+    open-in-view: false
+
+server:
+  port: ${SERVER_PORT:8080}
+
+app:
+  bootstrap:
+    tenant:
+      nome: Plataforma SaaS
+      slug: platform
+    super-admin:
+      nome: Super Admin
+      email: admin@erpcorporativo.com
+      password: ${BOOTSTRAP_SUPER_ADMIN_PASSWORD:}
