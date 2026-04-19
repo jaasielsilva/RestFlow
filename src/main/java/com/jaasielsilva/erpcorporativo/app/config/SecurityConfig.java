@@ -74,7 +74,7 @@ public class SecurityConfig {
             )
             .logout(logout -> logout
                 .logoutUrl("/logout")
-                .logoutSuccessUrl("/login?logout=true")
+                .logoutSuccessUrl("/login")
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
                 .permitAll()
@@ -87,7 +87,10 @@ public class SecurityConfig {
                         apiAuthenticationEntryPoint,
                         new AntPathRequestMatcher("/api/**")
                 )
-                .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
+                .defaultAuthenticationEntryPointFor(
+                        new LoginUrlAuthenticationEntryPoint("/login"),
+                        new AntPathRequestMatcher("/**")
+                )
                 .defaultAccessDeniedHandlerFor(
                         apiAccessDeniedHandler,
                         new AntPathRequestMatcher("/api/**")
@@ -96,8 +99,9 @@ public class SecurityConfig {
             .headers(headers -> headers
                 .contentSecurityPolicy(csp -> csp.policyDirectives(
                         "default-src 'self'; " +
-                        "script-src 'self' 'unsafe-inline'; " +
-                        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; " +
+                        "connect-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; " +
+                        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
+                        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; " +
                         "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; " +
                         "img-src 'self' data:; " +
                         "object-src 'none'; " +

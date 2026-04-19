@@ -27,6 +27,6 @@ public class LogoutWebController {
             request.getSession().invalidate();
         }
 
-        return "redirect:/login?logout=true";
+        return "redirect:/login";
     }
 }

@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import com.jaasielsilva.erpcorporativo.app.model.Role;
 import com.jaasielsilva.erpcorporativo.app.model.Usuario;
 import com.jaasielsilva.erpcorporativo.app.repository.usuario.UsuarioRepository;
 import com.jaasielsilva.erpcorporativo.app.tenant.TenantContext;
@@ -47,7 +48,14 @@ public class UsuarioDetailsService implements UserDetailsService {
                             "Usuário não encontrado para o tenant informado: " + email));
         }
 
-        return usuarioRepository.findFirstByEmailIgnoreCase(email)
+        Usuario usuario = usuarioRepository.findFirstByEmailIgnoreCase(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + email));
+
+        if (usuario.getRole() != Role.SUPER_ADMIN) {
+            throw new UsernameNotFoundException(
+                    "Tenant obrigatório para autenticação deste usuário. Informe X-Tenant-Id ou tenantId.");
+        }
+
+        return usuario;
     }
 }

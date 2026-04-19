@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="topbar(title, subtitle, showControls)">
+    <div class="topbar">
+        <div>
+            <h1 th:text="${title}">Título</h1>
+            <small th:if="${subtitle != null}" th:text="${subtitle}">Subtítulo</small>
+        </div>
+
+        <div class="topbar-right" th:if="${showControls}">
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" placeholder="Buscar..." />
+            </div>
+            <div class="topbar-notifications">
+                <button id="notifToggle" type="button" class="icon-btn topbar-bell-btn" aria-expanded="false" aria-controls="notifMenu">
+                    <i class="fa-regular fa-bell"></i>
+                    <span class="notif-badge">5</span>
+                </button>
+                <div id="notifMenu" class="notif-menu" hidden>
+                    <div class="notif-header">
+                        <strong>Notificações</strong>
+                        <button id="notifMarkAll" type="button" class="notif-link-btn">Marcar todas como lidas</button>
+                    </div>
+                    <div class="notif-item">
+                        <p class="notif-title">Tenant criado com sucesso</p>
+                        <small>Empresa Alpha foi adicionada na plataforma.</small>
+                    </div>
+                    <div class="notif-item">
+                        <p class="notif-title">Módulo habilitado</p>
+                        <small>Financeiro foi habilitado para o tenant Beta.</small>
+                    </div>
+                    <div class="notif-item">
+                        <p class="notif-title">Novo usuário ADMIN</p>
+                        <small>Conta admin@empresa.com foi criada.</small>
+                    </div>
+                    <a class="notif-view-all" th:href="@{/admin/notifications}">Ver todas</a>
+                </div>
+            </div>
+            <button class="icon-btn"><i class="fa-solid fa-gear"></i></button>
+            <div class="user-box">
+                <div class="avatar">SA</div>
+                <strong>Super Admin</strong>
+            </div>
+        </div>
+    </div>
+    <div id="app-toast-root" class="app-toast-root" aria-live="polite" aria-atomic="true"></div>
+    <script src="/js/shared/toast.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            if (window.AppToast) {
+                window.AppToast.fromDocument();
+            }
+
+            const toggle = document.getElementById("notifToggle");
+            const menu = document.getElementById("notifMenu");
+            const markAll = document.getElementById("notifMarkAll");
+            if (!toggle || !menu) {
+                return;
+            }
+
+            function closeMenu() {
+                menu.hidden = true;
+                toggle.setAttribute("aria-expanded", "false");
+            }
+
+            toggle.addEventListener("click", function () {
+                const isOpen = !menu.hidden;
+                if (isOpen) {
+                    closeMenu();
+                    return;
+                }
+                menu.hidden = false;
+                toggle.setAttribute("aria-expanded", "true");
+            });
+
+            document.addEventListener("click", function (event) {
+                if (!menu.hidden && !event.target.closest(".topbar-notifications")) {
+                    closeMenu();
+                }
+            });
+
+            if (markAll) {
+                markAll.addEventListener("click", function () {
+                    const badge = document.querySelector(".notif-badge");
+                    if (badge) {
+                        badge.textContent = "0";
+                    }
+                    if (window.AppToast) {
+                        window.AppToast.success("Todas as notificações foram marcadas como lidas.");
+                    }
+                    closeMenu();
+                });
+            }
+        });
+    </script>
+</th:block>
+</body>
+</html>

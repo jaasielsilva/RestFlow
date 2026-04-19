@@ -5,7 +5,8 @@ import org.springframework.stereotype.Component;
 
 import com.jaasielsilva.erpcorporativo.app.dto.api.auth.SessionResponse;
 import com.jaasielsilva.erpcorporativo.app.mapper.api.v1.auth.SessionApiMapper;
-import com.jaasielsilva.erpcorporativo.app.tenant.TenantContext;
+import com.jaasielsilva.erpcorporativo.app.security.AppUserDetails;
+import com.jaasielsilva.erpcorporativo.app.security.SecurityPrincipalUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -16,6 +17,7 @@ public class GetSessionUseCase {
     private final SessionApiMapper sessionApiMapper;
 
     public SessionResponse execute(Authentication authentication) {
-        return sessionApiMapper.toResponse(authentication, TenantContext.getTenantId());
+        AppUserDetails currentUser = SecurityPrincipalUtils.getCurrentUser(authentication);
+        return sessionApiMapper.toResponse(authentication, currentUser.getTenantId());
     }
 }

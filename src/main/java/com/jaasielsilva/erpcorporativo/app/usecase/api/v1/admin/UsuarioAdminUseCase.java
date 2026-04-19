@@ -154,6 +154,16 @@ public class UsuarioAdminUseCase {
         delete(id);
     }
 
+    @Transactional
+    public void resetTenantAdminPassword(Long tenantId, String newPassword) {
+        Usuario tenantAdmin = usuarioRepository.findFirstByTenantIdAndRoleOrderByIdAsc(tenantId, Role.ADMIN)
+                .orElseThrow(() -> new ResourceNotFoundException("ADMIN do tenant não encontrado: " + tenantId));
+
+        tenantAdmin.setPassword(encodeRequiredPassword(newPassword));
+        tenantAdmin.setAtivo(true);
+        usuarioRepository.save(tenantAdmin);
+    }
+
     private Usuario findUsuario(Long id) {
         return usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado: " + id));

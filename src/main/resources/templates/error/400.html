@@ -1,15 +1,33 @@
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Erro 400</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Erro 400 | ERP Corporativo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="/css/auth/home.css" />
+    <link rel="stylesheet" href="/css/shared/error.css" />
 </head>
-<body>
-    <main>
-        <h1>Erro 400</h1>
-        <p>Requisição inválida.</p>
-        <p th:text="${message}"></p>
+<body class="error-page">
+<div class="layout">
+    <aside th:replace="~{fragments/sidebar :: sidebar('home')}"></aside>
+    <main class="main">
+        <div th:replace="~{fragments/topbar :: topbar('Erro 400', 'Requisição inválida', false)}"></div>
+        <section class="bottom-grid" style="grid-template-columns: 1fr;">
+            <div class="error-card">
+                <span class="error-chip">Erro 400</span>
+                <h1 class="error-title">Não foi possível processar sua solicitação.</h1>
+                <p class="error-text">Revise os dados enviados e tente novamente.</p>
+                <div class="error-meta">
+                    <small>Detalhes</small>
+                    <code th:text="${message}">Mensagem</code>
+                </div>
+                <div class="error-actions">
+                    <a class="app-btn app-btn-primary" th:href="@{/home}">Voltar ao Dashboard</a>
+                </div>
+            </div>
+        </section>
     </main>
+</div>
 </body>
 </html>

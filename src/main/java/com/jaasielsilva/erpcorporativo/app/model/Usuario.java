@@ -17,6 +17,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.ParamDef;
 
 @Entity
 @Table(
@@ -25,6 +28,8 @@ import lombok.NoArgsConstructor;
                 @UniqueConstraint(name = "uk_usuarios_tenant_email", columnNames = {"tenant_id", "email"})
         }
 )
+@FilterDef(name = "tenantFilter", parameters = @ParamDef(name = "tenantId", type = Long.class))
+@Filter(name = "tenantFilter", condition = "tenant_id = :tenantId")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

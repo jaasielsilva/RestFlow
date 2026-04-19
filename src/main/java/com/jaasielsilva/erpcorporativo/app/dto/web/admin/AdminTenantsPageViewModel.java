@@ -2,10 +2,8 @@ package com.jaasielsilva.erpcorporativo.app.dto.web.admin;
 
 import java.util.List;
 
-import com.jaasielsilva.erpcorporativo.app.dto.api.admin.tenant.TenantResponse;
-
 public record AdminTenantsPageViewModel(
-        List<TenantResponse> tenants,
+        List<AdminTenantListItemViewModel> tenants,
         int page,
         int totalPages
 ) {

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<body>
+<aside class="sidebar" th:fragment="sidebar(active)">
+    <a href="#" class="brand">
+        <div class="brand-icon">
+            <i class="fa-solid fa-building-columns"></i>
+        </div>
+        <div>
+            <p class="brand-title">ERP</p>
+            <p class="brand-subtitle">Corporativo</p>
+        </div>
+    </a>
+
+    <div class="menu-title">Menu</div>
+
+    <a class="nav-link-custom" th:classappend="${active == 'home'} ? ' active' : ''" th:href="@{/home}">
+        <i class="fa-solid fa-house"></i> Dashboard
+    </a>
+    <a class="nav-link-custom" th:classappend="${active == 'tenants'} ? ' active' : ''" th:href="@{/admin/tenants}">
+        <i class="fa-solid fa-building"></i> Tenants
+    </a>
+    <a class="nav-link-custom" th:classappend="${active == 'modules'} ? ' active' : ''" th:href="@{/admin/modulos}">
+        <i class="fa-solid fa-puzzle-piece"></i> Módulos
+    </a>
+    <a class="nav-link-custom" th:classappend="${active == 'users'} ? ' active' : ''" th:href="@{/admin/users}">
+        <i class="fa-solid fa-users"></i> Usuários
+    </a>
+    <a class="nav-link-custom" th:classappend="${active == 'permissions'} ? ' active' : ''" th:href="@{/admin/permissions}">
+        <i class="fa-solid fa-shield-halved"></i> Permissões
+    </a>
+    <a class="nav-link-custom" th:classappend="${active == 'settings'} ? ' active' : ''" th:href="@{/admin/settings}">
+        <i class="fa-solid fa-gear"></i> Configurações
+    </a>
+    <a class="nav-link-custom" th:classappend="${active == 'reports'} ? ' active' : ''" th:href="@{/admin/reports}">
+        <i class="fa-solid fa-chart-column"></i> Relatórios
+    </a>
+
+    <div class="sidebar-footer">
+        <a class="nav-link-custom" href="#">
+            <i class="fa-solid fa-headset"></i> Suporte
+        </a>
+        <form th:action="@{/logout}" method="post" style="margin:0;">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <button type="submit"
+                    class="nav-link-custom"
+                    style="width:100%; border:0; background:transparent; text-align:left; cursor:pointer;">
+                <i class="fa-solid fa-right-from-bracket"></i> Sair
+            </button>
+        </form>
+    </div>
+</aside>
+</body>
+</html>

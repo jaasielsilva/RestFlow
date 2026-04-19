@@ -1,15 +1,33 @@
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Erro 401</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Erro 401 | ERP Corporativo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="/css/auth/home.css" />
+    <link rel="stylesheet" href="/css/shared/error.css" />
 </head>
-<body>
-    <main>
-        <h1>Erro 401</h1>
-        <p>Autenticação obrigatória.</p>
-        <p th:text="${message}"></p>
+<body class="error-page">
+<div class="layout">
+    <aside th:replace="~{fragments/sidebar :: sidebar('home')}"></aside>
+    <main class="main">
+        <div th:replace="~{fragments/topbar :: topbar('Erro 401', 'Autenticação obrigatória', false)}"></div>
+        <section class="bottom-grid" style="grid-template-columns: 1fr;">
+            <div class="error-card">
+                <span class="error-chip">Erro 401</span>
+                <h1 class="error-title">Sua sessão expirou ou o acesso não foi autenticado.</h1>
+                <p class="error-text">Faça login novamente para continuar navegando.</p>
+                <div class="error-meta">
+                    <small>Detalhes</small>
+                    <code th:text="${message}">Mensagem</code>
+                </div>
+                <div class="error-actions">
+                    <a class="app-btn app-btn-primary" th:href="@{/login}">Entrar novamente</a>
+                </div>
+            </div>
+        </section>
     </main>
+</div>
 </body>
 </html>
