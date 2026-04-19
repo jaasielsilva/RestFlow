@@ -51,7 +51,7 @@
                     <div class="col-12 col-md-6">
                         <label class="form-label">Senha</label>
                         <input class="form-control" type="password" th:field="*{password}"
-                               th:placeholder="${isEdit} ? 'Deixe em branco para manter a senha atual' : 'Informe a senha'}" />
+                               th:placeholder="${isEdit} ? 'Deixe em branco para manter a senha atual' : 'Informe a senha'" />
                         <div class="text-danger small mt-1" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Erro</div>
                     </div>
 

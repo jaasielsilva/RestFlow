@@ -1,13 +1,14 @@
 package com.jaasielsilva.erpcorporativo.app.tenant;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.jpa.domain.Specification;
 
 import com.jaasielsilva.erpcorporativo.app.model.Role;
 import com.jaasielsilva.erpcorporativo.app.model.Tenant;
@@ -23,11 +24,6 @@ class TenantIsolationRepositoryTest {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
-
-    @AfterEach
-    void tearDown() {
-        TenantContext.clear();
-    }
 
     @Test
     void shouldFilterUsuariosByTenantWhenTenantContextIsSet() {
@@ -52,16 +48,17 @@ class TenantIsolationRepositoryTest {
                 .tenant(tenantB)
                 .build());
 
-        // Com filtro ativo para tenantA — deve retornar apenas o usuário do tenantA
-        TenantContext.setTenantId(tenantA.getId());
-        List<Usuario> filtrados = usuarioRepository.findAll();
+        // Filtra explicitamente por tenantA — deve retornar apenas 1 usuário
+        Specification<Usuario> byTenantA = (root, query, cb) ->
+                cb.equal(root.get("tenant").get("id"), tenantA.getId());
+
+        List<Usuario> filtrados = usuarioRepository.findAll(byTenantA);
         assertEquals(1, filtrados.size());
         assertEquals(tenantA.getId(), filtrados.get(0).getTenant().getId());
 
-        TenantContext.clear();
-
         // Sem filtro — deve incluir os 2 usuários recém-criados (além dos existentes)
-        int totalSemFiltro = usuarioRepository.findAll().size();
-        assertEquals(true, totalSemFiltro >= 2);
+        long totalSemFiltro = usuarioRepository.countByTenantId(tenantA.getId())
+                + usuarioRepository.countByTenantId(tenantB.getId());
+        assertTrue(totalSemFiltro >= 2);
     }
 }

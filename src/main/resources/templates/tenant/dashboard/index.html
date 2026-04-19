@@ -1,108 +1,258 @@
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard do Cliente | ERP Corporativo</title>
-
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <link rel="stylesheet" href="/css/auth/home.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard | Portal Cliente</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/css/auth/home.css" />
 </head>
 <body>
 <div class="layout">
     <aside th:replace="~{fragments/sidebar-tenant :: sidebar(${activeMenu})}"></aside>
-
     <main class="main">
         <div th:replace="~{fragments/topbar :: topbar(${pageTitle}, ${pageSubtitle}, false)}"></div>
 
+        <!-- ═══════════════════════════════════════════════════════════
+             SEÇÃO 1 — KPIs de OS (visível para todos: READ+)
+        ═══════════════════════════════════════════════════════════ -->
         <section class="stats-grid">
             <div class="stat-card">
-                <div class="icon"><i class="fa-solid fa-users"></i></div>
-                <h6>Usuários Ativos</h6>
-                <h2 th:text="${view.usuariosAtivos}">0</h2>
+                <div class="icon"><i class="fa-solid fa-folder-open"></i></div>
+                <h6>OS Abertas</h6>
+                <h2 th:text="${view.osAbertas}">0</h2>
             </div>
             <div class="stat-card">
-                <div class="icon"><i class="fa-solid fa-puzzle-piece"></i></div>
-                <h6>Módulos Habilitados</h6>
-                <h2 th:text="${view.modulosHabilitados}">0</h2>
+                <div class="icon"><i class="fa-solid fa-spinner"></i></div>
+                <h6>Em Andamento</h6>
+                <h2 th:text="${view.osEmAndamento}">0</h2>
             </div>
             <div class="stat-card">
-                <div class="icon"><i class="fa-solid fa-user-shield"></i></div>
-                <h6>Admins Ativos</h6>
-                <h2 th:text="${view.adminsAtivos}">0</h2>
+                <div class="icon"><i class="fa-solid fa-circle-check"></i></div>
+                <h6>Concluídas</h6>
+                <h2 th:text="${view.osConcluidas}">0</h2>
             </div>
-            <div class="stat-card">
-                <div class="icon"><i class="fa-solid fa-user-group"></i></div>
-                <h6>Total de Usuários</h6>
-                <h2 th:text="${view.totalUsuarios}">0</h2>
+            <!-- ADMIN vê faturamento; USER vê canceladas -->
+            <div class="stat-card" th:if="${isAdmin}">
+                <div class="icon"><i class="fa-solid fa-wallet"></i></div>
+                <h6>Faturamento (mês)</h6>
+                <h2 th:text="${view.faturamentoMes != null ? 'R$ ' + #numbers.formatDecimal(view.faturamentoMes, 1, 'POINT', 2, 'COMMA') : 'R$ 0,00'}">R$ 0</h2>
+            </div>
+            <div class="stat-card" th:unless="${isAdmin}">
+                <div class="icon"><i class="fa-solid fa-ban"></i></div>
+                <h6>Canceladas</h6>
+                <h2 th:text="${view.osCanceladas}">0</h2>
             </div>
         </section>
 
-        <section class="bottom-grid" style="grid-template-columns: 1fr;">
+        <!-- ═══════════════════════════════════════════════════════════
+             SEÇÃO 2 — ADMIN: Gráfico + Financeiro + Carga de equipe
+        ═══════════════════════════════════════════════════════════ -->
+        <section class="bottom-grid" th:if="${isAdmin}">
+
+            <!-- Gráfico de OS — últimos 6 meses -->
             <div class="card-ui">
                 <div class="card-header-ui">
-                    <h4>Resumo Executivo</h4>
+                    <h4><i class="fa-solid fa-chart-line me-2"></i>OS — Últimos 6 meses</h4>
+                    <span class="text-muted small">Abertas vs Concluídas</span>
                 </div>
-                <p class="text-muted mb-0">
-                    Acesse rapidamente seus módulos liberados e acompanhe indicadores do seu tenant.
-                </p>
+                <canvas id="osChart" height="120"></canvas>
+            </div>
+
+            <!-- Financeiro executivo -->
+            <div class="card-ui">
+                <div class="card-header-ui">
+                    <h4><i class="fa-solid fa-wallet me-2"></i>Financeiro</h4>
+                </div>
+                <ul class="list-group list-group-flush mb-3">
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span class="text-muted">Faturamento este mês</span>
+                        <strong th:text="${view.faturamentoMes != null ? 'R$ ' + #numbers.formatDecimal(view.faturamentoMes, 1, 'POINT', 2, 'COMMA') : 'R$ 0,00'}">R$ 0</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span class="text-muted">Faturamento total (OS concluídas)</span>
+                        <strong th:text="${view.faturamentoTotal != null ? 'R$ ' + #numbers.formatDecimal(view.faturamentoTotal, 1, 'POINT', 2, 'COMMA') : 'R$ 0,00'}">R$ 0</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span class="text-muted">OS em aberto (pendentes)</span>
+                        <strong th:text="${view.osPendentesValor}">0</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span class="text-muted">Usuários ativos</span>
+                        <strong th:text="${view.usuariosAtivos}">0</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span class="text-muted">Módulos habilitados</span>
+                        <strong th:text="${view.modulosHabilitados}">0</strong>
+                    </li>
+                </ul>
+                <a class="app-btn app-btn-outline app-btn-sm" th:href="@{/app/pedidos}">
+                    <i class="fa-solid fa-receipt me-2"></i>Ver todas as OS
+                </a>
             </div>
         </section>
 
-        <section class="bottom-grid">
+        <!-- Carga por responsável — ADMIN only -->
+        <section class="bottom-grid" th:if="${isAdmin and !#lists.isEmpty(view.cargaPorResponsavel)}" style="grid-template-columns: 1fr;">
             <div class="card-ui">
                 <div class="card-header-ui">
-                    <h4>Módulos Liberados</h4>
+                    <h4><i class="fa-solid fa-users me-2"></i>Carga por Responsável</h4>
                 </div>
                 <div class="table-responsive">
                     <table class="table align-middle table-left">
                         <thead>
                         <tr>
-                            <th>Módulo</th>
-                            <th style="width: 160px;">Acessar</th>
+                            <th>Responsável</th>
+                            <th>Total OS</th>
+                            <th>Em aberto</th>
+                            <th>Concluídas</th>
+                            <th>Progresso</th>
                         </tr>
                         </thead>
                         <tbody>
-                        <tr th:if="${#lists.isEmpty(tenantModules)}">
-                            <td colspan="2" class="text-muted">Nenhum módulo habilitado.</td>
+                        <tr th:each="r : ${view.cargaPorResponsavel}">
+                            <td class="fw-semibold" th:text="${r.nome()}">—</td>
+                            <td th:text="${r.total()}">0</td>
+                            <td>
+                                <span class="badge bg-warning text-dark" th:text="${r.abertas()}">0</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-success" th:text="${r.concluidas()}">0</span>
+                            </td>
+                            <td style="min-width: 120px;">
+                                <div class="progress" style="height: 6px;">
+                                    <div class="progress-bar bg-success"
+                                         th:style="'width: ' + (${r.total()} > 0 ? (${r.concluidas()} * 100 / ${r.total()}) : 0) + '%'"
+                                         role="progressbar"></div>
+                                </div>
+                            </td>
                         </tr>
-                        <th:block th:each="m : ${tenantModules}">
-                            <tr th:if="${m.codigo != 'DASHBOARD'}">
-                                <td>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <span class="module-icon-chip" th:classappend="' ' + ${m.toneClass}">
-                                            <i th:class="${m.iconClass}"></i>
-                                        </span>
-                                        <span th:text="${m.nome}">Módulo</span>
-                                    </div>
-                                </td>
-                                <td>
-                                    <a class="app-btn app-btn-outline app-btn-sm" th:href="${m.path}">
-                                        <i class="fa-solid fa-arrow-right me-2"></i>Abrir
-                                    </a>
-                                </td>
-                            </tr>
-                        </th:block>
                         </tbody>
                     </table>
                 </div>
             </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             SEÇÃO 3 — OS Recentes + Ações Rápidas (todos veem)
+        ═══════════════════════════════════════════════════════════ -->
+        <section class="bottom-grid">
+
+            <!-- OS Recentes -->
+            <div class="card-ui">
+                <div class="card-header-ui d-flex justify-content-between align-items-center">
+                    <h4><i class="fa-solid fa-clock-rotate-left me-2"></i>OS Recentes</h4>
+                    <a class="app-btn app-btn-outline app-btn-sm" th:href="@{/app/pedidos}">
+                        <i class="fa-solid fa-arrow-right me-1"></i>Ver todas
+                    </a>
+                </div>
+
+                <div th:if="${#lists.isEmpty(view.osRecentes)}" class="text-muted py-2">
+                    Nenhuma ordem de serviço criada ainda.
+                </div>
+
+                <ul class="list-group list-group-flush" th:unless="${#lists.isEmpty(view.osRecentes)}">
+                    <li class="list-group-item px-0 d-flex justify-content-between align-items-center"
+                        th:each="os : ${view.osRecentes}">
+                        <div>
+                            <span class="badge bg-secondary me-2" th:text="${os.numero()}">OS-0001</span>
+                            <a th:href="@{/app/pedidos/{id}(id=${os.id()})}"
+                               th:text="${os.titulo()}" class="text-decoration-none fw-semibold">Título</a>
+                            <div class="text-muted small" th:text="${os.clienteNome()}">Cliente</div>
+                        </div>
+                        <span class="badge" th:classappend="' ' + ${os.statusCss()}" th:text="${os.status()}">Status</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Ações Rápidas -->
             <div class="card-ui">
                 <div class="card-header-ui">
-                    <h4>Ações Rápidas</h4>
+                    <h4><i class="fa-solid fa-bolt me-2"></i>Ações Rápidas</h4>
                 </div>
                 <div class="quick-actions">
-                    <a class="quick-btn blue" th:href="@{/app/usuarios}">
-                        <span><i class="fa-solid fa-users me-2"></i>Gerenciar Usuários</span><i class="fa-solid fa-chevron-right"></i>
+                    <a th:if="${canWrite}" class="quick-btn blue" th:href="@{/app/pedidos/new}">
+                        <span><i class="fa-solid fa-plus me-2"></i>Nova OS</span>
+                        <i class="fa-solid fa-chevron-right"></i>
                     </a>
-                    <a class="quick-btn green" th:href="@{/app}">
-                        <span><i class="fa-solid fa-chart-line me-2"></i>Atualizar Visão</span><i class="fa-solid fa-chevron-right"></i>
+                    <a class="quick-btn green" th:href="@{/app/pedidos}">
+                        <span><i class="fa-solid fa-receipt me-2"></i>Ver OS</span>
+                        <i class="fa-solid fa-chevron-right"></i>
                     </a>
+                    <a th:if="${isAdmin}" class="quick-btn yellow" th:href="@{/app/usuarios}">
+                        <span><i class="fa-solid fa-users me-2"></i>Gerenciar Equipe</span>
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </a>
+                    <a class="quick-btn" style="background:#f0fdf4;" th:href="@{/app/conhecimento}">
+                        <span><i class="fa-solid fa-book-open me-2"></i>Base de Conhecimento</span>
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </a>
+                </div>
+
+                <!-- Resumo de equipe — ADMIN only -->
+                <div th:if="${isAdmin}" class="mt-3">
+                    <h6 class="text-muted mb-2">Equipe</h6>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between px-0">
+                            <span class="text-muted">Total de usuários</span>
+                            <strong th:text="${view.totalUsuarios}">0</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between px-0">
+                            <span class="text-muted">Usuários ativos</span>
+                            <strong th:text="${view.usuariosAtivos}">0</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between px-0">
+                            <span class="text-muted">Admins</span>
+                            <strong th:text="${view.adminsAtivos}">0</strong>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </section>
+
     </main>
 </div>
+
+<script th:if="${isAdmin}" th:inline="javascript">
+    const labels     = /*[[${view.chartLabels}]]*/ [];
+    const abertas    = /*[[${view.chartAbertas}]]*/ [];
+    const concluidas = /*[[${view.chartConcluidas}]]*/ [];
+
+    if (labels.length > 0) {
+        new Chart(document.getElementById('osChart'), {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        type: 'bar',
+                        label: 'Abertas',
+                        data: abertas,
+                        backgroundColor: 'rgba(59,130,246,0.7)',
+                        borderRadius: 6
+                    },
+                    {
+                        type: 'line',
+                        label: 'Concluídas',
+                        data: concluidas,
+                        borderColor: '#10b981',
+                        backgroundColor: 'transparent',
+                        tension: 0.4,
+                        pointRadius: 4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { position: 'top' } },
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+            }
+        });
+    }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/shared/toast.js"></script>
 </body>
 </html>

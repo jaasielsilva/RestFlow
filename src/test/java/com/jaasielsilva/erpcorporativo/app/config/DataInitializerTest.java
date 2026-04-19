@@ -21,8 +21,10 @@ import com.jaasielsilva.erpcorporativo.app.config.properties.AppBootstrapPropert
 import com.jaasielsilva.erpcorporativo.app.model.Role;
 import com.jaasielsilva.erpcorporativo.app.model.Tenant;
 import com.jaasielsilva.erpcorporativo.app.model.Usuario;
+import com.jaasielsilva.erpcorporativo.app.repository.module.PlatformModuleRepository;
 import com.jaasielsilva.erpcorporativo.app.repository.tenant.TenantRepository;
 import com.jaasielsilva.erpcorporativo.app.repository.usuario.UsuarioRepository;
+import com.jaasielsilva.erpcorporativo.app.service.shared.PlatformSettingService;
 
 @ExtendWith(MockitoExtension.class)
 class DataInitializerTest {
@@ -36,12 +38,21 @@ class DataInitializerTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private PlatformSettingService platformSettingService;
+
+    @Mock
+    private PlatformModuleRepository platformModuleRepository;
+
+    @Mock
+    private com.jaasielsilva.erpcorporativo.app.repository.knowledge.KnowledgeArticleRepository knowledgeArticleRepository;
+
     private DataInitializer dataInitializer;
 
     @BeforeEach
     void setUp() {
         AppBootstrapProperties properties = new AppBootstrapProperties();
-        dataInitializer = new DataInitializer(usuarioRepository, passwordEncoder, tenantRepository, properties);
+        dataInitializer = new DataInitializer(usuarioRepository, passwordEncoder, tenantRepository, properties, platformSettingService, platformModuleRepository, knowledgeArticleRepository);
     }
 
     @Test

@@ -49,6 +49,7 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
+                    "/",
                     "/login",
                     "/recuperar-senha",
                     "/webjars/**",
@@ -60,7 +61,7 @@ public class SecurityConfig {
                 ).permitAll()
                 .requestMatchers("/home").hasRole("SUPER_ADMIN")
                 .requestMatchers("/app/conhecimento", "/app/conhecimento/**").hasAnyRole("ADMIN", "USER")
-                .requestMatchers("/app/**").hasRole("ADMIN")
+                .requestMatchers("/app/**").hasAnyRole("ADMIN", "USER")
                 .requestMatchers("/admin/**").hasRole("SUPER_ADMIN")
                 .requestMatchers("/api/v1/admin/**").hasRole("SUPER_ADMIN")
                 .requestMatchers("/api/v1/tenant-admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
@@ -77,7 +78,7 @@ public class SecurityConfig {
             )
             .logout(logout -> logout
                 .logoutUrl("/logout")
-                .logoutSuccessUrl("/login")
+                .logoutSuccessUrl("/")
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
                 .permitAll()

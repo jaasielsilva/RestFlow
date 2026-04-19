@@ -83,13 +83,14 @@
                                     <th>Usuários</th>
                                     <th>Email Admin</th>
                                     <th>Status</th>
+                                    <th>Contrato</th>
                                     <th>Criação</th>
                                     <th style="width: 250px;">Ações</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr th:if="${#lists.isEmpty(view.tenants)}">
-                                    <td colspan="7" class="text-muted">Nenhum tenant encontrado.</td>
+                                    <td colspan="8" class="text-muted">Nenhum tenant encontrado.</td>
                                 </tr>
                                 <tr th:each="tenant : ${view.tenants}">
                                     <td th:text="${tenant.nome}">Empresa</td>
@@ -101,9 +102,19 @@
                                             th:classappend="${tenant.ativo} ? ' badge-success' : ' badge-warning'"
                                             th:text="${tenant.ativo} ? 'Ativo' : 'Inativo'">Ativo</span>
                                     </td>
-                                    <td
-                                        th:text="${tenant.createdAt != null ? #temporals.format(tenant.createdAt, 'dd/MM/yyyy') : '-'}">
-                                        -</td>
+                                    <td>
+                                        <span class="badge"
+                                              th:classappend="${tenant.contractStatus == 'ATIVO'} ? ' bg-success' :
+                                                              (${tenant.contractStatus == 'SUSPENSO'} ? ' bg-warning text-dark' :
+                                                              (${tenant.contractStatus == 'ENCERRADO'} ? ' bg-danger' : ' bg-secondary'))"
+                                              th:text="${tenant.contractStatus}">—</span>
+                                        <a th:if="${tenant.contractStatus == 'SEM CONTRATO'}"
+                                           class="app-btn app-btn-outline app-btn-sm ms-1"
+                                           th:href="@{/admin/contratos/new(tenantId=${tenant.id})}">
+                                            <i class="fa-solid fa-plus me-1"></i>Contrato
+                                        </a>
+                                    </td>
+                                    <td th:text="${tenant.createdAt != null ? #temporals.format(tenant.createdAt, 'dd/MM/yyyy') : '-'}">-</td>
                                     <td>
                                         <div th:replace="~{fragments/table-actions :: tenantActions(${tenant.id})}"></div>
                                     </td>

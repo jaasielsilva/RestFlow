@@ -44,6 +44,12 @@ public class TenantRequestFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain
     ) throws ServletException, IOException {
+        // Bypass para rotas públicas — não precisam de processamento de tenant
+        String uri = request.getRequestURI();
+        if (isPublicRoute(uri)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
         try {
             boolean apiRequest = isApiRequest(request);
             boolean tenantRequired = requiresTenant(request);
@@ -180,6 +186,20 @@ public class TenantRequestFilter extends OncePerRequestFilter {
     private boolean isApiRequest(HttpServletRequest request) {
         String uri = request.getRequestURI();
         return uri != null && uri.startsWith("/api/");
+    }
+
+    private boolean isPublicRoute(String uri) {
+        if (uri == null) return false;
+        return uri.equals("/")
+                || uri.equals("/login")
+                || uri.equals("/logout")
+                || uri.startsWith("/recuperar-senha")
+                || uri.startsWith("/css/")
+                || uri.startsWith("/js/")
+                || uri.startsWith("/img/")
+                || uri.startsWith("/webjars/")
+                || uri.equals("/favicon.ico")
+                || uri.equals("/api/v1/system/health");
     }
 
     private boolean requiresTenant(HttpServletRequest request) {

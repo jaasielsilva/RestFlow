@@ -1,8 +1,10 @@
 package com.jaasielsilva.erpcorporativo.app.usecase.web.admin;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.TextStyle;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -14,9 +16,16 @@ import com.jaasielsilva.erpcorporativo.app.dto.web.admin.AdminDashboardViewModel
 import com.jaasielsilva.erpcorporativo.app.dto.web.admin.PlatformChartPointViewModel;
 import com.jaasielsilva.erpcorporativo.app.dto.web.admin.PlatformMetricViewModel;
 import com.jaasielsilva.erpcorporativo.app.dto.web.admin.RestaurantRowViewModel;
+import com.jaasielsilva.erpcorporativo.app.dto.web.admin.contract.ContractAlertViewModel;
+import com.jaasielsilva.erpcorporativo.app.dto.web.admin.contract.ContractKpiViewModel;
 import com.jaasielsilva.erpcorporativo.app.mapper.web.admin.AdminDashboardWebMapper;
+import com.jaasielsilva.erpcorporativo.app.model.Contract;
+import com.jaasielsilva.erpcorporativo.app.model.ContractStatus;
+import com.jaasielsilva.erpcorporativo.app.model.PaymentStatus;
 import com.jaasielsilva.erpcorporativo.app.model.Role;
 import com.jaasielsilva.erpcorporativo.app.model.Tenant;
+import com.jaasielsilva.erpcorporativo.app.repository.contract.ContractRepository;
+import com.jaasielsilva.erpcorporativo.app.repository.contract.PaymentRecordRepository;
 import com.jaasielsilva.erpcorporativo.app.repository.tenant.TenantRepository;
 import com.jaasielsilva.erpcorporativo.app.repository.usuario.UsuarioRepository;
 
@@ -29,6 +38,8 @@ public class BuildAdminDashboardUseCase {
     private final UsuarioRepository usuarioRepository;
     private final TenantRepository tenantRepository;
     private final AdminDashboardWebMapper adminDashboardWebMapper;
+    private final ContractRepository contractRepository;
+    private final PaymentRecordRepository paymentRecordRepository;
 
     public AdminDashboardViewModel execute(Authentication authentication) {
         List<Tenant> restaurants = tenantRepository.findAll().stream()
@@ -51,6 +62,9 @@ public class BuildAdminDashboardUseCase {
                 .mapToLong(this::resolveMonthlyRevenue)
                 .sum();
 
+        ContractKpiViewModel contractKpis = buildContractKpis();
+        List<ContractAlertViewModel> contractAlerts = buildContractAlerts();
+
         return adminDashboardWebMapper.toViewModel(
                 authentication.getName(),
                 totalUsuarios,
@@ -59,8 +73,42 @@ public class BuildAdminDashboardUseCase {
                 buildGrowthChart(restaurants),
                 buildRevenueChart(restaurants),
                 buildPlanDistribution(restaurants),
-                buildRestaurantRows(restaurants)
+                buildRestaurantRows(restaurants),
+                contractKpis,
+                contractAlerts
         );
+    }
+
+    private ContractKpiViewModel buildContractKpis() {
+        long totalAtivos = contractRepository.countByStatus(ContractStatus.ATIVO);
+        long totalVencidos = contractRepository.countByStatusAndDataTerminoBefore(ContractStatus.ATIVO, LocalDate.now());
+        long totalAtrasados = paymentRecordRepository.countByStatus(PaymentStatus.ATRASADO);
+        BigDecimal mrrTotal = contractRepository.sumValorMensalByStatus(ContractStatus.ATIVO);
+        return new ContractKpiViewModel(totalAtivos, totalVencidos, totalAtrasados, mrrTotal);
+    }
+
+    private List<ContractAlertViewModel> buildContractAlerts() {
+        LocalDate hoje = LocalDate.now();
+        LocalDate em30Dias = hoje.plusDays(30);
+
+        List<Contract> vencendo = contractRepository.findByStatusAndDataTerminoBetween(
+                ContractStatus.ATIVO, hoje, em30Dias);
+
+        List<ContractAlertViewModel> alerts = new ArrayList<>();
+        for (Contract c : vencendo) {
+            boolean pagamentoAtrasado = paymentRecordRepository
+                    .findFirstByContractIdOrderByMesReferenciaDesc(c.getId())
+                    .map(p -> p.getStatus() == PaymentStatus.ATRASADO)
+                    .orElse(false);
+            alerts.add(new ContractAlertViewModel(
+                    c.getId(),
+                    c.getTenant().getNome(),
+                    c.getDataTermino(),
+                    true,
+                    pagamentoAtrasado
+            ));
+        }
+        return alerts;
     }
 
     private boolean isRestaurantTenant(Tenant tenant) {

@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <body>
-<aside class="sidebar" th:fragment="sidebar(active)">
+<th:block th:fragment="sidebar(active)">
+<aside class="sidebar">
     <a href="#" class="brand">
         <div class="brand-icon">
             <i class="fa-solid fa-store"></i>
@@ -30,15 +31,38 @@
     </p>
 
     <div class="sidebar-footer">
-        <form th:action="@{/logout}" method="post" style="margin:0;">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-            <button type="submit"
-                    class="nav-link-custom"
-                    style="width:100%; border:0; background:transparent; text-align:left; cursor:pointer;">
-                <i class="fa-solid fa-right-from-bracket"></i> Sair
-            </button>
-        </form>
+        <button type="button" class="nav-link-custom"
+                style="width:100%; border:0; background:transparent; text-align:left; cursor:pointer;"
+                onclick="document.getElementById('modalSair').style.display='flex';">
+            <i class="fa-solid fa-right-from-bracket"></i> Sair
+        </button>
     </div>
 </aside>
+
+<!-- Modal confirmação de saída -->
+<div id="modalSair"
+     style="display:none; position:fixed; inset:0; z-index:9999; align-items:center; justify-content:center; background:rgba(0,0,0,0.5);">
+    <div style="background:#fff; border-radius:12px; padding:24px; max-width:320px; width:90%; box-shadow:0 8px 32px rgba(0,0,0,0.18);">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+            <h5 style="margin:0; font-size:1rem;">
+                <i class="fa-solid fa-right-from-bracket me-2" style="color:#dc3545;"></i>Sair do sistema
+            </h5>
+            <button onclick="document.getElementById('modalSair').style.display='none';"
+                    style="border:none; background:none; font-size:1.2rem; cursor:pointer; color:#6c757d;">&times;</button>
+        </div>
+        <p style="color:#6c757d; margin-bottom:20px;">Tem certeza que deseja encerrar sua sessão?</p>
+        <div style="display:flex; gap:8px; justify-content:flex-end;">
+            <button onclick="document.getElementById('modalSair').style.display='none';"
+                    class="btn btn-outline-secondary btn-sm">Cancelar</button>
+            <form th:action="@{/logout}" method="post" style="margin:0;">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <button type="submit" class="btn btn-danger btn-sm">
+                    <i class="fa-solid fa-right-from-bracket me-1"></i>Sair
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+</th:block>
 </body>
 </html>

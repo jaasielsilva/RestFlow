@@ -18,6 +18,9 @@ import com.jaasielsilva.erpcorporativo.app.repository.module.TenantModuleReposit
 import com.jaasielsilva.erpcorporativo.app.repository.plan.SubscriptionPlanRepository;
 import com.jaasielsilva.erpcorporativo.app.repository.tenant.TenantRepository;
 
+import com.jaasielsilva.erpcorporativo.app.model.AuditAction;
+import com.jaasielsilva.erpcorporativo.app.service.shared.AuditService;
+
 import lombok.RequiredArgsConstructor;
 
 @Component
@@ -28,6 +31,7 @@ public class SubscriptionPlanAdminUseCase {
     private final PlatformModuleRepository platformModuleRepository;
     private final TenantRepository tenantRepository;
     private final TenantModuleRepository tenantModuleRepository;
+    private final AuditService auditService;
 
     @Transactional(readOnly = true)
     public List<SubscriptionPlan> listAll() {
@@ -99,8 +103,10 @@ public class SubscriptionPlanAdminUseCase {
 
         tenant.setSubscriptionPlan(plan);
         tenantRepository.save(tenant);
-
         provisionTenantModules(tenant, plan);
+        auditService.log(AuditAction.TENANT_PLANO_ATRIBUIDO,
+                "Plano '" + plan.getNome() + "' atribuído ao tenant '" + tenant.getNome() + "'.",
+                "Tenant", tenant.getId(), "SUPER_ADMIN", null);
     }
 
     /**

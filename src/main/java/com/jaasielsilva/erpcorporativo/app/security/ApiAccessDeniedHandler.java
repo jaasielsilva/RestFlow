@@ -30,6 +30,15 @@ public class ApiAccessDeniedHandler implements AccessDeniedHandler {
             HttpServletResponse response,
             AccessDeniedException accessDeniedException
     ) throws IOException, ServletException {
+        String uri = request.getRequestURI();
+        boolean isApiRequest = uri != null && uri.startsWith("/api/");
+
+        if (!isApiRequest) {
+            // Rota web — redireciona para login
+            response.sendRedirect("/login");
+            return;
+        }
+
         ApiErrorResponse body = new ApiErrorResponse(
                 "error",
                 ApiErrorCode.ACCESS_DENIED.name(),

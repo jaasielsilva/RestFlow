@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Relatórios | ERP Corporativo</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="/css/auth/home.css" />
+</head>
+<body>
+<div class="layout">
+    <aside th:replace="~{fragments/sidebar :: sidebar('reports')}"></aside>
+    <main class="main">
+        <div th:replace="~{fragments/topbar :: topbar('Relatórios', 'Consolidação e análise dos dados da plataforma', false)}"></div>
+
+        <!-- KPIs -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="icon"><i class="fa-solid fa-building"></i></div>
+                <h6>Tenants Ativos</h6>
+                <h2 th:text="${tenantsAtivos}">0</h2>
+            </div>
+            <div class="stat-card">
+                <div class="icon"><i class="fa-solid fa-building-circle-xmark"></i></div>
+                <h6>Tenants Inativos</h6>
+                <h2 th:text="${tenantsInativos}">0</h2>
+            </div>
+            <div class="stat-card">
+                <div class="icon"><i class="fa-solid fa-user-group"></i></div>
+                <h6>Total de Usuários</h6>
+                <h2 th:text="${totalUsuarios}">0</h2>
+            </div>
+            <div class="stat-card">
+                <div class="icon"><i class="fa-solid fa-wallet"></i></div>
+                <h6>MRR Estimado</h6>
+                <h2 th:text="'R$ ' + ${mrr}">R$ 0</h2>
+            </div>
+            <div class="stat-card">
+                <div class="icon"><i class="fa-solid fa-calendar-plus"></i></div>
+                <h6>Novos Tenants (mês)</h6>
+                <h2 th:text="${novosMes}">0</h2>
+            </div>
+            <div class="stat-card">
+                <div class="icon"><i class="fa-solid fa-shield-halved"></i></div>
+                <h6>Ações Auditadas Hoje</h6>
+                <h2 th:text="${logsHoje}">0</h2>
+            </div>
+        </section>
+
+        <section class="bottom-grid">
+            <!-- Distribuição por plano -->
+            <div class="card-ui">
+                <div class="card-header-ui">
+                    <h4><i class="fa-solid fa-layer-group me-2"></i>Distribuição por Plano</h4>
+                </div>
+
+                <div th:if="${tenantsPorPlano.isEmpty()}" class="text-muted py-3">
+                    Nenhum plano atribuído ainda.
+                </div>
+
+                <div th:unless="${tenantsPorPlano.isEmpty()}">
+                    <div th:each="entry : ${tenantsPorPlano}" class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span th:text="${entry.key}">Plano</span>
+                            <strong th:text="${entry.value} + ' tenant(s)'">0</strong>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar"
+                                 th:style="'width: ' + (${tenantsAtivos + tenantsInativos} > 0 ? (${entry.value} * 100 / (${tenantsAtivos} + ${tenantsInativos})) : 0) + '%'"
+                                 role="progressbar"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Atalhos e resumo -->
+            <div class="card-ui">
+                <div class="card-header-ui">
+                    <h4><i class="fa-solid fa-list-check me-2"></i>Resumo da Plataforma</h4>
+                </div>
+                <ul class="list-group list-group-flush mb-3">
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span class="text-muted">Módulos ativos</span>
+                        <strong th:text="${modulosAtivos}">0</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span class="text-muted">Planos cadastrados</span>
+                        <strong th:text="${planosAtivos}">0</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span class="text-muted">Tenants ativos</span>
+                        <strong th:text="${tenantsAtivos}">0</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span class="text-muted">Tenants inativos</span>
+                        <strong th:text="${tenantsInativos}">0</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span class="text-muted">Total de usuários</span>
+                        <strong th:text="${totalUsuarios}">0</strong>
+                    </li>
+                </ul>
+
+                <div class="d-flex flex-column gap-2">
+                    <a class="app-btn app-btn-outline app-btn-sm" th:href="@{/admin/reports/audit}">
+                        <i class="fa-solid fa-clock-rotate-left me-2"></i>Log de Auditoria
+                    </a>
+                    <a class="app-btn app-btn-outline app-btn-sm" th:href="@{/admin/tenants}">
+                        <i class="fa-solid fa-building me-2"></i>Gerenciar Tenants
+                    </a>
+                    <a class="app-btn app-btn-outline app-btn-sm" th:href="@{/admin/users}">
+                        <i class="fa-solid fa-users me-2"></i>Gerenciar Usuários
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

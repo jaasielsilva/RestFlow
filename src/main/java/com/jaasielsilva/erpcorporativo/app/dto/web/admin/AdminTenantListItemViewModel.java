@@ -9,6 +9,7 @@ public record AdminTenantListItemViewModel(
         boolean ativo,
         long totalUsuarios,
         LocalDateTime createdAt,
-        String adminEmail
+        String adminEmail,
+        String contractStatus
 ) {
 }

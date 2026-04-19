@@ -1,0 +1,51 @@
+package com.jaasielsilva.erpcorporativo.app.model;
+
+public enum AuditAction {
+    // Tenants
+    TENANT_CRIADO,
+    TENANT_ATUALIZADO,
+    TENANT_REMOVIDO,
+    TENANT_PLANO_ATRIBUIDO,
+
+    // Usuários
+    USUARIO_CRIADO,
+    USUARIO_ATUALIZADO,
+    USUARIO_REMOVIDO,
+    USUARIO_SENHA_RESETADA,
+
+    // Módulos
+    MODULO_CRIADO,
+    MODULO_HABILITADO,
+    MODULO_DESABILITADO,
+
+    // Permissões
+    PERMISSAO_ATUALIZADA,
+    PLANO_CRIADO,
+    PLANO_ATUALIZADO,
+    PLANO_REMOVIDO,
+
+    // Conhecimento
+    ARTIGO_CRIADO,
+    ARTIGO_ATUALIZADO,
+    ARTIGO_REMOVIDO,
+    ARTIGO_PUBLICADO,
+    ARTIGO_DESPUBLICADO,
+
+    // Configurações
+    CONFIGURACAO_ATUALIZADA,
+
+    // Auth
+    LOGIN_SUCESSO,
+    LOGIN_FALHA,
+
+    // Contratos
+    CONTRACT_CRIADO,
+    CONTRACT_ATUALIZADO,
+    CONTRACT_ENCERRADO,
+    CONTRACT_SUSPENSO,
+    CONTRACT_REMOVIDO,
+
+    // Pagamentos
+    PAGAMENTO_REGISTRADO,
+    PAGAMENTO_ATUALIZADO
+}

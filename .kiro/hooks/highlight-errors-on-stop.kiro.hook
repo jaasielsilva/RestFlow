@@ -1,0 +1,15 @@
+{
+  "enabled": true,
+  "name": "Highlight Errors on Stop",
+  "description": "After the agent stops, prints a visual separator in the terminal to make it easy to identify where the last execution ended and spot errors quickly",
+  "version": "1",
+  "when": {
+    "type": "agentStop"
+  },
+  "then": {
+    "type": "runCommand",
+    "command": "echo \"\" && echo \"========================================\" && echo \"  AGENT STOP — verifique erros acima\" && echo \"========================================\" && echo \"\""
+  },
+  "workspaceFolderName": "RestFlow",
+  "shortName": "highlight-errors-on-stop"
+}

@@ -9,24 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/admin")
 public class AdminPlaceholderWebController {
 
-    @GetMapping("/settings")
-    public String settings(Model model) {
-        model.addAttribute("activeMenu", "settings");
-        model.addAttribute("pageTitle", "Configurações");
-        model.addAttribute("pageSubtitle", "Parâmetros globais e preferências da plataforma");
-        model.addAttribute("moduleName", "Configurações");
-        return "admin/placeholder/index";
-    }
-
-    @GetMapping("/reports")
-    public String reports(Model model) {
-        model.addAttribute("activeMenu", "reports");
-        model.addAttribute("pageTitle", "Relatórios");
-        model.addAttribute("pageSubtitle", "Consolidação e análise dos dados da plataforma");
-        model.addAttribute("moduleName", "Relatórios");
-        return "admin/placeholder/index";
-    }
-
     @GetMapping("/notifications")
     public String notifications(Model model) {
         model.addAttribute("activeMenu", "home");

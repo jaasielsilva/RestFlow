@@ -39,6 +39,12 @@ public class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             return;
         }
 
-        response.sendError(HttpServletResponse.SC_FORBIDDEN, "Acesso restrito ao SUPER_ADMIN.");
+        // USER também vai para o portal do tenant
+        if (authentication.getPrincipal() instanceof AppUserDetails) {
+            getRedirectStrategy().sendRedirect(request, response, "/app");
+            return;
+        }
+
+        response.sendError(HttpServletResponse.SC_FORBIDDEN, "Acesso não autorizado.");
     }
 }

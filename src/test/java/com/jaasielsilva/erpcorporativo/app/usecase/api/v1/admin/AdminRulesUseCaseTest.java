@@ -22,6 +22,7 @@ import com.jaasielsilva.erpcorporativo.app.exception.ConflictException;
 import com.jaasielsilva.erpcorporativo.app.mapper.api.v1.admin.TenantAdminApiMapper;
 import com.jaasielsilva.erpcorporativo.app.mapper.api.v1.admin.UsuarioAdminApiMapper;
 import com.jaasielsilva.erpcorporativo.app.model.Role;
+import com.jaasielsilva.erpcorporativo.app.service.shared.AuditService;
 import com.jaasielsilva.erpcorporativo.app.model.Tenant;
 import com.jaasielsilva.erpcorporativo.app.model.Usuario;
 import com.jaasielsilva.erpcorporativo.app.repository.tenant.TenantRepository;
@@ -39,10 +40,13 @@ class AdminRulesUseCaseTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private AuditService auditService;
+
     @Test
     void deveCriarTenantComAdminInicial() {
         TenantAdminApiMapper mapper = new TenantAdminApiMapper();
-        TenantAdminUseCase useCase = new TenantAdminUseCase(tenantRepository, usuarioRepository, mapper, passwordEncoder);
+        TenantAdminUseCase useCase = new TenantAdminUseCase(tenantRepository, usuarioRepository, mapper, passwordEncoder, auditService);
 
         TenantRequest request = new TenantRequest(
                 "Cliente A",

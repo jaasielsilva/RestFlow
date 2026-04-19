@@ -20,6 +20,8 @@ import com.jaasielsilva.erpcorporativo.app.dto.web.tenantadmin.TenantUserForm;
 import com.jaasielsilva.erpcorporativo.app.dto.api.admin.user.UsuarioResponse;
 import com.jaasielsilva.erpcorporativo.app.exception.AppException;
 import com.jaasielsilva.erpcorporativo.app.model.Role;
+import com.jaasielsilva.erpcorporativo.app.security.AppUserDetails;
+import com.jaasielsilva.erpcorporativo.app.security.SecurityPrincipalUtils;
 import com.jaasielsilva.erpcorporativo.app.service.web.tenantadmin.TenantDashboardWebService;
 import com.jaasielsilva.erpcorporativo.app.service.web.tenantadmin.TenantPortalWebService;
 import com.jaasielsilva.erpcorporativo.app.service.web.tenantadmin.TenantUserWebService;
@@ -38,10 +40,18 @@ public class TenantDashboardWebController {
     @GetMapping
     public String index(Authentication authentication, Model model) {
         populateSidebar(authentication, model);
+        AppUserDetails user = SecurityPrincipalUtils.getCurrentUser(authentication);
+        boolean isAdmin = user.getRole() == Role.ADMIN
+                || user.getRole() == Role.SUPER_ADMIN;
+
+        TenantPortalModuleViewModel dashModule = tenantPortalWebService.requireEnabledModule(authentication, "DASHBOARD");
+
         model.addAttribute("activeMenu", tenantPortalWebService.dashboardKey());
-        model.addAttribute("pageTitle", "Dashboard do Cliente");
-        model.addAttribute("pageSubtitle", "Visão inicial do seu tenant");
+        model.addAttribute("pageTitle", "Dashboard");
+        model.addAttribute("pageSubtitle", isAdmin ? "Visão executiva do seu tenant" : "Visão geral das suas atividades");
         model.addAttribute("view", tenantDashboardWebService.build(authentication));
+        model.addAttribute("isAdmin", isAdmin);
+        model.addAttribute("canWrite", dashModule.canWrite());
         return "tenant/dashboard/index";
     }
 

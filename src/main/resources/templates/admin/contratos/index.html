@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contratos | ERP Corporativo</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="/css/auth/home.css" />
+</head>
+<body>
+<div class="layout">
+    <aside th:replace="~{fragments/sidebar :: sidebar('contratos')}"></aside>
+    <main class="main">
+        <div th:replace="~{fragments/topbar :: topbar('Contratos', 'Gestão de contratos e assinaturas', false)}"></div>
+
+        <div data-app-toast data-toast-type="success" th:attr="data-toast-message=${toastSuccess}" th:if="${toastSuccess != null}"></div>
+        <div data-app-toast data-toast-type="error"   th:attr="data-toast-message=${toastError}"   th:if="${toastError != null}"></div>
+
+        <!-- KPIs -->
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="icon"><i class="fa-solid fa-file-contract"></i></div>
+                <h6>Contratos Ativos</h6>
+                <h2 th:text="${view.totalAtivos}">0</h2>
+            </div>
+            <div class="stat-card">
+                <div class="icon"><i class="fa-solid fa-calendar-xmark"></i></div>
+                <h6>Contratos Vencidos</h6>
+                <h2 th:text="${view.totalVencidos}">0</h2>
+            </div>
+            <div class="stat-card">
+                <div class="icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                <h6>Pagamentos Atrasados</h6>
+                <h2 th:text="${view.totalAtrasados}">0</h2>
+            </div>
+            <div class="stat-card">
+                <div class="icon"><i class="fa-solid fa-wallet"></i></div>
+                <h6>MRR (Contratos Ativos)</h6>
+                <h2 th:text="${view.mrrTotal != null ? 'R$ ' + #numbers.formatDecimal(view.mrrTotal, 1, 'POINT', 2, 'COMMA') : 'R$ 0,00'}">R$ 0</h2>
+            </div>
+        </section>
+
+        <section class="bottom-grid" style="grid-template-columns: 1fr;">
+            <div class="card-ui">
+                <div class="card-header-ui d-flex justify-content-between align-items-center">
+                    <h4><i class="fa-solid fa-file-contract me-2"></i>Contratos</h4>
+                    <a class="app-btn app-btn-primary app-btn-sm" th:href="@{/admin/contratos/new}">
+                        <i class="fa-solid fa-plus me-2"></i>Novo Contrato
+                    </a>
+                </div>
+
+                <!-- Filtros -->
+                <form class="row g-2 align-items-end mb-3" method="get" th:action="@{/admin/contratos}">
+                    <div class="col-12 col-md-4">
+                        <input class="form-control" type="text" name="tenantNome" placeholder="Buscar por tenant..."
+                               th:value="${param.tenantNome}">
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <select class="form-select" name="status">
+                            <option value="">Todos os status</option>
+                            <option th:each="s : ${statusValues}" th:value="${s}" th:text="${s}"
+                                    th:selected="${param.status != null and param.status[0] == s.name()}"></option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <select class="form-select" name="planoCodigo">
+                            <option value="">Todos os planos</option>
+                            <option th:each="p : ${planos}" th:value="${p.codigo}" th:text="${p.nome}"
+                                    th:selected="${param.planoCodigo != null and param.planoCodigo[0] == p.codigo}"></option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-2">
+                        <button class="app-btn app-btn-secondary app-btn-sm w-100" type="submit">
+                            <i class="fa-solid fa-filter me-2"></i>Filtrar
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Tabela -->
+                <div class="table-responsive">
+                    <table class="table align-middle table-left">
+                        <thead>
+                        <tr>
+                            <th>Tenant</th>
+                            <th>Plano</th>
+                            <th>Valor Mensal</th>
+                            <th>Início</th>
+                            <th>Término</th>
+                            <th>Status</th>
+                            <th>Último Pgto</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:if="${#lists.isEmpty(view.items)}">
+                            <td colspan="8" class="text-muted">Nenhum contrato encontrado.</td>
+                        </tr>
+                        <tr th:each="c : ${view.items}">
+                            <td>
+                                <a th:href="@{/admin/contratos/{id}(id=${c.id})}"
+                                   th:text="${c.tenantNome}" class="text-decoration-none fw-semibold">Tenant</a>
+                            </td>
+                            <td class="text-muted small" th:text="${c.subscriptionPlanNome ?: '—'}">—</td>
+                            <td th:text="${c.valorMensal != null ? 'R$ ' + #numbers.formatDecimal(c.valorMensal, 1, 'POINT', 2, 'COMMA') : '—'}">—</td>
+                            <td class="text-muted small" th:text="${#temporals.format(c.dataInicio, 'dd/MM/yyyy')}">—</td>
+                            <td>
+                                <span th:if="${c.dataTermino == null}" class="text-muted small">Indeterminado</span>
+                                <span th:if="${c.dataTermino != null and c.isVencido}" class="badge bg-danger">
+                                    Vencido <span th:text="${#temporals.format(c.dataTermino, 'dd/MM/yyyy')}"></span>
+                                </span>
+                                <span th:if="${c.dataTermino != null and c.isVencendoEm30Dias and !c.isVencido}" class="badge bg-warning text-dark">
+                                    <i class="fa-solid fa-bell me-1"></i><span th:text="${#temporals.format(c.dataTermino, 'dd/MM/yyyy')}"></span>
+                                </span>
+                                <span th:if="${c.dataTermino != null and !c.isVencido and !c.isVencendoEm30Dias}" class="text-muted small"
+                                      th:text="${#temporals.format(c.dataTermino, 'dd/MM/yyyy')}">—</span>
+                            </td>
+                            <td>
+                                <span class="badge"
+                                      th:classappend="${c.status.name() == 'ATIVO'} ? ' bg-success' :
+                                                      (${c.status.name() == 'SUSPENSO'} ? ' bg-warning text-dark' :
+                                                      (${c.status.name() == 'ENCERRADO'} ? ' bg-danger' : ' bg-secondary'))"
+                                      th:text="${c.status}">Status</span>
+                            </td>
+                            <td>
+                                <span th:if="${c.ultimoPagamentoStatus == null}" class="text-muted small">—</span>
+                                <span th:if="${c.ultimoPagamentoStatus != null}" class="badge"
+                                      th:classappend="${c.ultimoPagamentoStatus.name() == 'PAGO'} ? ' bg-success' :
+                                                      (${c.ultimoPagamentoStatus.name() == 'ATRASADO'} ? ' bg-danger' :
+                                                      (${c.ultimoPagamentoStatus.name() == 'PENDENTE'} ? ' bg-warning text-dark' : ' bg-secondary'))"
+                                      th:text="${c.ultimoPagamentoStatus}">—</span>
+                            </td>
+                            <td>
+                                <a class="app-btn app-btn-outline app-btn-sm"
+                                   th:href="@{/admin/contratos/{id}(id=${c.id})}">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Paginação -->
+                <div class="d-flex justify-content-between align-items-center mt-3" th:if="${view.totalPages > 1}">
+                    <div class="text-muted small" th:text="'Página ' + (${view.currentPage} + 1) + ' de ' + ${view.totalPages}"></div>
+                    <div class="btn-group">
+                        <a class="btn btn-outline-secondary btn-sm"
+                           th:classappend="${!view.hasPrev()} ? ' disabled'"
+                           th:href="@{/admin/contratos(page=${view.currentPage - 1}, tenantNome=${param.tenantNome}, status=${param.status}, planoCodigo=${param.planoCodigo})}">Anterior</a>
+                        <a class="btn btn-outline-secondary btn-sm"
+                           th:classappend="${!view.hasNext()} ? ' disabled'"
+                           th:href="@{/admin/contratos(page=${view.currentPage + 1}, tenantNome=${param.tenantNome}, status=${param.status}, planoCodigo=${param.planoCodigo})}">Próxima</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/shared/toast.js"></script>
+</body>
+</html>

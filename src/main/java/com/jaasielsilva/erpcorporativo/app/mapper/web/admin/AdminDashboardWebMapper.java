@@ -8,6 +8,8 @@ import com.jaasielsilva.erpcorporativo.app.dto.web.admin.AdminDashboardViewModel
 import com.jaasielsilva.erpcorporativo.app.dto.web.admin.PlatformChartPointViewModel;
 import com.jaasielsilva.erpcorporativo.app.dto.web.admin.PlatformMetricViewModel;
 import com.jaasielsilva.erpcorporativo.app.dto.web.admin.RestaurantRowViewModel;
+import com.jaasielsilva.erpcorporativo.app.dto.web.admin.contract.ContractAlertViewModel;
+import com.jaasielsilva.erpcorporativo.app.dto.web.admin.contract.ContractKpiViewModel;
 
 @Component
 public class AdminDashboardWebMapper {
@@ -20,7 +22,9 @@ public class AdminDashboardWebMapper {
             List<PlatformChartPointViewModel> crescimentoClientes,
             List<PlatformChartPointViewModel> receitaMensal,
             List<PlatformChartPointViewModel> distribuicaoPlanos,
-            List<RestaurantRowViewModel> restaurantes
+            List<RestaurantRowViewModel> restaurantes,
+            ContractKpiViewModel contractKpis,
+            List<ContractAlertViewModel> contractAlerts
     ) {
         return new AdminDashboardViewModel(
                 email,
@@ -30,7 +34,9 @@ public class AdminDashboardWebMapper {
                 crescimentoClientes,
                 receitaMensal,
                 distribuicaoPlanos,
-                restaurantes
+                restaurantes,
+                contractKpis,
+                contractAlerts
         );
     }
 }

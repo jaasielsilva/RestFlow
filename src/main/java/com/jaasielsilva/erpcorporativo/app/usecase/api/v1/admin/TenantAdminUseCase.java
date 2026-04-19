@@ -23,6 +23,9 @@ import com.jaasielsilva.erpcorporativo.app.repository.tenant.TenantRepository;
 import com.jaasielsilva.erpcorporativo.app.repository.tenant.TenantSpecifications;
 import com.jaasielsilva.erpcorporativo.app.repository.usuario.UsuarioRepository;
 
+import com.jaasielsilva.erpcorporativo.app.service.shared.AuditService;
+import com.jaasielsilva.erpcorporativo.app.model.AuditAction;
+
 import lombok.RequiredArgsConstructor;
 
 @Component
@@ -33,6 +36,7 @@ public class TenantAdminUseCase {
     private final UsuarioRepository usuarioRepository;
     private final TenantAdminApiMapper tenantAdminApiMapper;
     private final PasswordEncoder passwordEncoder;
+    private final AuditService auditService;
 
     @Transactional(readOnly = true)
     public PageResponse<TenantResponse> list(TenantFilter filter, int page, int size) {
@@ -55,6 +59,8 @@ public class TenantAdminUseCase {
         Tenant tenant = tenantAdminApiMapper.toNewEntity(request);
         Tenant saved = tenantRepository.save(tenant);
         createTenantAdmin(saved, request.admin());
+        auditService.log(AuditAction.TENANT_CRIADO,
+                "Tenant '" + saved.getNome() + "' criado.", "Tenant", saved.getId(), "SUPER_ADMIN", null);
         return tenantAdminApiMapper.toResponse(saved, 1L);
     }
 
@@ -70,6 +76,8 @@ public class TenantAdminUseCase {
             ensureTenantAdmin(saved, request.admin());
         }
 
+        auditService.log(AuditAction.TENANT_ATUALIZADO,
+                "Tenant '" + saved.getNome() + "' atualizado.", "Tenant", saved.getId(), "SUPER_ADMIN", null);
         return tenantAdminApiMapper.toResponse(saved, usuarioRepository.countByTenantId(saved.getId()));
     }
 
@@ -86,6 +94,8 @@ public class TenantAdminUseCase {
         }
 
         tenantRepository.delete(tenant);
+        auditService.log(AuditAction.TENANT_REMOVIDO,
+                "Tenant '" + tenant.getNome() + "' removido.", "Tenant", tenant.getId(), "SUPER_ADMIN", null);
     }
 
     private Tenant findTenant(Long id) {

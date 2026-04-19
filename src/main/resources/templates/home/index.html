@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard | ERP Corporativo</title>
-
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -13,51 +12,49 @@
 <body>
 <div class="layout">
     <aside th:replace="~{fragments/sidebar :: sidebar('home')}"></aside>
-
     <main class="main">
-        <div th:replace="~{fragments/topbar :: topbar('Dashboard', 'Bem-vindo, Super Admin!', true)}"></div>
+        <div th:replace="~{fragments/topbar :: topbar('Dashboard', 'Visão geral da plataforma', true)}"></div>
 
         <section class="stats-grid">
             <div class="stat-card">
                 <div class="icon"><i class="fa-solid fa-building"></i></div>
                 <h6>Tenants Ativos</h6>
-                <h2>12</h2>
+                <h2 th:text="${view.tenantsAtivos}">0</h2>
             </div>
             <div class="stat-card">
                 <div class="icon"><i class="fa-solid fa-user-group"></i></div>
                 <h6>Usuários Ativos</h6>
-                <h2>258</h2>
+                <h2 th:text="${view.usuariosAtivos}">0</h2>
             </div>
             <div class="stat-card">
                 <div class="icon"><i class="fa-solid fa-puzzle-piece"></i></div>
                 <h6>Módulos Ativos</h6>
-                <h2>8</h2>
+                <h2 th:text="${view.modulosAtivos}">0</h2>
             </div>
             <div class="stat-card">
                 <div class="icon"><i class="fa-solid fa-chart-line"></i></div>
-                <h6>Lucro Mensal</h6>
-                <h2>R$ 45.320</h2>
+                <h6>MRR Estimado</h6>
+                <h2 th:text="'R$ ' + ${view.mrrTotal}">R$ 0</h2>
             </div>
         </section>
 
         <section class="content-grid">
             <div class="card-ui">
                 <div class="card-header-ui">
-                    <h4>Visão Geral da Plataforma</h4>
-                    <span class="text-muted">Últimos 6 meses</span>
+                    <h4>Crescimento — Últimos 6 meses</h4>
+                    <span class="text-muted">Tenants e usuários</span>
                 </div>
                 <canvas id="overviewChart" height="110"></canvas>
             </div>
-
             <div class="card-ui">
                 <div class="card-header-ui">
                     <h4>Ações Rápidas</h4>
                 </div>
                 <div class="quick-actions">
-                    <button type="button" class="quick-btn blue" th:onclick="|window.location.href='@{/admin/tenants/new}'|"><span><i class="fa-solid fa-plus me-2"></i>Novo Tenant</span><i class="fa-solid fa-chevron-right"></i></button>
-                    <button type="button" class="quick-btn green" th:onclick="|window.location.href='@{/admin/users}'|"><span><i class="fa-solid fa-user-plus me-2"></i>Adicionar Usuário</span><i class="fa-solid fa-chevron-right"></i></button>
-                    <button type="button" class="quick-btn yellow" th:onclick="|window.location.href='@{/admin/modulos}'|"><span><i class="fa-solid fa-layer-group me-2"></i>Gerenciar Módulos</span><i class="fa-solid fa-chevron-right"></i></button>
-                    <button type="button" class="quick-btn red" th:onclick="|window.location.href='@{/admin/settings}'|"><span><i class="fa-solid fa-sliders me-2"></i>Configurações Gerais</span><i class="fa-solid fa-chevron-right"></i></button>
+                    <a class="quick-btn blue" th:href="@{/admin/tenants/new}"><span><i class="fa-solid fa-plus me-2"></i>Novo Tenant</span><i class="fa-solid fa-chevron-right"></i></a>
+                    <a class="quick-btn green" th:href="@{/admin/users}"><span><i class="fa-solid fa-user-plus me-2"></i>Gerenciar Usuários</span><i class="fa-solid fa-chevron-right"></i></a>
+                    <a class="quick-btn yellow" th:href="@{/admin/modulos}"><span><i class="fa-solid fa-layer-group me-2"></i>Gerenciar Módulos</span><i class="fa-solid fa-chevron-right"></i></a>
+                    <a class="quick-btn red" th:href="@{/admin/settings}"><span><i class="fa-solid fa-sliders me-2"></i>Configurações</span><i class="fa-solid fa-chevron-right"></i></a>
                 </div>
             </div>
         </section>
@@ -73,21 +70,21 @@
                             <tr>
                                 <th>Nome</th>
                                 <th>Status</th>
-                                <th>Data de Criação</th>
+                                <th>Criação</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr th:if="${#lists.isEmpty(view.recentTenants)}">
                                 <td colspan="3" class="text-muted">Nenhum tenant cadastrado ainda.</td>
                             </tr>
-                            <tr th:each="tenant : ${view.recentTenants}">
-                                <td th:text="${tenant.nome}">Empresa Exemplo</td>
+                            <tr th:each="t : ${view.recentTenants}">
+                                <td th:text="${t.nome}">Empresa</td>
                                 <td>
                                     <span class="badge-status"
-                                          th:classappend="${tenant.ativo} ? ' badge-success' : ' badge-warning'"
-                                          th:text="${tenant.ativo} ? 'Ativo' : 'Inativo'">Ativo</span>
+                                          th:classappend="${t.ativo} ? ' badge-success' : ' badge-warning'"
+                                          th:text="${t.ativo} ? 'Ativo' : 'Inativo'">Ativo</span>
                                 </td>
-                                <td th:text="${tenant.createdAt != null ? #temporals.format(tenant.createdAt, 'dd/MM/yyyy') : '-'}">18/04/2026</td>
+                                <td th:text="${t.createdAt != null ? #temporals.format(t.createdAt, 'dd/MM/yyyy') : '-'}">-</td>
                             </tr>
                         </tbody>
                     </table>
@@ -98,38 +95,20 @@
                 <div class="card-header-ui">
                     <h4>Atividades Recentes</h4>
                 </div>
-
-                <div class="activity-item">
-                    <div class="activity-left">
-                        <div class="activity-avatar"><i class="fa-solid fa-user"></i></div>
-                        <div>
-                            <strong>Novo tenant criado</strong>
-                            <div class="text-muted">Empresa Alpha cadastrada na plataforma.</div>
+                <div id="auditFeed">
+                    <div class="activity-item" th:each="log : ${view.recentLogs}" th:if="${view.recentLogs != null}">
+                        <div class="activity-left">
+                            <div class="activity-avatar"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                            <div>
+                                <strong th:text="${log.acao}">Ação</strong>
+                                <div class="text-muted" th:text="${log.descricao}">Descrição</div>
+                            </div>
                         </div>
+                        <small class="text-muted" th:text="${log.quando}">agora</small>
                     </div>
-                    <small class="text-muted">há 10 min</small>
-                </div>
-
-                <div class="activity-item">
-                    <div class="activity-left">
-                        <div class="activity-avatar"><i class="fa-solid fa-user-gear"></i></div>
-                        <div>
-                            <strong>Permissões atualizadas</strong>
-                            <div class="text-muted">Perfil ADMIN recebeu novos acessos.</div>
-                        </div>
-                    </div>
-                    <small class="text-muted">há 30 min</small>
-                </div>
-
-                <div class="activity-item" style="border-bottom:none;">
-                    <div class="activity-left">
-                        <div class="activity-avatar"><i class="fa-solid fa-database"></i></div>
-                        <div>
-                            <strong>Backup concluído</strong>
-                            <div class="text-muted">Processo diário executado com sucesso.</div>
-                        </div>
-                    </div>
-                    <small class="text-muted">hoje 02:00</small>
+                    <p class="text-muted small" th:if="${view.recentLogs == null or #lists.isEmpty(view.recentLogs)}">
+                        Nenhuma atividade registrada ainda.
+                    </p>
                 </div>
             </div>
         </section>
@@ -157,36 +136,23 @@
     </main>
 </div>
 
-<script>
-    const ctx = document.getElementById('overviewChart');
-    new Chart(ctx, {
+<script th:inline="javascript">
+    const labels  = /*[[${view.chartLabels}]]*/ [];
+    const tenants = /*[[${view.chartTenants}]]*/ [];
+    const users   = /*[[${view.chartUsuarios}]]*/ [];
+
+    new Chart(document.getElementById('overviewChart'), {
         type: 'bar',
         data: {
-            labels: ['Nov', 'Dez', 'Jan', 'Fev', 'Mar', 'Abr'],
+            labels: labels,
             datasets: [
-                {
-                    type: 'bar',
-                    label: 'Novos usuários',
-                    data: [12, 18, 22, 28, 25, 31],
-                    borderRadius: 8
-                },
-                {
-                    type: 'line',
-                    label: 'Receita mensal',
-                    data: [8, 15, 19, 17, 26, 30],
-                    tension: 0.4
-                }
+                { type: 'bar',  label: 'Novos tenants', data: tenants, borderRadius: 8, backgroundColor: 'rgba(59,130,246,0.7)' },
+                { type: 'line', label: 'Usuários acumulados', data: users, tension: 0.4, borderColor: '#10b981', backgroundColor: 'transparent' }
             ]
         },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { position: 'top' }
-            }
-        }
+        options: { responsive: true, plugins: { legend: { position: 'top' } } }
     });
 </script>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

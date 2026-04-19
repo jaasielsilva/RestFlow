@@ -17,6 +17,9 @@ import com.jaasielsilva.erpcorporativo.app.service.api.v1.admin.TenantAdminApiSe
 import com.jaasielsilva.erpcorporativo.app.usecase.api.v1.admin.UsuarioAdminUseCase;
 import com.jaasielsilva.erpcorporativo.app.repository.usuario.UsuarioRepository;
 
+import com.jaasielsilva.erpcorporativo.app.model.ContractStatus;
+import com.jaasielsilva.erpcorporativo.app.repository.contract.ContractRepository;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -28,6 +31,7 @@ public class AdminTenantWebService {
     private final TenantAdminApiService tenantAdminApiService;
     private final UsuarioRepository usuarioRepository;
     private final UsuarioAdminUseCase usuarioAdminUseCase;
+    private final ContractRepository contractRepository;
 
     public AdminTenantsPageViewModel list(String nome, String slug, Boolean ativo, int page, int size) {
         PageResponse<TenantResponse> response = tenantAdminApiService.list(new TenantFilter(nome, slug, ativo), page, size);
@@ -41,11 +45,19 @@ public class AdminTenantWebService {
                         tenant.createdAt(),
                         usuarioRepository.findFirstByTenantIdAndRoleOrderByIdAsc(tenant.id(), Role.ADMIN)
                                 .map(admin -> admin.getEmail())
-                                .orElse("-")
+                                .orElse("-"),
+                        resolveContractStatus(tenant.id())
                 ))
                 .toList();
 
         return new AdminTenantsPageViewModel(tenants, response.page(), response.totalPages());
+    }
+
+    private String resolveContractStatus(Long tenantId) {
+        if (contractRepository.existsByTenantIdAndStatus(tenantId, ContractStatus.ATIVO)) return "ATIVO";
+        if (contractRepository.existsByTenantIdAndStatus(tenantId, ContractStatus.SUSPENSO)) return "SUSPENSO";
+        if (contractRepository.existsByTenantIdAndStatus(tenantId, ContractStatus.ENCERRADO)) return "ENCERRADO";
+        return "SEM CONTRATO";
     }
 
     public TenantResponse create(AdminTenantCreateForm form) {
