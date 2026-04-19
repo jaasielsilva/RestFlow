@@ -48,6 +48,7 @@ public interface KnowledgeArticleRepository extends JpaRepository<KnowledgeArtic
             Pageable pageable
     );
 
+    @Query("select distinct a.categoria from KnowledgeArticle a where a.publicado = true and a.categoria is not null order by a.categoria")
     List<String> findDistinctCategoriaByPublicadoTrue();
 
     @Query("select distinct a.categoria from KnowledgeArticle a order by a.categoria")

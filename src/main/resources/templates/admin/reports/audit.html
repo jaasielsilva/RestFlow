@@ -81,15 +81,22 @@
                     </table>
                 </div>
 
-                <div class="d-flex justify-content-between align-items-center mt-3" th:if="${totalPages > 1}">
-                    <div class="text-muted" th:text="'Página ' + (${currentPage} + 1) + ' de ' + ${totalPages}"></div>
-                    <div class="btn-group">
-                        <a class="btn btn-outline-secondary btn-sm"
-                           th:classappend="${currentPage == 0} ? ' disabled'"
-                           th:href="@{/admin/reports/audit(page=${currentPage - 1}, acao=${param.acao}, entidade=${param.entidade}, executadoPor=${param.executadoPor})}">Anterior</a>
-                        <a class="btn btn-outline-secondary btn-sm"
-                           th:classappend="${currentPage + 1 >= totalPages} ? ' disabled'"
-                           th:href="@{/admin/reports/audit(page=${currentPage + 1}, acao=${param.acao}, entidade=${param.entidade}, executadoPor=${param.executadoPor})}">Próxima</a>
+                <div class="d-flex justify-content-between align-items-center mt-3" th:if="${totalPages > 0}">
+                    <div class="text-muted" th:text="'Página ' + (${currentPage} + 1) + ' de ' + ${totalPages}">Página 1 de 1</div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-muted" th:text="'Total: ' + ${#lists.size(logs)}">Total: 0</span>
+                        <div class="btn-group">
+                            <a class="btn btn-outline-secondary btn-sm"
+                               th:classappend="${currentPage == 0} ? ' disabled'"
+                               th:href="@{/admin/reports/audit(page=${currentPage - 1}, acao=${param.acao}, entidade=${param.entidade}, executadoPor=${param.executadoPor})}">
+                                Anterior
+                            </a>
+                            <a class="btn btn-outline-secondary btn-sm"
+                               th:classappend="${currentPage + 1 >= totalPages} ? ' disabled'"
+                               th:href="@{/admin/reports/audit(page=${currentPage + 1}, acao=${param.acao}, entidade=${param.entidade}, executadoPor=${param.executadoPor})}">
+                                Próxima
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
