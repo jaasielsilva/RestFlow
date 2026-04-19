@@ -98,7 +98,15 @@
                             <td colspan="5" class="text-muted">Nenhum módulo cadastrado.</td>
                         </tr>
                         <tr th:each="m : ${modules}">
-                            <td th:text="${m.nome}">Nome</td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="module-icon-chip"
+                                          th:classappend="' ' + ${@moduleVisualMapper.toneClass(m.codigo)}">
+                                        <i th:class="${@moduleVisualMapper.iconClass(m.codigo)}"></i>
+                                    </span>
+                                    <span th:text="${m.nome}">Nome</span>
+                                </div>
+                            </td>
                             <td><span class="text-muted" th:text="${m.codigo}">codigo</span></td>
                             <td>
                                 <span class="badge-status"

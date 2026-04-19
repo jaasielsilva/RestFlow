@@ -23,6 +23,11 @@ body {
     padding: 24px;
 }
 
+.error-page.no-sidebar .main {
+    width: 100%;
+    margin-left: 0;
+}
+
 .error-card {
     width: min(980px, 100%);
     background: #fff;

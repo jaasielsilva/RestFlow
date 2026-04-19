@@ -102,6 +102,17 @@
             font-weight: 600;
         }
 
+        .module-nav-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 9px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            border: 1px solid transparent;
+        }
+
         .nav-link-custom:hover,
         .nav-link-custom.active {
             background: rgba(255, 255, 255, .08);
@@ -449,7 +460,8 @@
 
         .table-actions {
             display: flex;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
+            align-items: center;
             gap: 6px;
         }
 
@@ -511,6 +523,65 @@
 
         .table-actions .action-icon-reset:hover {
             background: #fde68a;
+        }
+
+        .module-icon-chip {
+            width: 28px;
+            height: 28px;
+            border-radius: 9px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            border: 1px solid transparent;
+        }
+
+        .module-tone-blue {
+            background: #eff6ff;
+            color: #1d4ed8;
+            border-color: #bfdbfe;
+        }
+
+        .module-tone-green {
+            background: #ecfdf5;
+            color: #047857;
+            border-color: #a7f3d0;
+        }
+
+        .module-tone-slate {
+            background: #f1f5f9;
+            color: #334155;
+            border-color: #cbd5e1;
+        }
+
+        .module-tone-orange {
+            background: #fff7ed;
+            color: #c2410c;
+            border-color: #fed7aa;
+        }
+
+        .module-tone-purple {
+            background: #f5f3ff;
+            color: #6d28d9;
+            border-color: #ddd6fe;
+        }
+
+        .module-tone-amber {
+            background: #fef3c7;
+            color: #92400e;
+            border-color: #fde68a;
+        }
+
+        .module-tone-cyan {
+            background: #ecfeff;
+            color: #0e7490;
+            border-color: #a5f3fc;
+        }
+
+        .module-tone-indigo {
+            background: #eef2ff;
+            color: #3730a3;
+            border-color: #c7d2fe;
         }
 
         .badge-status {

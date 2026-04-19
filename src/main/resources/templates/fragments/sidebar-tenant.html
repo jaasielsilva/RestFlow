@@ -18,7 +18,9 @@
        th:each="module : ${tenantModules}"
        th:classappend="${active == module.activeKey} ? ' active' : ''"
        th:href="${module.path}">
-        <i th:class="${module.iconClass}"></i>
+        <span class="module-nav-icon" th:classappend="' ' + ${module.toneClass}">
+            <i th:class="${module.iconClass}"></i>
+        </span>
         <span th:text="${module.nome}">Módulo</span>
     </a>
 

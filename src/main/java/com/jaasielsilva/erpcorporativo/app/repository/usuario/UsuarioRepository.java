@@ -20,7 +20,15 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long>, JpaSpec
 
     long countByTenantId(Long tenantId);
 
+    long countByTenantIdAndAtivoTrue(Long tenantId);
+
+    long countByTenantIdAndAtivoFalse(Long tenantId);
+
     long countByTenantIdAndRole(Long tenantId, Role role);
+
+    long countByTenantIdAndRoleAndAtivoTrue(Long tenantId, Role role);
+
+    List<Usuario> findTop5ByTenantIdOrderByIdDesc(Long tenantId);
 
     long countByRole(Role role);
 

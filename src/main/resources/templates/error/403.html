@@ -8,9 +8,8 @@
     <link rel="stylesheet" href="/css/auth/home.css" />
     <link rel="stylesheet" href="/css/shared/error.css" />
 </head>
-<body class="error-page">
+<body class="error-page no-sidebar">
 <div class="layout">
-    <aside th:replace="~{fragments/sidebar :: sidebar('home')}"></aside>
     <main class="main">
         <div th:replace="~{fragments/topbar :: topbar('Erro 403', 'Acesso negado', false)}"></div>
         <section class="bottom-grid" style="grid-template-columns: 1fr;">

@@ -46,7 +46,13 @@
                         </tr>
                         <tr th:each="m : ${modules}">
                             <td>
-                                <strong th:text="${m.nome}">Nome</strong>
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <span class="module-icon-chip"
+                                          th:classappend="' ' + ${@moduleVisualMapper.toneClass(m.codigo)}">
+                                        <i th:class="${@moduleVisualMapper.iconClass(m.codigo)}"></i>
+                                    </span>
+                                    <strong th:text="${m.nome}">Nome</strong>
+                                </div>
                                 <div class="text-muted" th:if="${m.descricao != null}" th:text="${m.descricao}">Descrição</div>
                             </td>
                             <td><span class="text-muted" th:text="${m.codigo}">codigo</span></td>

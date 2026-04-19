@@ -228,6 +228,8 @@ public class UsuarioAdminUseCase {
                 && usuarioRepository.countByTenantIdAndRole(usuarioAtual.getTenant().getId(), Role.ADMIN) <= 1) {
             throw new ConflictException("O tenant não pode ficar sem nenhum ADMIN.");
         }
+
+        ensureTenantWillKeepActiveAdmin(usuarioAtual, request);
     }
 
     private void ensureTenantWillKeepAdmin(Usuario usuario) {
@@ -237,8 +239,30 @@ public class UsuarioAdminUseCase {
 
         Long tenantId = usuario.getTenant() != null ? usuario.getTenant().getId() : null;
 
-        if (tenantId != null && usuarioRepository.countByTenantIdAndRole(tenantId, Role.ADMIN) <= 1) {
+        if (tenantId != null
+                && usuario.isAtivo()
+                && usuarioRepository.countByTenantIdAndRoleAndAtivoTrue(tenantId, Role.ADMIN) <= 1) {
             throw new ConflictException("O tenant não pode ficar sem nenhum ADMIN.");
+        }
+    }
+
+    private void ensureTenantWillKeepActiveAdmin(Usuario usuarioAtual, UsuarioRequest request) {
+        if (usuarioAtual.getRole() != Role.ADMIN || !usuarioAtual.isAtivo()) {
+            return;
+        }
+
+        boolean willRemainActiveAdmin = request.role() == Role.ADMIN && request.ativo();
+        if (willRemainActiveAdmin) {
+            return;
+        }
+
+        Long tenantId = usuarioAtual.getTenant() != null ? usuarioAtual.getTenant().getId() : null;
+        if (tenantId == null) {
+            return;
+        }
+
+        if (usuarioRepository.countByTenantIdAndRoleAndAtivoTrue(tenantId, Role.ADMIN) <= 1) {
+            throw new ConflictException("Não é permitido desativar ou rebaixar o único ADMIN ativo da empresa.");
         }
     }
 

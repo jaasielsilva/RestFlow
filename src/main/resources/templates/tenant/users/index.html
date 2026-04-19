@@ -19,15 +19,24 @@
         <section class="bottom-grid" style="grid-template-columns: 1fr;">
             <div class="card-ui">
                 <div class="card-header-ui">
-                    <h4>Usuários do Tenant</h4>
+                    <h4>Lista de Usuários</h4>
                 </div>
 
+                <div data-app-toast
+                     data-toast-type="success"
+                     th:attr="data-toast-message=${toastSuccess}"
+                     th:if="${toastSuccess != null}"></div>
+                <div data-app-toast
+                     data-toast-type="error"
+                     th:attr="data-toast-message=${toastError}"
+                     th:if="${toastError != null}"></div>
+
                 <form class="row g-2 align-items-end mb-3 tenant-filter-form" method="get" th:action="@{/app/usuarios}">
-                    <div class="col-12 col-md-4">
+                    <div class="col-12 col-md-3">
                         <label class="form-label">Nome</label>
                         <input class="form-control" type="text" name="nome" placeholder="Buscar por nome" th:value="${param.nome}" />
                     </div>
-                    <div class="col-12 col-md-4">
+                    <div class="col-12 col-md-3">
                         <label class="form-label">Email</label>
                         <input class="form-control" type="text" name="email" placeholder="Buscar por email" th:value="${param.email}" />
                     </div>
@@ -47,11 +56,14 @@
                             <option value="USER" th:selected="${param.role != null and param.role[0] == 'USER'}">USER</option>
                         </select>
                     </div>
-                    <div class="col-12 d-flex align-items-end">
+                    <div class="col-12 col-md-2 d-flex align-items-end">
                         <div class="tenant-filter-actions">
                             <button class="app-btn app-btn-primary app-btn-sm tenant-btn-filter" type="submit">
                                 <i class="fa-solid fa-filter me-2"></i>Filtrar
                             </button>
+                            <a class="app-btn app-btn-outline app-btn-sm" th:href="@{/app/usuarios/new}">
+                                <i class="fa-solid fa-plus me-2"></i>Novo
+                            </a>
                         </div>
                     </div>
                 </form>
@@ -62,22 +74,58 @@
                         <tr>
                             <th>Nome</th>
                             <th>Email</th>
+                            <th>Tenant</th>
                             <th>Perfil</th>
                             <th>Status</th>
+                            <th style="width: 180px;">Ações</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr th:if="${#lists.isEmpty(view.usuarios)}">
-                            <td colspan="4" class="text-muted">Nenhum usuário encontrado.</td>
+                            <td colspan="6" class="text-muted">Nenhum usuário encontrado.</td>
                         </tr>
                         <tr th:each="usuario : ${view.usuarios}">
                             <td th:text="${usuario.nome}">Nome</td>
                             <td th:text="${usuario.email}">email@empresa.com</td>
+                            <td th:text="${usuario.tenantNome != null ? usuario.tenantNome : '-'}">Tenant</td>
                             <td th:text="${usuario.role}">USER</td>
                             <td>
                                 <span class="badge-status"
                                       th:classappend="${usuario.ativo} ? ' badge-success' : ' badge-warning'"
                                       th:text="${usuario.ativo} ? 'Ativo' : 'Inativo'">Ativo</span>
+                            </td>
+                            <td>
+                                <div class="table-actions">
+                                    <a class="app-btn app-btn-outline app-btn-sm action-icon action-icon-modules"
+                                       th:href="@{/app/usuarios/{id}/edit(id=${usuario.id})}"
+                                       title="Editar usuário">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </a>
+                                    <form th:action="@{/app/usuarios/{id}/toggle-status(id=${usuario.id})}" method="post">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                        <button class="app-btn app-btn-outline app-btn-sm action-icon action-icon-users"
+                                                type="submit"
+                                                th:title="${usuario.ativo} ? 'Inativar usuário' : 'Ativar usuário'">
+                                            <i class="fa-solid" th:classappend="${usuario.ativo} ? ' fa-user-slash' : ' fa-user-check'"></i>
+                                        </button>
+                                    </form>
+                                    <button class="app-btn app-btn-outline app-btn-sm action-icon action-icon-permissions is-disabled"
+                                            type="button" disabled title="Permissões (em breve)">
+                                        <i class="fa-solid fa-shield-halved"></i>
+                                    </button>
+                                    <button class="app-btn app-btn-outline app-btn-sm action-icon action-icon-rbac is-disabled"
+                                            type="button" disabled title="RBAC (em breve)">
+                                        <i class="fa-solid fa-user-lock"></i>
+                                    </button>
+                                    <form th:action="@{/app/usuarios/{id}/reset-password(id=${usuario.id})}" method="post">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                        <button class="app-btn app-btn-outline app-btn-sm action-icon action-icon-reset"
+                                                type="submit"
+                                                title="Resetar senha para mudar123">
+                                            <i class="fa-solid fa-key"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                         </tbody>
@@ -86,17 +134,20 @@
 
                 <div class="d-flex justify-content-between align-items-center mt-3" th:if="${view.totalPages > 0}">
                     <div class="text-muted" th:text="'Página ' + (${view.page} + 1) + ' de ' + ${view.totalPages}">Página 1 de 1</div>
-                    <div class="btn-group">
-                        <a class="btn btn-outline-secondary btn-sm"
-                           th:classappend="${view.page == 0} ? ' disabled'"
-                           th:href="@{/app/usuarios(page=${view.page - 1}, size=${param.size}, nome=${param.nome}, email=${param.email}, ativo=${param.ativo}, role=${param.role})}">
-                            Anterior
-                        </a>
-                        <a class="btn btn-outline-secondary btn-sm"
-                           th:classappend="${view.page + 1 >= view.totalPages} ? ' disabled'"
-                           th:href="@{/app/usuarios(page=${view.page + 1}, size=${param.size}, nome=${param.nome}, email=${param.email}, ativo=${param.ativo}, role=${param.role})}">
-                            Próxima
-                        </a>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-muted" th:text="'Total: ' + ${#lists.size(view.usuarios)}">Total: 0</span>
+                        <div class="btn-group">
+                            <a class="btn btn-outline-secondary btn-sm"
+                               th:classappend="${view.page == 0} ? ' disabled'"
+                               th:href="@{/app/usuarios(page=${view.page - 1}, size=${param.size}, nome=${param.nome}, email=${param.email}, ativo=${param.ativo}, role=${param.role})}">
+                                Anterior
+                            </a>
+                            <a class="btn btn-outline-secondary btn-sm"
+                               th:classappend="${view.page + 1 >= view.totalPages} ? ' disabled'"
+                               th:href="@{/app/usuarios(page=${view.page + 1}, size=${param.size}, nome=${param.nome}, email=${param.email}, ativo=${param.ativo}, role=${param.role})}">
+                                Próxima
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>

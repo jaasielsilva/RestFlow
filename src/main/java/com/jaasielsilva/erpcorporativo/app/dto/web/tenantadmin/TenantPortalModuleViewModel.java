@@ -5,6 +5,7 @@ public record TenantPortalModuleViewModel(
         String nome,
         String path,
         String iconClass,
+        String toneClass,
         String activeKey
 ) {
 }

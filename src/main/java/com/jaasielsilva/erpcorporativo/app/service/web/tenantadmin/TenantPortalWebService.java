@@ -13,6 +13,7 @@ import com.jaasielsilva.erpcorporativo.app.model.TenantModule;
 import com.jaasielsilva.erpcorporativo.app.repository.module.TenantModuleRepository;
 import com.jaasielsilva.erpcorporativo.app.security.AppUserDetails;
 import com.jaasielsilva.erpcorporativo.app.security.SecurityPrincipalUtils;
+import com.jaasielsilva.erpcorporativo.app.service.shared.ModuleVisualMapper;
 
 import lombok.RequiredArgsConstructor;
 
@@ -29,6 +30,7 @@ public class TenantPortalWebService {
     private static final String RELATORIOS_CODE = "RELATORIOS";
 
     private final TenantModuleRepository tenantModuleRepository;
+    private final ModuleVisualMapper moduleVisualMapper;
 
     public List<TenantPortalModuleViewModel> listEnabledModules(Authentication authentication) {
         AppUserDetails currentUser = SecurityPrincipalUtils.getCurrentUser(authentication);
@@ -67,6 +69,10 @@ public class TenantPortalWebService {
         return "dashboard";
     }
 
+    public String moduleKey(String codigo) {
+        return normalizeCode(codigo);
+    }
+
     private TenantPortalModuleViewModel toViewModel(TenantModule tenantModule) {
         String codigo = tenantModule.getModule().getCodigo();
         String normalized = normalizeCode(codigo);
@@ -74,7 +80,8 @@ public class TenantPortalWebService {
                 codigo,
                 tenantModule.getModule().getNome(),
                 resolvePath(codigo, normalized),
-                resolveIcon(codigo),
+                moduleVisualMapper.iconClass(codigo),
+                moduleVisualMapper.toneClass(codigo),
                 normalized
         );
     }
@@ -85,7 +92,8 @@ public class TenantPortalWebService {
                 codigo,
                 codigo,
                 resolvePath(codigo, normalized),
-                resolveIcon(codigo),
+                moduleVisualMapper.iconClass(codigo),
+                moduleVisualMapper.toneClass(codigo),
                 normalized
         );
     }
@@ -122,44 +130,13 @@ public class TenantPortalWebService {
         return "/app/modulos/" + normalized;
     }
 
-    private String resolveIcon(String codigo) {
-        if (DASHBOARD_CODE.equalsIgnoreCase(codigo)) {
-            return "fa-solid fa-house";
-        }
-
-        if (USUARIOS_CODE.equalsIgnoreCase(codigo)) {
-            return "fa-solid fa-users";
-        }
-
-        if (CONFIGURACOES_CODE.equalsIgnoreCase(codigo)) {
-            return "fa-solid fa-gear";
-        }
-
-        if (PEDIDOS_CODE.equalsIgnoreCase(codigo)) {
-            return "fa-solid fa-receipt";
-        }
-
-        if (ESTOQUE_CODE.equalsIgnoreCase(codigo)) {
-            return "fa-solid fa-boxes-stacked";
-        }
-
-        if (FINANCEIRO_CODE.equalsIgnoreCase(codigo)) {
-            return "fa-solid fa-wallet";
-        }
-
-        if (RELATORIOS_CODE.equalsIgnoreCase(codigo)) {
-            return "fa-solid fa-chart-column";
-        }
-
-        return "fa-solid fa-puzzle-piece";
-    }
-
     private TenantPortalModuleViewModel dashboardModule() {
         return new TenantPortalModuleViewModel(
                 DASHBOARD_CODE,
                 "Dashboard",
                 "/app",
-                "fa-solid fa-house",
+                moduleVisualMapper.iconClass(DASHBOARD_CODE),
+                moduleVisualMapper.toneClass(DASHBOARD_CODE),
                 dashboardKey()
         );
     }

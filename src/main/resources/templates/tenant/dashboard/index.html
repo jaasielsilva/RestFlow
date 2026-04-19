@@ -20,29 +20,86 @@
             <div class="stat-card">
                 <div class="icon"><i class="fa-solid fa-users"></i></div>
                 <h6>Usuários Ativos</h6>
-                <h2>-</h2>
+                <h2 th:text="${view.usuariosAtivos}">0</h2>
             </div>
             <div class="stat-card">
                 <div class="icon"><i class="fa-solid fa-puzzle-piece"></i></div>
                 <h6>Módulos Habilitados</h6>
-                <h2>-</h2>
+                <h2 th:text="${view.modulosHabilitados}">0</h2>
             </div>
             <div class="stat-card">
-                <div class="icon"><i class="fa-solid fa-list-check"></i></div>
-                <h6>Tarefas Hoje</h6>
-                <h2>-</h2>
+                <div class="icon"><i class="fa-solid fa-user-shield"></i></div>
+                <h6>Admins Ativos</h6>
+                <h2 th:text="${view.adminsAtivos}">0</h2>
+            </div>
+            <div class="stat-card">
+                <div class="icon"><i class="fa-solid fa-user-group"></i></div>
+                <h6>Total de Usuários</h6>
+                <h2 th:text="${view.totalUsuarios}">0</h2>
             </div>
         </section>
 
         <section class="bottom-grid" style="grid-template-columns: 1fr;">
             <div class="card-ui">
                 <div class="card-header-ui">
-                    <h4>Área Inicial do Cliente</h4>
+                    <h4>Resumo Executivo</h4>
                 </div>
                 <p class="text-muted mb-0">
-                    Esse dashboard é o ponto de entrada dos ADMINs dos tenants.
-                    A partir daqui você pode evoluir os módulos de cliente sem expor funcionalidades da plataforma.
+                    Acesse rapidamente seus módulos liberados e acompanhe indicadores do seu tenant.
                 </p>
+            </div>
+        </section>
+
+        <section class="bottom-grid">
+            <div class="card-ui">
+                <div class="card-header-ui">
+                    <h4>Módulos Liberados</h4>
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle table-left">
+                        <thead>
+                        <tr>
+                            <th>Módulo</th>
+                            <th style="width: 160px;">Acessar</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:if="${#lists.isEmpty(tenantModules)}">
+                            <td colspan="2" class="text-muted">Nenhum módulo habilitado.</td>
+                        </tr>
+                        <th:block th:each="m : ${tenantModules}">
+                            <tr th:if="${m.codigo != 'DASHBOARD'}">
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="module-icon-chip" th:classappend="' ' + ${m.toneClass}">
+                                            <i th:class="${m.iconClass}"></i>
+                                        </span>
+                                        <span th:text="${m.nome}">Módulo</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <a class="app-btn app-btn-outline app-btn-sm" th:href="${m.path}">
+                                        <i class="fa-solid fa-arrow-right me-2"></i>Abrir
+                                    </a>
+                                </td>
+                            </tr>
+                        </th:block>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-ui">
+                <div class="card-header-ui">
+                    <h4>Ações Rápidas</h4>
+                </div>
+                <div class="quick-actions">
+                    <a class="quick-btn blue" th:href="@{/app/usuarios}">
+                        <span><i class="fa-solid fa-users me-2"></i>Gerenciar Usuários</span><i class="fa-solid fa-chevron-right"></i>
+                    </a>
+                    <a class="quick-btn green" th:href="@{/app}">
+                        <span><i class="fa-solid fa-chart-line me-2"></i>Atualizar Visão</span><i class="fa-solid fa-chevron-right"></i>
+                    </a>
+                </div>
             </div>
         </section>
     </main>
