@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Usuários | Portal Cliente</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="/css/auth/home.css" />
+</head>
+<body>
+<div class="layout">
+    <aside th:replace="~{fragments/sidebar-tenant :: sidebar(${activeMenu})}"></aside>
+
+    <main class="main">
+        <div th:replace="~{fragments/topbar :: topbar(${pageTitle}, ${pageSubtitle}, false)}"></div>
+
+        <section class="bottom-grid" style="grid-template-columns: 1fr;">
+            <div class="card-ui">
+                <div class="card-header-ui">
+                    <h4>Usuários do Tenant</h4>
+                </div>
+
+                <form class="row g-2 align-items-end mb-3 tenant-filter-form" method="get" th:action="@{/app/usuarios}">
+                    <div class="col-12 col-md-4">
+                        <label class="form-label">Nome</label>
+                        <input class="form-control" type="text" name="nome" placeholder="Buscar por nome" th:value="${param.nome}" />
+                    </div>
+                    <div class="col-12 col-md-4">
+                        <label class="form-label">Email</label>
+                        <input class="form-control" type="text" name="email" placeholder="Buscar por email" th:value="${param.email}" />
+                    </div>
+                    <div class="col-12 col-md-2">
+                        <label class="form-label">Status</label>
+                        <select class="form-select" name="ativo">
+                            <option value="" th:selected="${param.ativo == null or #lists.isEmpty(param.ativo)}">Todos</option>
+                            <option value="true" th:selected="${param.ativo != null and param.ativo[0] == 'true'}">Ativo</option>
+                            <option value="false" th:selected="${param.ativo != null and param.ativo[0] == 'false'}">Inativo</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-2">
+                        <label class="form-label">Perfil</label>
+                        <select class="form-select" name="role">
+                            <option value="" th:selected="${param.role == null or #lists.isEmpty(param.role)}">Todos</option>
+                            <option value="ADMIN" th:selected="${param.role != null and param.role[0] == 'ADMIN'}">ADMIN</option>
+                            <option value="USER" th:selected="${param.role != null and param.role[0] == 'USER'}">USER</option>
+                        </select>
+                    </div>
+                    <div class="col-12 d-flex align-items-end">
+                        <div class="tenant-filter-actions">
+                            <button class="app-btn app-btn-primary app-btn-sm tenant-btn-filter" type="submit">
+                                <i class="fa-solid fa-filter me-2"></i>Filtrar
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="table-responsive">
+                    <table class="table align-middle table-left">
+                        <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Email</th>
+                            <th>Perfil</th>
+                            <th>Status</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:if="${#lists.isEmpty(view.usuarios)}">
+                            <td colspan="4" class="text-muted">Nenhum usuário encontrado.</td>
+                        </tr>
+                        <tr th:each="usuario : ${view.usuarios}">
+                            <td th:text="${usuario.nome}">Nome</td>
+                            <td th:text="${usuario.email}">email@empresa.com</td>
+                            <td th:text="${usuario.role}">USER</td>
+                            <td>
+                                <span class="badge-status"
+                                      th:classappend="${usuario.ativo} ? ' badge-success' : ' badge-warning'"
+                                      th:text="${usuario.ativo} ? 'Ativo' : 'Inativo'">Ativo</span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-3" th:if="${view.totalPages > 0}">
+                    <div class="text-muted" th:text="'Página ' + (${view.page} + 1) + ' de ' + ${view.totalPages}">Página 1 de 1</div>
+                    <div class="btn-group">
+                        <a class="btn btn-outline-secondary btn-sm"
+                           th:classappend="${view.page == 0} ? ' disabled'"
+                           th:href="@{/app/usuarios(page=${view.page - 1}, size=${param.size}, nome=${param.nome}, email=${param.email}, ativo=${param.ativo}, role=${param.role})}">
+                            Anterior
+                        </a>
+                        <a class="btn btn-outline-secondary btn-sm"
+                           th:classappend="${view.page + 1 >= view.totalPages} ? ' disabled'"
+                           th:href="@{/app/usuarios(page=${view.page + 1}, size=${param.size}, nome=${param.nome}, email=${param.email}, ativo=${param.ativo}, role=${param.role})}">
+                            Próxima
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+</body>
+</html>

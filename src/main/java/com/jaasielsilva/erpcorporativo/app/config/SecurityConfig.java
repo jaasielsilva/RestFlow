@@ -58,6 +58,8 @@ public class SecurityConfig {
                     "/favicon.ico",
                     "/api/v1/system/health"
                 ).permitAll()
+                .requestMatchers("/home").hasRole("SUPER_ADMIN")
+                .requestMatchers("/app/**").hasRole("ADMIN")
                 .requestMatchers("/admin/**").hasRole("SUPER_ADMIN")
                 .requestMatchers("/api/v1/admin/**").hasRole("SUPER_ADMIN")
                 .requestMatchers("/api/v1/tenant-admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")

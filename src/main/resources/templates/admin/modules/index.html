@@ -24,8 +24,8 @@
 
                 <div data-app-toast
                      data-toast-type="success"
-                     data-toast-message="Módulo criado com sucesso."
-                     th:if="${param.created != null}"></div>
+                     th:attr="data-toast-message=${toastSuccess}"
+                     th:if="${toastSuccess != null}"></div>
 
                 <form th:action="@{/admin/modulos}" th:object="${form}" method="post" class="row g-3 mb-4">
                     <div data-app-toast

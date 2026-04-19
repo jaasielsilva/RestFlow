@@ -27,8 +27,8 @@
 
                 <div data-app-toast
                      data-toast-type="success"
-                     data-toast-message="Módulos do tenant atualizados com sucesso."
-                     th:if="${param.updated != null}"></div>
+                     th:attr="data-toast-message=${toastSuccess}"
+                     th:if="${toastSuccess != null}"></div>
 
                 <div class="table-responsive">
                     <table class="table align-middle table-left">

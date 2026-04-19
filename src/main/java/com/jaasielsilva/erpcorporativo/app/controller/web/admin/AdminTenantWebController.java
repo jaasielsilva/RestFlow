@@ -5,6 +5,7 @@ import jakarta.validation.Valid;
 import org.springframework.validation.BindingResult;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -48,7 +49,8 @@ public class AdminTenantWebController {
     public String create(
             @Valid @ModelAttribute("form") AdminTenantCreateForm form,
             BindingResult bindingResult,
-            Model model
+            Model model,
+            RedirectAttributes redirectAttributes
     ) {
         if (bindingResult.hasErrors()) {
             return "admin/tenants/new";
@@ -56,7 +58,8 @@ public class AdminTenantWebController {
 
         try {
             adminTenantWebService.create(form);
-            return "redirect:/admin/tenants?created=true";
+            redirectAttributes.addFlashAttribute("toastSuccess", "Tenant criado com sucesso.");
+            return "redirect:/admin/tenants";
         } catch (AppException ex) {
             bindingResult.reject("tenant.create", ex.getMessage());
             model.addAttribute("form", form);
@@ -65,17 +68,19 @@ public class AdminTenantWebController {
     }
 
     @PostMapping("/{tenantId}/reset-admin-password")
-    public String resetTenantAdminPassword(@PathVariable Long tenantId) {
+    public String resetTenantAdminPassword(@PathVariable Long tenantId, RedirectAttributes redirectAttributes) {
         try {
             adminTenantWebService.resetTenantAdminPassword(tenantId);
-            return "redirect:/admin/tenants?reset=true";
+            redirectAttributes.addFlashAttribute("toastSuccess", "Senha do ADMIN resetada para: mudar123");
+            return "redirect:/admin/tenants";
         } catch (AppException ex) {
-            return "redirect:/admin/tenants?resetError=true";
+            redirectAttributes.addFlashAttribute("toastError", "Não foi possível resetar a senha do ADMIN deste tenant.");
+            return "redirect:/admin/tenants";
         }
     }
 
     @GetMapping("/{tenantId}/reset-admin-password")
-    public String resetTenantAdminPasswordGet(@PathVariable Long tenantId) {
-        return resetTenantAdminPassword(tenantId);
+    public String resetTenantAdminPasswordGet(@PathVariable Long tenantId, RedirectAttributes redirectAttributes) {
+        return resetTenantAdminPassword(tenantId, redirectAttributes);
     }
 }

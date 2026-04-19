@@ -24,14 +24,14 @@
                         <h4>Lista de Tenants</h4>
                     </div>
 
-                    <div data-app-toast data-toast-type="success" data-toast-message="Tenant criado com sucesso."
-                        th:if="${param.created != null}"></div>
-                    <div data-app-toast data-toast-type="success"
-                        data-toast-message="Senha do ADMIN resetada para: mudar123" th:if="${param.reset != null}">
-                    </div>
-                    <div data-app-toast data-toast-type="error"
-                        data-toast-message="Não foi possível resetar a senha do ADMIN deste tenant."
-                        th:if="${param.resetError != null}"></div>
+                    <div data-app-toast
+                         data-toast-type="success"
+                         th:attr="data-toast-message=${toastSuccess}"
+                         th:if="${toastSuccess != null}"></div>
+                    <div data-app-toast
+                         data-toast-type="error"
+                         th:attr="data-toast-message=${toastError}"
+                         th:if="${toastError != null}"></div>
 
                     <form class="row g-2 align-items-end mb-3 tenant-filter-form" method="get"
                         th:action="@{/admin/tenants}">

@@ -19,6 +19,7 @@ public class HomeWebController {
     @GetMapping("/home")
     public String home(Authentication authentication, Model model) {
         HomeViewModel homeView = homeWebService.buildHomeView(authentication);
+        model.addAttribute("view", homeView);
         model.addAttribute("email", homeView.email());
         return "home/index";
     }

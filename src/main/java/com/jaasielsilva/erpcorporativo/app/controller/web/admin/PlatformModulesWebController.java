@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,7 +43,8 @@ public class PlatformModulesWebController {
     public String create(
             @Valid @ModelAttribute("form") AdminModuleCreateForm form,
             BindingResult bindingResult,
-            Model model
+            Model model,
+            RedirectAttributes redirectAttributes
     ) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("modules", adminPlatformModuleWebService.listModules());
@@ -51,7 +53,8 @@ public class PlatformModulesWebController {
 
         try {
             adminPlatformModuleWebService.create(form);
-            return "redirect:/admin/modulos?created=true";
+            redirectAttributes.addFlashAttribute("toastSuccess", "Módulo criado com sucesso.");
+            return "redirect:/admin/modulos";
         } catch (AppException ex) {
             bindingResult.reject("module.create", ex.getMessage());
             model.addAttribute("modules", adminPlatformModuleWebService.listModules());
@@ -75,9 +78,11 @@ public class PlatformModulesWebController {
     public String setTenantModule(
             @PathVariable Long tenantId,
             @RequestParam Long moduleId,
-            @RequestParam boolean enabled
+            @RequestParam boolean enabled,
+            RedirectAttributes redirectAttributes
     ) {
         adminPlatformModuleWebService.setTenantModule(tenantId, moduleId, enabled);
-        return "redirect:/admin/modulos/tenants/" + tenantId + "?updated=true";
+        redirectAttributes.addFlashAttribute("toastSuccess", "Módulos do tenant atualizados com sucesso.");
+        return "redirect:/admin/modulos/tenants/" + tenantId;
     }
 }
