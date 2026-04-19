@@ -1,5 +1,6 @@
 package com.jaasielsilva.erpcorporativo.app.repository.usuario;
 
+import java.util.List;
 import java.util.Optional;
 import com.jaasielsilva.erpcorporativo.app.model.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,6 +13,8 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long>, JpaSpec
     Optional<Usuario> findByEmailIgnoreCaseAndTenantId(String email, Long tenantId);
 
     Optional<Usuario> findFirstByEmailIgnoreCase(String email);
+
+    List<Usuario> findAllByEmailIgnoreCase(String email);
 
     boolean existsByEmailIgnoreCaseAndTenantId(String email, Long tenantId);
 
