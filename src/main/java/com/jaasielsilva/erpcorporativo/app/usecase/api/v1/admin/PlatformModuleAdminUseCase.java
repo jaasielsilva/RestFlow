@@ -35,13 +35,14 @@ public class PlatformModuleAdminUseCase {
     }
 
     @Transactional
-    public PlatformModule createModule(String codigo, String nome, String descricao, boolean ativo) {
+    public PlatformModule createModule(String codigo, String nome, String descricao, String rota, boolean ativo) {
         validateCodigo(codigo);
 
         PlatformModule module = PlatformModule.builder()
                 .codigo(codigo.trim())
                 .nome(nome.trim())
                 .descricao(descricao != null && !descricao.isBlank() ? descricao.trim() : null)
+                .rota(rota != null && !rota.isBlank() ? rota.trim() : null)
                 .ativo(ativo)
                 .build();
 

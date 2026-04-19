@@ -9,15 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/admin")
 public class AdminPlaceholderWebController {
 
-    @GetMapping("/permissions")
-    public String permissions(Model model) {
-        model.addAttribute("activeMenu", "permissions");
-        model.addAttribute("pageTitle", "Permissões");
-        model.addAttribute("pageSubtitle", "Controle de permissões e políticas de acesso");
-        model.addAttribute("moduleName", "Permissões");
-        return "admin/placeholder/index";
-    }
-
     @GetMapping("/settings")
     public String settings(Model model) {
         model.addAttribute("activeMenu", "settings");

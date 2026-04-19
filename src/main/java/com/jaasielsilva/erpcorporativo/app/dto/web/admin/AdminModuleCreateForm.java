@@ -20,5 +20,8 @@ public class AdminModuleCreateForm {
     @Size(max = 255, message = "Descrição deve ter no máximo 255 caracteres")
     private String descricao;
 
+    @Size(max = 120, message = "Rota deve ter no máximo 120 caracteres")
+    private String rota;
+
     private boolean ativo = true;
 }

@@ -17,6 +17,7 @@ public class ModuleVisualMapper {
             case "estoque" -> "fa-solid fa-boxes-stacked";
             case "financeiro" -> "fa-solid fa-wallet";
             case "relatorios" -> "fa-solid fa-chart-column";
+            case "conhecimento", "base_conhecimento" -> "fa-solid fa-book-open";
             default -> "fa-solid fa-puzzle-piece";
         };
     }
@@ -31,6 +32,7 @@ public class ModuleVisualMapper {
             case "estoque" -> "module-tone-purple";
             case "financeiro" -> "module-tone-amber";
             case "relatorios" -> "module-tone-cyan";
+            case "conhecimento", "base_conhecimento" -> "module-tone-green";
             default -> "module-tone-indigo";
         };
     }

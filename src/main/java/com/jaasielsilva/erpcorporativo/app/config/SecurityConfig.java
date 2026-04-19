@@ -59,6 +59,7 @@ public class SecurityConfig {
                     "/api/v1/system/health"
                 ).permitAll()
                 .requestMatchers("/home").hasRole("SUPER_ADMIN")
+                .requestMatchers("/app/conhecimento", "/app/conhecimento/**").hasAnyRole("ADMIN", "USER")
                 .requestMatchers("/app/**").hasRole("ADMIN")
                 .requestMatchers("/admin/**").hasRole("SUPER_ADMIN")
                 .requestMatchers("/api/v1/admin/**").hasRole("SUPER_ADMIN")

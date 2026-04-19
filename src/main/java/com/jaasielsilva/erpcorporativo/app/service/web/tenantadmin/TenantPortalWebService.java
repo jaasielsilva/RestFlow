@@ -2,15 +2,17 @@ package com.jaasielsilva.erpcorporativo.app.service.web.tenantadmin;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import com.jaasielsilva.erpcorporativo.app.dto.web.tenantadmin.TenantPortalModuleViewModel;
+import com.jaasielsilva.erpcorporativo.app.model.AccessLevel;
+import com.jaasielsilva.erpcorporativo.app.model.Role;
 import com.jaasielsilva.erpcorporativo.app.model.TenantModule;
 import com.jaasielsilva.erpcorporativo.app.repository.module.TenantModuleRepository;
+import com.jaasielsilva.erpcorporativo.app.repository.permission.TenantRolePermissionRepository;
 import com.jaasielsilva.erpcorporativo.app.security.AppUserDetails;
 import com.jaasielsilva.erpcorporativo.app.security.SecurityPrincipalUtils;
 import com.jaasielsilva.erpcorporativo.app.service.shared.ModuleVisualMapper;
@@ -21,15 +23,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class TenantPortalWebService {
 
-    private static final String DASHBOARD_CODE = "DASHBOARD";
-    private static final String USUARIOS_CODE = "USUARIOS";
-    private static final String CONFIGURACOES_CODE = "CONFIGURACOES";
-    private static final String PEDIDOS_CODE = "PEDIDOS";
-    private static final String ESTOQUE_CODE = "ESTOQUE";
-    private static final String FINANCEIRO_CODE = "FINANCEIRO";
-    private static final String RELATORIOS_CODE = "RELATORIOS";
+    private static final String DASHBOARD_CODE    = "DASHBOARD";
 
     private final TenantModuleRepository tenantModuleRepository;
+    private final TenantRolePermissionRepository permissionRepository;
     private final ModuleVisualMapper moduleVisualMapper;
 
     public List<TenantPortalModuleViewModel> listEnabledModules(Authentication authentication) {
@@ -38,8 +35,10 @@ public class TenantPortalWebService {
         List<TenantPortalModuleViewModel> enabledModules = tenantModuleRepository
                 .findEnabledModulesByTenantId(currentUser.getTenantId())
                 .stream()
-                .map(this::toViewModel)
-                .filter(module -> !module.codigo().equalsIgnoreCase(DASHBOARD_CODE))
+                .map(tm -> toViewModel(tm, currentUser))
+                .filter(m -> !m.codigo().equalsIgnoreCase(DASHBOARD_CODE))
+                // Filtra módulos com NONE para a role do usuário (exceto ADMIN que sempre vê tudo)
+                .filter(m -> currentUser.getRole() == Role.ADMIN || m.canRead())
                 .toList();
 
         List<TenantPortalModuleViewModel> modules = new ArrayList<>();
@@ -51,18 +50,35 @@ public class TenantPortalWebService {
     public TenantPortalModuleViewModel requireEnabledModule(Authentication authentication, String codigo) {
         AppUserDetails currentUser = SecurityPrincipalUtils.getCurrentUser(authentication);
 
-        boolean enabled = tenantModuleRepository.hasEnabledModuleByCodigo(
-                currentUser.getTenantId(),
-                codigo
-        );
+        boolean enabled = tenantModuleRepository.hasEnabledModuleByCodigo(currentUser.getTenantId(), codigo);
         if (!enabled) {
             throw new AccessDeniedException("Módulo não habilitado para este tenant.");
         }
 
+        // Verifica AccessLevel para a role do usuário (ADMIN sempre tem FULL)
+        if (currentUser.getRole() != Role.ADMIN && currentUser.getRole() != Role.SUPER_ADMIN) {
+            Long moduleId = tenantModuleRepository.findEnabledModulesByTenantId(currentUser.getTenantId())
+                    .stream()
+                    .filter(tm -> tm.getModule().getCodigo().equalsIgnoreCase(codigo))
+                    .map(tm -> tm.getModule().getId())
+                    .findFirst()
+                    .orElse(null);
+
+            if (moduleId != null) {
+                AccessLevel level = permissionRepository
+                        .findAccessLevel(currentUser.getTenantId(), moduleId, currentUser.getRole())
+                        .orElse(AccessLevel.NONE);
+
+                if (level == AccessLevel.NONE) {
+                    throw new AccessDeniedException("Sem permissão de acesso a este módulo.");
+                }
+            }
+        }
+
         return listEnabledModules(authentication).stream()
-                .filter(module -> module.codigo().equalsIgnoreCase(codigo))
+                .filter(m -> m.codigo().equalsIgnoreCase(codigo))
                 .findFirst()
-                .orElseGet(() -> fallbackModule(codigo));
+                .orElseGet(() -> fallbackModule(codigo, AccessLevel.FULL));
     }
 
     public String dashboardKey() {
@@ -73,61 +89,61 @@ public class TenantPortalWebService {
         return normalizeCode(codigo);
     }
 
-    private TenantPortalModuleViewModel toViewModel(TenantModule tenantModule) {
-        String codigo = tenantModule.getModule().getCodigo();
+    // -------------------------------------------------------------------------
+
+    private TenantPortalModuleViewModel toViewModel(TenantModule tenantModule, AppUserDetails currentUser) {
+        String codigo     = tenantModule.getModule().getCodigo();
         String normalized = normalizeCode(codigo);
+        String rota       = resolveRota(tenantModule.getModule(), normalized);
+        AccessLevel level = resolveAccessLevel(currentUser, tenantModule.getModule().getId());
+
         return new TenantPortalModuleViewModel(
                 codigo,
                 tenantModule.getModule().getNome(),
-                resolvePath(codigo, normalized),
+                rota,
                 moduleVisualMapper.iconClass(codigo),
                 moduleVisualMapper.toneClass(codigo),
-                normalized
+                normalized,
+                level
         );
     }
 
-    private TenantPortalModuleViewModel fallbackModule(String codigo) {
+    /**
+     * Resolve a rota do módulo:
+     * 1. Usa a rota configurada no banco (campo rota do PlatformModule) se existir
+     * 2. Caso contrário, gera automaticamente como /app/modulos/{codigo_lowercase}
+     * O DASHBOARD é sempre /app independente de configuração.
+     */
+    private String resolveRota(com.jaasielsilva.erpcorporativo.app.model.PlatformModule module, String normalized) {
+        if (DASHBOARD_CODE.equalsIgnoreCase(module.getCodigo())) {
+            return "/app";
+        }
+        if (module.getRota() != null && !module.getRota().isBlank()) {
+            return module.getRota().trim();
+        }
+        return "/app/modulos/" + normalized;
+    }
+
+    private AccessLevel resolveAccessLevel(AppUserDetails user, Long moduleId) {
+        if (user.getRole() == Role.SUPER_ADMIN || user.getRole() == Role.ADMIN) {
+            return AccessLevel.FULL;
+        }
+        return permissionRepository
+                .findAccessLevel(user.getTenantId(), moduleId, user.getRole())
+                .orElse(AccessLevel.NONE);
+    }
+
+    private TenantPortalModuleViewModel fallbackModule(String codigo, AccessLevel level) {
         String normalized = normalizeCode(codigo);
         return new TenantPortalModuleViewModel(
                 codigo,
                 codigo,
-                resolvePath(codigo, normalized),
+                "/app/modulos/" + normalized,
                 moduleVisualMapper.iconClass(codigo),
                 moduleVisualMapper.toneClass(codigo),
-                normalized
+                normalized,
+                level
         );
-    }
-
-    private String resolvePath(String codigo, String normalized) {
-        if (DASHBOARD_CODE.equalsIgnoreCase(codigo)) {
-            return "/app";
-        }
-
-        if (USUARIOS_CODE.equalsIgnoreCase(codigo)) {
-            return "/app/usuarios";
-        }
-
-        if (CONFIGURACOES_CODE.equalsIgnoreCase(codigo)) {
-            return "/app/configuracoes";
-        }
-
-        if (PEDIDOS_CODE.equalsIgnoreCase(codigo)) {
-            return "/app/modulos/pedidos";
-        }
-
-        if (ESTOQUE_CODE.equalsIgnoreCase(codigo)) {
-            return "/app/modulos/estoque";
-        }
-
-        if (FINANCEIRO_CODE.equalsIgnoreCase(codigo)) {
-            return "/app/modulos/financeiro";
-        }
-
-        if (RELATORIOS_CODE.equalsIgnoreCase(codigo)) {
-            return "/app/modulos/relatorios";
-        }
-
-        return "/app/modulos/" + normalized;
     }
 
     private TenantPortalModuleViewModel dashboardModule() {
@@ -137,14 +153,13 @@ public class TenantPortalWebService {
                 "/app",
                 moduleVisualMapper.iconClass(DASHBOARD_CODE),
                 moduleVisualMapper.toneClass(DASHBOARD_CODE),
-                dashboardKey()
+                dashboardKey(),
+                AccessLevel.FULL
         );
     }
 
     private String normalizeCode(String codigo) {
-        if (codigo == null) {
-            return "";
-        }
-        return codigo.trim().toLowerCase(Locale.ROOT);
+        if (codigo == null) return "";
+        return codigo.trim().toLowerCase(java.util.Locale.ROOT);
     }
 }

@@ -1,9 +1,11 @@
-package com.jaasielsilva.erpcorporativo.app.dto.api.admin.module;
+package com.jaasielsilva.erpcorporativo.app.dto.api.admin.plan;
+
+import java.util.Set;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public record PlatformModuleRequest(
+public record SubscriptionPlanRequest(
         @NotBlank(message = "Código é obrigatório")
         @Size(max = 60, message = "Código deve ter no máximo 60 caracteres")
         String codigo,
@@ -15,9 +17,8 @@ public record PlatformModuleRequest(
         @Size(max = 255, message = "Descrição deve ter no máximo 255 caracteres")
         String descricao,
 
-        @Size(max = 120, message = "Rota deve ter no máximo 120 caracteres")
-        String rota,
+        boolean ativo,
 
-        boolean ativo
+        Set<Long> moduleIds
 ) {
 }

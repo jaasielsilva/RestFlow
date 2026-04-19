@@ -31,6 +31,7 @@ public class PlatformModuleAdminApiService {
                 request.codigo(),
                 request.nome(),
                 request.descricao(),
+                request.rota(),
                 request.ativo()
         );
         return toResponse(created);
@@ -64,6 +65,7 @@ public class PlatformModuleAdminApiService {
                 module.getCodigo(),
                 module.getNome(),
                 module.getDescricao(),
+                module.getRota(),
                 module.isAtivo(),
                 module.getCreatedAt()
         );

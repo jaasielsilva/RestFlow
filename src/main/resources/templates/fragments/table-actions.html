@@ -13,16 +13,11 @@
            aria-label="Usuários do tenant">
             <i class="fa-solid fa-users"></i>
         </a>
-        <button class="app-btn app-btn-outline app-btn-sm action-icon action-icon-permissions is-disabled"
-                type="button" disabled title="Permissões (em breve)"
-                aria-label="Permissões em breve">
+        <a class="app-btn app-btn-outline app-btn-sm action-icon action-icon-permissions"
+           th:href="@{/admin/permissions/tenants/{tenantId}/matrix(tenantId=${tenantId})}"
+           title="Permissões por role" aria-label="Matriz de permissões do tenant">
             <i class="fa-solid fa-shield-halved"></i>
-        </button>
-        <button class="app-btn app-btn-outline app-btn-sm action-icon action-icon-rbac is-disabled"
-                type="button" disabled title="RBAC (em breve)"
-                aria-label="RBAC em breve">
-            <i class="fa-solid fa-user-lock"></i>
-        </button>
+        </a>
         <a class="app-btn app-btn-outline app-btn-sm action-icon action-icon-reset"
            th:href="@{/admin/tenants/{tenantId}/reset-admin-password(tenantId=${tenantId})}"
            title="Resetar senha do ADMIN para mudar123"

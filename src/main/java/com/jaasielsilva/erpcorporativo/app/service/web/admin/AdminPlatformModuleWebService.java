@@ -23,7 +23,8 @@ public class AdminPlatformModuleWebService {
     }
 
     public PlatformModule create(AdminModuleCreateForm form) {
-        return platformModuleAdminUseCase.createModule(form.getCodigo(), form.getNome(), form.getDescricao(), form.isAtivo());
+        return platformModuleAdminUseCase.createModule(
+                form.getCodigo(), form.getNome(), form.getDescricao(), form.getRota(), form.isAtivo());
     }
 
     public Tenant getTenant(Long tenantId) {

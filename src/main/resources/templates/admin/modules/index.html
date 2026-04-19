@@ -37,23 +37,30 @@
 
                     <div class="col-12 col-md-3">
                         <label class="form-label">Código</label>
-                        <input class="form-control" type="text" th:field="*{codigo}" placeholder="ex: financeiro" />
+                        <input class="form-control" type="text" th:field="*{codigo}" placeholder="ex: FINANCEIRO" />
                         <div class="text-danger small mt-1" th:if="${#fields.hasErrors('codigo')}" th:errors="*{codigo}">Erro</div>
                     </div>
 
-                    <div class="col-12 col-md-5">
+                    <div class="col-12 col-md-4">
                         <label class="form-label">Nome</label>
                         <input class="form-control" type="text" th:field="*{nome}" placeholder="Nome do módulo" />
                         <div class="text-danger small mt-1" th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}">Erro</div>
                     </div>
 
-                    <div class="col-12 col-md-4">
+                    <div class="col-12 col-md-5">
                         <label class="form-label">Descrição</label>
                         <input class="form-control" type="text" th:field="*{descricao}" placeholder="Opcional" />
                         <div class="text-danger small mt-1" th:if="${#fields.hasErrors('descricao')}" th:errors="*{descricao}">Erro</div>
                     </div>
 
-                    <div class="col-12 col-md-3">
+                    <div class="col-12 col-md-5">
+                        <label class="form-label">Rota no portal do cliente</label>
+                        <input class="form-control" type="text" th:field="*{rota}"
+                               placeholder="ex: /app/modulos/financeiro (opcional)" />
+                        <div class="text-muted small mt-1">Se vazio, gerado automaticamente como <code>/app/modulos/{codigo}</code></div>
+                    </div>
+
+                    <div class="col-12 col-md-2">
                         <label class="form-label">Ativo</label>
                         <select class="form-select" th:field="*{ativo}">
                             <option th:value="true">Ativo</option>
@@ -88,6 +95,7 @@
                         <tr>
                             <th>Nome</th>
                             <th>Código</th>
+                            <th>Rota</th>
                             <th>Status</th>
                             <th>Criação</th>
                             <th style="width: 160px;">Ações</th>
@@ -95,7 +103,7 @@
                         </thead>
                         <tbody>
                         <tr th:if="${#lists.isEmpty(modules)}">
-                            <td colspan="5" class="text-muted">Nenhum módulo cadastrado.</td>
+                            <td colspan="6" class="text-muted">Nenhum módulo cadastrado.</td>
                         </tr>
                         <tr th:each="m : ${modules}">
                             <td>
@@ -108,6 +116,11 @@
                                 </div>
                             </td>
                             <td><span class="text-muted" th:text="${m.codigo}">codigo</span></td>
+                            <td>
+                                <span th:if="${m.rota != null}" class="text-muted small" th:text="${m.rota}"></span>
+                                <span th:unless="${m.rota != null}" class="text-muted small"
+                                      th:text="'/app/modulos/' + ${m.codigo.toLowerCase()}"></span>
+                            </td>
                             <td>
                                 <span class="badge-status"
                                       th:classappend="${m.ativo} ? ' badge-success' : ' badge-warning'"

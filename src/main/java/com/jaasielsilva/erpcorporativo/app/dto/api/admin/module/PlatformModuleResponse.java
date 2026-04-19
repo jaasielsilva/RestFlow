@@ -7,6 +7,7 @@ public record PlatformModuleResponse(
         String codigo,
         String nome,
         String descricao,
+        String rota,
         boolean ativo,
         LocalDateTime createdAt
 ) {

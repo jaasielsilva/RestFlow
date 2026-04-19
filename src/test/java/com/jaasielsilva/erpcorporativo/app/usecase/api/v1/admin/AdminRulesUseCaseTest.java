@@ -93,7 +93,8 @@ class AdminRulesUseCaseTest {
                 .build();
 
         when(usuarioRepository.findById(100L)).thenReturn(Optional.of(admin));
-        when(usuarioRepository.countByTenantIdAndRole(30L, Role.ADMIN)).thenReturn(1L);
+        // delete() chama countByTenantIdAndRoleAndAtivoTrue para verificar se é o último admin ativo
+        when(usuarioRepository.countByTenantIdAndRoleAndAtivoTrue(30L, Role.ADMIN)).thenReturn(1L);
 
         assertThrows(ConflictException.class, () -> useCase.delete(100L));
     }
