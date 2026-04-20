@@ -614,6 +614,18 @@
                 </div>
 
                 <div>
+                    <label for="tenantId" class="field-label">Tenant ID (opcional)</label>
+                    <div class="input-wrap">
+                        <i class="fa-solid fa-building input-icon"></i>
+                        <input type="text" id="tenantId" name="tenantId" class="login-input"
+                            th:value="${param.tenantId != null ? param.tenantId[0] : ''}"
+                            placeholder="Ex.: 2"
+                            inputmode="numeric"
+                            autocomplete="off">
+                    </div>
+                </div>
+
+                <div>
                     <label for="password" class="field-label">Senha</label>
                     <div class="input-wrap">
                         <i class="fa-solid fa-lock input-icon"></i>

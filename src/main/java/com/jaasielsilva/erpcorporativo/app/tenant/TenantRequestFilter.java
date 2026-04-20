@@ -2,6 +2,8 @@ package com.jaasielsilva.erpcorporativo.app.tenant;
 
 import java.io.IOException;
 import java.time.OffsetDateTime;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -103,11 +105,22 @@ public class TenantRequestFilter extends OncePerRequestFilter {
                 }
 
                 if (resolvedTenant.isPresent() && !principalTenantId.equals(resolvedTenant.tenantId)) {
+                    String principalTenantLabel = formatTenantLabel(tenant);
+                    String requestedTenantLabel = tenantRepository.findById(resolvedTenant.tenantId)
+                            .map(this::formatTenantLabel)
+                            .orElse("tenantId=" + resolvedTenant.tenantId);
+                    String friendlyMessage = "Voce esta logado no tenant " + principalTenantLabel
+                            + ", mas tentou acessar o tenant " + requestedTenantLabel + ".";
+                    if (!apiRequest) {
+                        response.sendRedirect("/login?erro="
+                                + URLEncoder.encode(friendlyMessage, StandardCharsets.UTF_8));
+                        return;
+                    }
                     writeApiError(
                             response,
                             HttpStatus.UNAUTHORIZED,
                             ApiErrorCode.UNAUTHORIZED,
-                            "Tenant do request não corresponde ao tenant do usuário autenticado.",
+                            friendlyMessage,
                             request.getRequestURI(),
                             apiRequest
                     );
@@ -191,7 +204,6 @@ public class TenantRequestFilter extends OncePerRequestFilter {
     private boolean isPublicRoute(String uri) {
         if (uri == null) return false;
         return uri.equals("/")
-                || uri.equals("/login")
                 || uri.equals("/logout")
                 || uri.startsWith("/recuperar-senha")
                 || uri.startsWith("/css/")
@@ -205,6 +217,10 @@ public class TenantRequestFilter extends OncePerRequestFilter {
     private boolean requiresTenant(HttpServletRequest request) {
         String uri = request.getRequestURI();
         return uri != null && uri.startsWith("/api/v1/tenant-admin/");
+    }
+
+    private String formatTenantLabel(Tenant tenant) {
+        return tenant.getNome() + " (id=" + tenant.getId() + ")";
     }
 
     private void writeApiError(

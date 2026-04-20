@@ -39,7 +39,7 @@ public class TenantCommercialApiService {
     private final PaymentRecordRepository paymentRecordRepository;
     private final MercadoPagoBillingService mercadoPagoBillingService;
 
-    @Transactional(readOnly = true)
+    @Transactional
     public TenantCommercialProfileResponse profile(Authentication authentication) {
         AppUserDetails currentUser = SecurityPrincipalUtils.getCurrentUser(authentication);
         var tenant = tenantRepository.findById(currentUser.getTenantId())

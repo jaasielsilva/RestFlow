@@ -66,17 +66,8 @@ public class TenantUserWebService {
         return tenantAdminUserApiService.update(authentication, id, request);
     }
 
-    public UsuarioResponse resetPassword(Authentication authentication, Long id) {
-        UsuarioResponse current = tenantAdminUserApiService.getById(authentication, id);
-        UsuarioRequest request = new UsuarioRequest(
-                current.nome(),
-                current.email(),
-                DEFAULT_RESET_PASSWORD,
-                current.ativo(),
-                current.role(),
-                current.tenantId()
-        );
-        return tenantAdminUserApiService.update(authentication, id, request);
+    public void resetPassword(Authentication authentication, Long id) {
+        tenantAdminUserApiService.resetPassword(authentication, id, DEFAULT_RESET_PASSWORD);
     }
 
     private UsuarioRequest toRequest(TenantUserForm form) {
@@ -89,4 +80,5 @@ public class TenantUserWebService {
                 null
         );
     }
+
 }

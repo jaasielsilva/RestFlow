@@ -23,3 +23,6 @@ logging:
     org.hibernate.type.descriptor.sql: WARN
   pattern:
     console: "%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n"
+
+server:
+  forward-headers-strategy: framework

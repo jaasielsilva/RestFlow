@@ -70,7 +70,14 @@ public class AdminTenantWebService {
         return tenantAdminApiService.create(request);
     }
 
-    public void resetTenantAdminPassword(Long tenantId) {
+    public TenantAdminResetResult resetTenantAdminPassword(Long tenantId) {
+        String adminEmail = usuarioRepository.findFirstByTenantIdAndRoleOrderByIdAsc(tenantId, Role.ADMIN)
+                .map(admin -> admin.getEmail())
+                .orElse("-");
         usuarioAdminUseCase.resetTenantAdminPassword(tenantId, DEFAULT_ADMIN_RESET_PASSWORD);
+        return new TenantAdminResetResult(adminEmail, DEFAULT_ADMIN_RESET_PASSWORD);
+    }
+
+    public record TenantAdminResetResult(String adminEmail, String generatedPassword) {
     }
 }

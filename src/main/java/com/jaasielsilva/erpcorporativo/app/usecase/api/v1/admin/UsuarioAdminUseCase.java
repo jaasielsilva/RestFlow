@@ -161,9 +161,28 @@ public class UsuarioAdminUseCase {
         Usuario tenantAdmin = usuarioRepository.findFirstByTenantIdAndRoleOrderByIdAsc(tenantId, Role.ADMIN)
                 .orElseThrow(() -> new ResourceNotFoundException("ADMIN do tenant não encontrado: " + tenantId));
 
-        tenantAdmin.setPassword(encodeRequiredPassword(newPassword));
+        if (!StringUtils.hasText(newPassword)) {
+            throw new ValidationException("Senha de reset é obrigatória.");
+        }
+        tenantAdmin.setPassword(passwordEncoder.encode(newPassword));
         tenantAdmin.setAtivo(true);
         usuarioRepository.save(tenantAdmin);
+    }
+
+    @Transactional
+    public void resetUserPasswordForTenantAdmin(Long tenantId, Long userId, String newPassword) {
+        if (!StringUtils.hasText(newPassword)) {
+            throw new ValidationException("Senha de reset é obrigatória.");
+        }
+
+        Usuario usuario = findUsuario(userId);
+        if (usuario.getTenant() == null || !tenantId.equals(usuario.getTenant().getId())) {
+            throw new ResourceNotFoundException("Usuário não encontrado no tenant informado: " + userId);
+        }
+
+        usuario.setPassword(passwordEncoder.encode(newPassword));
+        usuario.setAtivo(true);
+        usuarioRepository.save(usuario);
     }
 
     private Usuario findUsuario(Long id) {

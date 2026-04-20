@@ -23,6 +23,7 @@ import com.jaasielsilva.erpcorporativo.app.mapper.api.v1.admin.TenantAdminApiMap
 import com.jaasielsilva.erpcorporativo.app.mapper.api.v1.admin.UsuarioAdminApiMapper;
 import com.jaasielsilva.erpcorporativo.app.model.Role;
 import com.jaasielsilva.erpcorporativo.app.service.shared.AuditService;
+import com.jaasielsilva.erpcorporativo.app.service.shared.PlatformSettingService;
 import com.jaasielsilva.erpcorporativo.app.model.Tenant;
 import com.jaasielsilva.erpcorporativo.app.model.Usuario;
 import com.jaasielsilva.erpcorporativo.app.repository.tenant.TenantRepository;
@@ -42,6 +43,9 @@ class AdminRulesUseCaseTest {
 
     @Mock
     private AuditService auditService;
+
+    @Mock
+    private PlatformSettingService platformSettingService;
 
     @Test
     void deveCriarTenantComAdminInicial() {
@@ -82,7 +86,8 @@ class AdminRulesUseCaseTest {
                 usuarioRepository,
                 tenantRepository,
                 mapper,
-                passwordEncoder
+                passwordEncoder,
+                platformSettingService
         );
 
         Tenant tenant = Tenant.builder().id(30L).nome("Cliente B").slug("cliente-b").ativo(true).build();
@@ -110,7 +115,8 @@ class AdminRulesUseCaseTest {
                 usuarioRepository,
                 tenantRepository,
                 mapper,
-                passwordEncoder
+                passwordEncoder,
+                platformSettingService
         );
 
         Tenant tenant = Tenant.builder().id(40L).nome("Cliente C").slug("cliente-c").ativo(true).build();

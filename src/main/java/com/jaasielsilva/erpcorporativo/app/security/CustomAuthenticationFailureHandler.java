@@ -1,10 +1,13 @@
 package com.jaasielsilva.erpcorporativo.app.security;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,10 +28,22 @@ public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationF
     ) throws IOException, ServletException {
         String clientKey = SecurityRequestUtils.extractClientKey(request);
         loginAttemptService.loginFailed(clientKey);
+        String tenantId = request.getParameter("tenantId");
+        String tenantQuery = StringUtils.hasText(tenantId)
+                ? "&tenantId=" + URLEncoder.encode(tenantId, StandardCharsets.UTF_8)
+                : "";
 
-        String redirectUrl = loginAttemptService.isBlocked(clientKey)
-                ? "/login?blocked=true"
-                : "/login?error=true";
+        String redirectUrl;
+        if (loginAttemptService.isBlocked(clientKey)) {
+            redirectUrl = "/login?blocked=true" + tenantQuery;
+        } else if (exception.getMessage() != null
+                && exception.getMessage().contains("múltiplos tenants")) {
+            redirectUrl = "/login?erro="
+                    + URLEncoder.encode("Informe o tenantId para autenticar este e-mail.", StandardCharsets.UTF_8)
+                    + tenantQuery;
+        } else {
+            redirectUrl = "/login?error=true" + tenantQuery;
+        }
 
         getRedirectStrategy().sendRedirect(request, response, redirectUrl);
     }

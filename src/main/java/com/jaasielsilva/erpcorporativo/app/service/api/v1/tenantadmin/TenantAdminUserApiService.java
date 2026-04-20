@@ -43,4 +43,9 @@ public class TenantAdminUserApiService {
         AppUserDetails currentUser = SecurityPrincipalUtils.getCurrentUser(authentication);
         usuarioAdminUseCase.deleteForTenantAdmin(currentUser.getTenantId(), id);
     }
+
+    public void resetPassword(Authentication authentication, Long id, String newPassword) {
+        AppUserDetails currentUser = SecurityPrincipalUtils.getCurrentUser(authentication);
+        usuarioAdminUseCase.resetUserPasswordForTenantAdmin(currentUser.getTenantId(), id, newPassword);
+    }
 }

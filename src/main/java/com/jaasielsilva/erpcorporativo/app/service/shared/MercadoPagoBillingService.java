@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
@@ -25,12 +27,16 @@ public class MercadoPagoBillingService {
 
     private final PlatformSettingService settingService;
     private final PaymentRecordRepository paymentRecordRepository;
+    private static final Pattern MP_MESSAGE_PATTERN = Pattern.compile("\"message\"\\s*:\\s*\"([^\"]+)\"");
 
     public PaymentRecord createCheckout(PaymentRecord paymentRecord, String tenantNome) {
         String token = requireAccessToken();
         String externalReference = paymentRecord.getExternalReference() != null
                 ? paymentRecord.getExternalReference()
                 : "pay_" + paymentRecord.getId() + "_" + UUID.randomUUID();
+        String successUrl = requireCheckoutUrl(PlatformSettingService.MP_SUCCESS_URL, "sucesso");
+        String failureUrl = requireCheckoutUrl(PlatformSettingService.MP_FAILURE_URL, "falha");
+        String pendingUrl = requireCheckoutUrl(PlatformSettingService.MP_PENDING_URL, "pendente");
 
         Map<String, Object> payload = Map.of(
                 "items", List.of(Map.of(
@@ -43,21 +49,27 @@ public class MercadoPagoBillingService {
                 )),
                 "external_reference", externalReference,
                 "back_urls", Map.of(
-                        "success", settingService.get(PlatformSettingService.MP_SUCCESS_URL, ""),
-                        "failure", settingService.get(PlatformSettingService.MP_FAILURE_URL, ""),
-                        "pending", settingService.get(PlatformSettingService.MP_PENDING_URL, "")
+                        "success", successUrl,
+                        "failure", failureUrl,
+                        "pending", pendingUrl
                 ),
                 "auto_return", "approved"
         );
 
-        @SuppressWarnings("unchecked")
-        Map<String, Object> response = RestClient.create("https://api.mercadopago.com")
-                .post()
-                .uri("/checkout/preferences")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
-                .body(payload)
-                .retrieve()
-                .body(Map.class);
+        Map<String, Object> response;
+        try {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> rawResponse = RestClient.create("https://api.mercadopago.com")
+                    .post()
+                    .uri("/checkout/preferences")
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                    .body(payload)
+                    .retrieve()
+                    .body(Map.class);
+            response = rawResponse;
+        } catch (RestClientResponseException ex) {
+            throw new ValidationException(buildMercadoPagoErrorMessage(ex));
+        }
 
         String checkoutUrl = response != null && response.get("init_point") != null
                 ? String.valueOf(response.get("init_point"))
@@ -154,5 +166,33 @@ public class MercadoPagoBillingService {
             throw new ValidationException("Mercado Pago não configurado. Defina billing.mp.access_token.");
         }
         return token;
+    }
+
+    private String requireCheckoutUrl(String settingKey, String description) {
+        String value = settingService.get(settingKey, "");
+        if (value == null || value.isBlank()) {
+            throw new ValidationException(
+                    "Mercado Pago não configurado. Defina a URL de retorno de " + description + " nas configurações.");
+        }
+        return value;
+    }
+
+    private String buildMercadoPagoErrorMessage(RestClientResponseException ex) {
+        String message = extractMercadoPagoMessage(ex.getResponseBodyAsString());
+        if (message != null && !message.isBlank()) {
+            return "Falha ao gerar checkout no Mercado Pago: " + message;
+        }
+        return "Falha ao gerar checkout no Mercado Pago (HTTP " + ex.getStatusCode().value() + ").";
+    }
+
+    private String extractMercadoPagoMessage(String responseBody) {
+        if (responseBody == null || responseBody.isBlank()) {
+            return null;
+        }
+        Matcher matcher = MP_MESSAGE_PATTERN.matcher(responseBody);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        return null;
     }
 }

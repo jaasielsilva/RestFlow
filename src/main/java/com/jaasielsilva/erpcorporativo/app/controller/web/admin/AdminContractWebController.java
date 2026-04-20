@@ -2,6 +2,8 @@ package com.jaasielsilva.erpcorporativo.app.controller.web.admin;
 
 import jakarta.validation.Valid;
 
+import java.time.YearMonth;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -101,9 +103,14 @@ public class AdminContractWebController {
     @GetMapping("/{id}")
     public String detail(@PathVariable("id") Long id, Model model) {
         ContractViewModel contract = contractUseCase.getById(id);
+        PaymentRecordForm paymentForm = new PaymentRecordForm();
+        paymentForm.setMesReferencia(YearMonth.now());
+        paymentForm.setValorPago(contract.valorMensal());
+        paymentForm.setStatus(com.jaasielsilva.erpcorporativo.app.model.PaymentStatus.PENDENTE);
+        paymentForm.setObservacoes("Fatura gerada pelo SUPER_ADMIN.");
         model.addAttribute("contract", contract);
         model.addAttribute("statusValues", ContractStatus.values());
-        model.addAttribute("paymentForm", new PaymentRecordForm());
+        model.addAttribute("paymentForm", paymentForm);
         populateCommon(model, "contratos", "Contrato " + contract.tenantNome(), contract.status().name());
         return "admin/contratos/detail";
     }

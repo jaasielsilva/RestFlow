@@ -22,6 +22,8 @@ import com.jaasielsilva.erpcorporativo.app.model.Role;
 import com.jaasielsilva.erpcorporativo.app.model.Tenant;
 import com.jaasielsilva.erpcorporativo.app.model.Usuario;
 import com.jaasielsilva.erpcorporativo.app.repository.module.PlatformModuleRepository;
+import com.jaasielsilva.erpcorporativo.app.repository.plan.PlanAddonRepository;
+import com.jaasielsilva.erpcorporativo.app.repository.plan.SubscriptionPlanRepository;
 import com.jaasielsilva.erpcorporativo.app.repository.tenant.TenantRepository;
 import com.jaasielsilva.erpcorporativo.app.repository.usuario.UsuarioRepository;
 import com.jaasielsilva.erpcorporativo.app.service.shared.PlatformSettingService;
@@ -47,12 +49,35 @@ class DataInitializerTest {
     @Mock
     private com.jaasielsilva.erpcorporativo.app.repository.knowledge.KnowledgeArticleRepository knowledgeArticleRepository;
 
+    @Mock
+    private SubscriptionPlanRepository subscriptionPlanRepository;
+
+    @Mock
+    private PlanAddonRepository planAddonRepository;
+
     private DataInitializer dataInitializer;
 
     @BeforeEach
     void setUp() {
         AppBootstrapProperties properties = new AppBootstrapProperties();
-        dataInitializer = new DataInitializer(usuarioRepository, passwordEncoder, tenantRepository, properties, platformSettingService, platformModuleRepository, knowledgeArticleRepository);
+        dataInitializer = new DataInitializer(
+                usuarioRepository,
+                passwordEncoder,
+                tenantRepository,
+                properties,
+                platformSettingService,
+                platformModuleRepository,
+                knowledgeArticleRepository,
+                subscriptionPlanRepository,
+                planAddonRepository
+        );
+
+        when(platformModuleRepository.findByCodigoIgnoreCase(any())).thenReturn(Optional.empty());
+        when(platformModuleRepository.findAll()).thenReturn(java.util.List.of());
+        when(planAddonRepository.findByCodigoIgnoreCase(any())).thenReturn(Optional.empty());
+        when(planAddonRepository.findAll()).thenReturn(java.util.List.of());
+        when(subscriptionPlanRepository.findByCodigoIgnoreCase(any())).thenReturn(Optional.empty());
+        when(knowledgeArticleRepository.count()).thenReturn(1L);
     }
 
     @Test

@@ -70,11 +70,14 @@ public class AdminTenantWebController {
     @PostMapping("/{tenantId}/reset-admin-password")
     public String resetTenantAdminPassword(@PathVariable("tenantId") Long tenantId, RedirectAttributes redirectAttributes) {
         try {
-            adminTenantWebService.resetTenantAdminPassword(tenantId);
-            redirectAttributes.addFlashAttribute("toastSuccess", "Senha do ADMIN resetada para: mudar123");
+            var result = adminTenantWebService.resetTenantAdminPassword(tenantId);
+            redirectAttributes.addFlashAttribute(
+                    "toastSuccess",
+                    "Senha do ADMIN (" + result.adminEmail() + ") resetada para: " + result.generatedPassword()
+            );
             return "redirect:/admin/tenants";
         } catch (AppException ex) {
-            redirectAttributes.addFlashAttribute("toastError", "Não foi possível resetar a senha do ADMIN deste tenant.");
+            redirectAttributes.addFlashAttribute("toastError", ex.getMessage());
             return "redirect:/admin/tenants";
         }
     }
