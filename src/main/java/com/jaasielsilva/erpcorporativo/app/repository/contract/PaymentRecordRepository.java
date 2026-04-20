@@ -14,6 +14,8 @@ public interface PaymentRecordRepository extends JpaRepository<PaymentRecord, Lo
 
     List<PaymentRecord> findByContractIdOrderByMesReferenciaDesc(Long contractId);
 
+    boolean existsByContractId(Long contractId);
+
     Optional<PaymentRecord> findFirstByContractIdOrderByMesReferenciaDesc(Long contractId);
 
     long countByStatus(PaymentStatus status);

@@ -172,6 +172,11 @@ public class ContractUseCase {
     @Transactional
     public void delete(Long id, String executadoPor) {
         Contract contract = findContract(id);
+        if (paymentRecordRepository.existsByContractId(id)) {
+            throw new ConflictException(
+                    "Não é possível excluir o contrato porque existem faturas/pagamentos vinculados. " +
+                    "Use o status ENCERRADO para manter o histórico financeiro.");
+        }
         String tenantNome = contract.getTenant().getNome();
         contractRepository.delete(contract);
         auditService.log(AuditAction.CONTRACT_REMOVIDO,

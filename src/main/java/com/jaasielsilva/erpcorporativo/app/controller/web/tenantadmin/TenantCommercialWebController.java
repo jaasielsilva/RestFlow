@@ -6,12 +6,14 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.jaasielsilva.erpcorporativo.app.dto.api.tenantadmin.commercial.TenantBillingProfileRequest;
 import com.jaasielsilva.erpcorporativo.app.exception.AppException;
 import com.jaasielsilva.erpcorporativo.app.service.api.v1.tenantadmin.TenantCommercialApiService;
+import com.jaasielsilva.erpcorporativo.app.service.shared.MercadoPagoBillingService;
 import com.jaasielsilva.erpcorporativo.app.service.web.tenantadmin.TenantPortalWebService;
 
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ public class TenantCommercialWebController {
 
     private final TenantPortalWebService tenantPortalWebService;
     private final TenantCommercialApiService tenantCommercialApiService;
+    private final MercadoPagoBillingService mercadoPagoBillingService;
 
     @GetMapping
     public String index(Authentication authentication, Model model) {
@@ -32,7 +35,21 @@ public class TenantCommercialWebController {
     }
 
     @GetMapping("/faturas")
-    public String invoices(Authentication authentication, Model model) {
+    public String invoices(
+            Authentication authentication,
+            @RequestParam(name = "payment_id", required = false) String paymentId,
+            @RequestParam(name = "collection_id", required = false) String collectionId,
+            Model model
+    ) {
+        // Fallback de sincronização quando o usuário volta do checkout e o webhook ainda não chegou.
+        String paymentToSync = paymentId != null && !paymentId.isBlank() ? paymentId : collectionId;
+        if (paymentToSync != null && !paymentToSync.isBlank()) {
+            try {
+                mercadoPagoBillingService.processPaymentWebhook(paymentToSync);
+            } catch (AppException ignored) {
+                // Não interrompe a experiência da tela de faturas em caso de falha transitória.
+            }
+        }
         populateCommon(authentication, model, "Faturas", "Assinatura e pagamentos");
         model.addAttribute("invoices", tenantCommercialApiService.listInvoices(authentication));
         return "tenant/commercial/invoices";
