@@ -554,7 +554,7 @@
         <div class="login-panel">
 
             <!-- Brand -->
-            <a href="/" class="brand">
+            <a th:href="@{/}" class="brand">
                 <div class="brand-mark">
                     <i class="fa-solid fa-building-columns"></i>
                 </div>
@@ -568,6 +568,10 @@
             <div class="login-heading">
                 <h1>Bem-vindo de volta</h1>
                 <p>Acesse sua conta para continuar no painel.</p>
+                <p style="margin-top: 12px; font-size: 0.84rem;">
+                    Ainda não é cliente?
+                    <a th:href="@{/planos}" class="forgot-link" id="goPlansLink" data-target-path="/planos">Assine um plano agora</a>
+                </p>
             </div>
 
             <!-- Alerts -->

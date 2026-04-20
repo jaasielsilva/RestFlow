@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Status da Assinatura</title>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.3/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/public/plans.css}">
+</head>
+<body>
+<main class="container py-5">
+    <section class="card shadow-sm status-card">
+        <div class="card-body">
+            <h1 class="h4 mb-3">Status da assinatura</h1>
+
+            <div th:if="${state == 'success'}" class="alert alert-success">
+                Pagamento identificado com sucesso. Estamos finalizando a ativação automática do tenant.
+            </div>
+            <div th:if="${state == 'pending'}" class="alert alert-warning">
+                Pagamento ainda pendente. Assim que for aprovado, enviaremos as credenciais por e-mail.
+            </div>
+            <div th:if="${state == 'failure'}" class="alert alert-danger">
+                O pagamento não foi aprovado. Você pode iniciar uma nova tentativa de assinatura.
+            </div>
+
+            <div class="status-box" th:if="${onboarding != null}">
+                <p><strong>Tenant:</strong> <span th:text="${onboarding.tenantNome}">Empresa</span></p>
+                <p><strong>E-mail admin:</strong> <span th:text="${onboarding.adminEmail}">admin@email.com</span></p>
+                <p><strong>Status interno:</strong> <span th:text="${onboarding.status}">PENDING_PAYMENT</span></p>
+                <p class="mb-0" th:if="${onboarding.status.name() == 'ACTIVATED' || onboarding.status.name() == 'ACTIVATED_EMAIL_PENDING'}">
+                    Se o e-mail não chegar em até 5 minutos, acione o suporte para reenvio de credenciais.
+                </p>
+            </div>
+
+            <div class="mt-4 d-flex gap-2">
+                <a class="btn btn-primary" href="/planos">Nova assinatura</a>
+                <a class="btn btn-outline-secondary" href="/login">Ir para login</a>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

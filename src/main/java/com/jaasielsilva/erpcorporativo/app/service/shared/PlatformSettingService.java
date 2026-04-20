@@ -34,6 +34,7 @@ public class PlatformSettingService {
     public static final String MP_SUCCESS_URL     = "billing.mp.success_url";
     public static final String MP_FAILURE_URL     = "billing.mp.failure_url";
     public static final String MP_PENDING_URL     = "billing.mp.pending_url";
+    public static final String ONBOARDING_ENTRY_PRICE = "billing.onboarding.entry_price";
 
     @Transactional(readOnly = true)
     public List<PlatformSetting> findAll() {
@@ -87,6 +88,7 @@ public class PlatformSettingService {
         ensureDefault(MP_SUCCESS_URL,     "http://localhost:8080/app/minha-conta/faturas", "URL de retorno sucesso checkout");
         ensureDefault(MP_FAILURE_URL,     "http://localhost:8080/app/minha-conta/faturas", "URL de retorno falha checkout");
         ensureDefault(MP_PENDING_URL,     "http://localhost:8080/app/minha-conta/faturas", "URL de retorno pendente checkout");
+        ensureDefault(ONBOARDING_ENTRY_PRICE, "2.00",         "Preço de entrada para onboarding self-service");
     }
 
     private void ensureDefault(String chave, String valor, String descricao) {

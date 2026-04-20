@@ -1,0 +1,71 @@
+body {
+    background: #f8fafc;
+}
+
+.public-layout {
+    max-width: 980px;
+}
+
+.test-price {
+    color: #0f766e;
+}
+
+.plan-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px;
+    cursor: pointer;
+    display: block;
+    transition: border-color .2s ease, box-shadow .2s ease;
+    background: #fff;
+}
+
+.plan-card:hover {
+    border-color: #6366f1;
+}
+
+.plan-card input {
+    position: absolute;
+    opacity: 0;
+}
+
+.plan-card input:checked + .plan-content {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, .12);
+}
+
+.plan-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    padding: 8px;
+}
+
+.plan-name {
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.plan-tier {
+    font-size: .75rem;
+    color: #475569;
+}
+
+.plan-description {
+    font-size: .84rem;
+    color: #334155;
+}
+
+.status-card {
+    max-width: 760px;
+    margin: 0 auto;
+}
+
+.status-box {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 16px;
+}

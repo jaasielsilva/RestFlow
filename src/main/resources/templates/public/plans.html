@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assinatura ERP Corporativo</title>
+    <meta name="description" content="Assine o ERP Corporativo e ative seu tenant automaticamente.">
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.3/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/public/plans.css}">
+</head>
+<body>
+<main class="public-layout container py-5">
+    <header class="text-center mb-4">
+        <h1 class="display-6 fw-bold">Assine e ative seu ERP automaticamente</h1>
+        <p class="text-secondary mb-2">
+            Após confirmação do pagamento, o tenant é ativado e as credenciais são enviadas por e-mail.
+        </p>
+        <p class="test-price mb-0">Oferta de teste: <strong th:text="${'R$ ' + entryPrice}">R$ 2,00</strong></p>
+    </header>
+
+    <div th:if="${param.blocked}" class="alert alert-warning">
+        <span th:text="${param.blocked[0]}">Muitas tentativas detectadas.</span>
+    </div>
+
+    <section class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h2 class="h5 mb-3">1) Escolha seu plano</h2>
+            <div class="row g-3">
+                <div class="col-md-4" th:each="plan : ${plans}">
+                    <label class="plan-card w-100">
+                        <input type="radio" name="planIdPreview"
+                               th:value="${plan.id}"
+                               th:checked="${subscriptionForm.planId == plan.id}">
+                        <span class="plan-content">
+                            <span class="plan-name" th:text="${plan.nome}">Plano</span>
+                            <span class="plan-tier" th:text="${plan.tier}">START</span>
+                            <span class="plan-description"
+                                  th:text="${plan.descricao != null ? plan.descricao : 'Plano profissional para operação SaaS.'}">
+                                Descrição
+                            </span>
+                        </span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="card shadow-sm">
+        <div class="card-body">
+            <h2 class="h5 mb-3">2) Informe os dados para ativação</h2>
+            <form th:action="@{/planos/assinar}" th:object="${subscriptionForm}" method="post" class="row g-3" id="subscriptionForm">
+                <div class="col-12" th:if="${#fields.hasGlobalErrors()}">
+                    <div class="alert alert-danger mb-0">
+                        <div th:each="err : ${#fields.globalErrors()}" th:text="${err}">Erro ao processar assinatura.</div>
+                    </div>
+                </div>
+                <input type="hidden" th:field="*{planId}" id="planId">
+                <input type="text" th:field="*{website}" class="d-none" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+                <div class="col-md-6">
+                    <label class="form-label" for="tenantNome">Nome da empresa</label>
+                    <input id="tenantNome" class="form-control" th:field="*{tenantNome}" placeholder="Ex.: Restaurante Alfa" required>
+                    <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('tenantNome')}" th:errors="*{tenantNome}">Nome inválido</div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="tenantSlug">Identificador (slug)</label>
+                    <input id="tenantSlug" class="form-control" th:field="*{tenantSlug}" placeholder="ex: restaurante-alfa" required>
+                    <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('tenantSlug')}" th:errors="*{tenantSlug}">Slug inválido</div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="adminNome">Nome do administrador</label>
+                    <input id="adminNome" class="form-control" th:field="*{adminNome}" placeholder="Seu nome completo" required>
+                    <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('adminNome')}" th:errors="*{adminNome}">Nome inválido</div>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="adminEmail">E-mail do administrador</label>
+                    <input id="adminEmail" class="form-control" th:field="*{adminEmail}" type="email" placeholder="voce@empresa.com" required>
+                    <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('adminEmail')}" th:errors="*{adminEmail}">Email inválido</div>
+                </div>
+                <div class="col-12">
+                    <div class="form-check">
+                        <input id="aceiteTermos" class="form-check-input" type="checkbox" th:field="*{aceiteTermos}">
+                        <label class="form-check-label" for="aceiteTermos">
+                            Confirmo que estou autorizando a criação automática do tenant após pagamento aprovado.
+                        </label>
+                    </div>
+                    <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('aceiteTermos')}" th:errors="*{aceiteTermos}">Aceite os termos</div>
+                </div>
+                <div class="col-12 d-flex gap-2 align-items-center">
+                    <button class="btn btn-primary px-4" type="submit">Pagar e ativar agora</button>
+                    <a class="btn btn-outline-secondary" th:href="@{/login}">Já tenho acesso</a>
+                </div>
+            </form>
+        </div>
+    </section>
+</main>
+
+<script th:inline="javascript">
+    (function () {
+        const radios = document.querySelectorAll('input[name="planIdPreview"]');
+        const hiddenPlanId = document.getElementById('planId');
+        radios.forEach(function (radio) {
+            radio.addEventListener('change', function () {
+                hiddenPlanId.value = radio.value;
+            });
+            if (radio.checked) {
+                hiddenPlanId.value = radio.value;
+            }
+        });
+    })();
+</script>
+</body>
+</html>

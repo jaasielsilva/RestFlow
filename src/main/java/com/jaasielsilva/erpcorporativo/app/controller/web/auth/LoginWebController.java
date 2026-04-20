@@ -25,7 +25,7 @@ public class LoginWebController {
             // já logado — redireciona para a área correta
             return "redirect:/home";
         }
-        return "redirect:/login";
+        return "redirect:/planos";
     }
 
     @GetMapping("/login")

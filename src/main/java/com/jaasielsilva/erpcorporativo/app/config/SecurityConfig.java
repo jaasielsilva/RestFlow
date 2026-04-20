@@ -17,6 +17,7 @@ import com.jaasielsilva.erpcorporativo.app.security.CustomAuthenticationFailureH
 import com.jaasielsilva.erpcorporativo.app.security.CustomAuthenticationSuccessHandler;
 import com.jaasielsilva.erpcorporativo.app.security.LoginThrottleFilter;
 import com.jaasielsilva.erpcorporativo.app.security.MaintenanceModeFilter;
+import com.jaasielsilva.erpcorporativo.app.security.PublicEndpointRateLimitFilter;
 import com.jaasielsilva.erpcorporativo.app.tenant.TenantRequestFilter;
 
 @Configuration
@@ -29,6 +30,7 @@ public class SecurityConfig {
     private final ApiAuthenticationEntryPoint apiAuthenticationEntryPoint;
     private final ApiAccessDeniedHandler apiAccessDeniedHandler;
     private final MaintenanceModeFilter maintenanceModeFilter;
+    private final PublicEndpointRateLimitFilter publicEndpointRateLimitFilter;
 
     public SecurityConfig(
             TenantRequestFilter tenantRequestFilter,
@@ -37,7 +39,8 @@ public class SecurityConfig {
             CustomAuthenticationFailureHandler authenticationFailureHandler,
             ApiAuthenticationEntryPoint apiAuthenticationEntryPoint,
             ApiAccessDeniedHandler apiAccessDeniedHandler,
-            MaintenanceModeFilter maintenanceModeFilter
+            MaintenanceModeFilter maintenanceModeFilter,
+            PublicEndpointRateLimitFilter publicEndpointRateLimitFilter
     ) {
         this.tenantRequestFilter = tenantRequestFilter;
         this.loginThrottleFilter = loginThrottleFilter;
@@ -46,6 +49,7 @@ public class SecurityConfig {
         this.apiAuthenticationEntryPoint = apiAuthenticationEntryPoint;
         this.apiAccessDeniedHandler = apiAccessDeniedHandler;
         this.maintenanceModeFilter = maintenanceModeFilter;
+        this.publicEndpointRateLimitFilter = publicEndpointRateLimitFilter;
     }
 
     @Bean
@@ -54,6 +58,10 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                     "/",
+                    "/planos",
+                    "/planos/**",
+                    "/assinatura/status",
+                    "/error",
                     "/login",
                     "/recuperar-senha",
                     "/webjars/**",
@@ -72,6 +80,12 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/admin/**").hasRole("SUPER_ADMIN")
                 .requestMatchers("/api/v1/tenant-admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
                 .anyRequest().authenticated()
+            )
+            .csrf(csrf -> csrf
+                .ignoringRequestMatchers(
+                        "/api/v1/system/webhooks/mercadopago",
+                        "/planos/assinar"
+                )
             )
             .formLogin(form -> form
                 .loginPage("/login")
@@ -122,6 +136,7 @@ public class SecurityConfig {
                 .referrerPolicy(referrer -> referrer.policy(ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
             )
             .addFilterBefore(tenantRequestFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(publicEndpointRateLimitFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(loginThrottleFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterAfter(maintenanceModeFilter, TenantRequestFilter.class);
 

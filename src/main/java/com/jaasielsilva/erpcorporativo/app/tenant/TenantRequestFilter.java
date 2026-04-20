@@ -204,14 +204,18 @@ public class TenantRequestFilter extends OncePerRequestFilter {
     private boolean isPublicRoute(String uri) {
         if (uri == null) return false;
         return uri.equals("/")
+                || uri.startsWith("/planos")
+                || uri.startsWith("/assinatura")
                 || uri.equals("/logout")
+                || uri.equals("/error")
                 || uri.startsWith("/recuperar-senha")
                 || uri.startsWith("/css/")
                 || uri.startsWith("/js/")
                 || uri.startsWith("/img/")
                 || uri.startsWith("/webjars/")
                 || uri.equals("/favicon.ico")
-                || uri.equals("/api/v1/system/health");
+                || uri.equals("/api/v1/system/health")
+                || uri.startsWith("/api/v1/system/webhooks/mercadopago");
     }
 
     private boolean requiresTenant(HttpServletRequest request) {

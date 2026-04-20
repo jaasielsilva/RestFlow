@@ -16,6 +16,7 @@
 
     const toggleBtn = document.getElementById('togglePassword') || document.getElementById('togglePass');
     const toggleIcon = document.getElementById('toggleIcon');
+    const goPlansLink = document.getElementById('goPlansLink');
 
     if (toggleBtn && passEl) {
         toggleBtn.addEventListener('click', () => {
@@ -25,6 +26,14 @@
             if (toggleIcon) {
                 toggleIcon.className = isPassword ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
             }
+        });
+    }
+
+    if (goPlansLink) {
+        goPlansLink.addEventListener('click', (event) => {
+            event.preventDefault();
+            const targetPath = goPlansLink.dataset.targetPath || '/planos';
+            window.location.assign(window.location.origin + targetPath);
         });
     }
 

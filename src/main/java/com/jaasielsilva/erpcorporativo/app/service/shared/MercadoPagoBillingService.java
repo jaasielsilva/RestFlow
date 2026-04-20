@@ -31,34 +31,67 @@ public class MercadoPagoBillingService {
 
     private final PlatformSettingService settingService;
     private final PaymentRecordRepository paymentRecordRepository;
+    private final PublicOnboardingActivationService publicOnboardingActivationService;
     private static final Pattern MP_MESSAGE_PATTERN = Pattern.compile("\"message\"\\s*:\\s*\"([^\"]+)\"");
 
     public PaymentRecord createCheckout(PaymentRecord paymentRecord, String tenantNome) {
-        String token = requireAccessToken();
-        String externalReference = paymentRecord.getExternalReference() != null
-                ? paymentRecord.getExternalReference()
-                : "pay_" + paymentRecord.getId() + "_" + UUID.randomUUID();
-        String successUrl = requireCheckoutUrl(PlatformSettingService.MP_SUCCESS_URL, "sucesso");
-        String failureUrl = requireCheckoutUrl(PlatformSettingService.MP_FAILURE_URL, "falha");
-        String pendingUrl = requireCheckoutUrl(PlatformSettingService.MP_PENDING_URL, "pendente");
+        return createCheckout(
+                paymentRecord,
+                "Assinatura SaaS - " + tenantNome + " - " + paymentRecord.getMesReferencia(),
+                "Pagamento de assinatura mensal da plataforma SaaS",
+                new CheckoutBackUrls(
+                        requireCheckoutUrl(PlatformSettingService.MP_SUCCESS_URL, "sucesso"),
+                        requireCheckoutUrl(PlatformSettingService.MP_FAILURE_URL, "falha"),
+                        requireCheckoutUrl(PlatformSettingService.MP_PENDING_URL, "pendente")
+                ),
+                paymentRecord.getExternalReference() != null
+                        ? paymentRecord.getExternalReference()
+                        : "pay_" + paymentRecord.getId() + "_" + UUID.randomUUID()
+        );
+    }
 
-        Map<String, Object> payload = Map.of(
+    public PaymentRecord createCheckout(
+            PaymentRecord paymentRecord,
+            String itemTitle,
+            String itemDescription,
+            CheckoutBackUrls backUrls,
+            String externalReference
+    ) {
+        return createCheckout(paymentRecord, itemTitle, itemDescription, backUrls, externalReference, true);
+    }
+
+    public PaymentRecord createCheckout(
+            PaymentRecord paymentRecord,
+            String itemTitle,
+            String itemDescription,
+            CheckoutBackUrls backUrls,
+            String externalReference,
+            boolean autoReturnApproved
+    ) {
+        String token = requireAccessToken();
+
+        java.util.Map<String, Object> payload = new java.util.HashMap<>();
+        payload.put(
                 "items", List.of(Map.of(
                         "id", String.valueOf(paymentRecord.getId()),
-                        "title", "Assinatura SaaS - " + tenantNome + " - " + paymentRecord.getMesReferencia(),
-                        "description", "Pagamento de assinatura mensal da plataforma SaaS",
+                        "title", itemTitle,
+                        "description", itemDescription,
                         "quantity", 1,
                         "currency_id", "BRL",
                         "unit_price", paymentRecord.getValorPago() != null ? paymentRecord.getValorPago() : BigDecimal.ZERO
-                )),
-                "external_reference", externalReference,
-                "back_urls", Map.of(
-                        "success", successUrl,
-                        "failure", failureUrl,
-                        "pending", pendingUrl
-                ),
-                "auto_return", "approved"
+                ))
         );
+        payload.put("external_reference", externalReference);
+        payload.put(
+                "back_urls", Map.of(
+                        "success", backUrls.successUrl(),
+                        "failure", backUrls.failureUrl(),
+                        "pending", backUrls.pendingUrl()
+                )
+        );
+        if (autoReturnApproved) {
+            payload.put("auto_return", "approved");
+        }
 
         Map<String, Object> response;
         try {
@@ -134,6 +167,7 @@ public class MercadoPagoBillingService {
             record.setDataPagamento(LocalDate.now());
         }
         PaymentRecord updated = paymentRecordRepository.save(record);
+        var activationResult = publicOnboardingActivationService.activateFromPaidRecord(updated, "mercadopago_webhook");
         boolean changed = statusAnterior != updated.getStatus()
                 || providerPaymentIdAnterior == null
                 || !providerPaymentIdAnterior.equals(updated.getProviderPaymentId());
@@ -142,6 +176,16 @@ public class MercadoPagoBillingService {
                 "[MercadoPago] sincronização concluída paymentId={} externalReference={} recordId={} statusMp={} statusAnterior={} statusAtual={}",
                 paymentId, externalReference, updated.getId(), status, statusAnterior, updated.getStatus()
         );
+        if (activationResult.activated() || activationResult.alreadyActive()) {
+            log.info(
+                    "[Onboarding] resultado ativação onboardingId={} tenantId={} activated={} alreadyActive={} emailSent={}",
+                    activationResult.onboardingId(),
+                    activationResult.tenantId(),
+                    activationResult.activated(),
+                    activationResult.alreadyActive(),
+                    activationResult.emailSent()
+            );
+        }
 
         return PaymentSyncResult.synced(
                 paymentId,
@@ -262,5 +306,8 @@ public class MercadoPagoBillingService {
                     "Sincronização concluída."
             );
         }
+    }
+
+    public record CheckoutBackUrls(String successUrl, String failureUrl, String pendingUrl) {
     }
 }
