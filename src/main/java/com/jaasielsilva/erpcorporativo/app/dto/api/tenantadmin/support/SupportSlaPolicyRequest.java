@@ -1,0 +1,21 @@
+package com.jaasielsilva.erpcorporativo.app.dto.api.tenantadmin.support;
+
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+
+public record SupportSlaPolicyRequest(
+        @NotNull(message = "Tempo de primeira resposta é obrigatório")
+        @Min(value = 5, message = "Tempo mínimo de primeira resposta é 5 minutos")
+        @Max(value = 43200, message = "Tempo máximo de primeira resposta é 43200 minutos")
+        Integer firstResponseMinutes,
+        @NotNull(message = "Tempo de resolução é obrigatório")
+        @Min(value = 10, message = "Tempo mínimo de resolução é 10 minutos")
+        @Max(value = 86400, message = "Tempo máximo de resolução é 86400 minutos")
+        Integer resolutionMinutes,
+        @NotNull(message = "Tempo de aviso é obrigatório")
+        @Min(value = 1, message = "Aviso mínimo é 1 minuto")
+        @Max(value = 10080, message = "Aviso máximo é 10080 minutos")
+        Integer warningBeforeMinutes
+) {
+}

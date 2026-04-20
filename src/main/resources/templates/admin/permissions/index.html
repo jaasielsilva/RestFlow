@@ -58,6 +58,37 @@
                         </select>
                     </div>
 
+                    <div class="col-12 col-md-2">
+                        <label class="form-label">Tier</label>
+                        <select class="form-select" th:field="*{tier}">
+                            <option value="START">START</option>
+                            <option value="GROWTH">GROWTH</option>
+                            <option value="SCALE">SCALE</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12 col-md-2">
+                        <label class="form-label">Máx. usuários</label>
+                        <input class="form-control" type="number" min="1" th:field="*{maxUsers}" placeholder="Opcional" />
+                    </div>
+
+                    <div class="col-12 col-md-2">
+                        <label class="form-label">Storage (GB)</label>
+                        <input class="form-control" type="number" min="1" th:field="*{maxStorageGb}" placeholder="Opcional" />
+                    </div>
+
+                    <div class="col-12 col-md-3">
+                        <label class="form-label">Template onboarding</label>
+                        <input class="form-control" type="text" th:field="*{onboardingTemplate}" placeholder="START/GROWTH/SCALE" />
+                    </div>
+
+                    <div class="col-12 col-md-1 d-flex align-items-end">
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" th:field="*{annualDiscountEligible}" />
+                            <label class="form-check-label">Anual</label>
+                        </div>
+                    </div>
+
                     <div class="col-12" th:if="${not #lists.isEmpty(view.availableModules)}">
                         <label class="form-label">Módulos incluídos no plano</label>
                         <div class="d-flex flex-wrap gap-3">
@@ -67,6 +98,19 @@
                                        name="moduleIds"
                                        th:value="${m.id}" />
                                 <label class="form-check-label" th:for="'mod_' + ${m.id}" th:text="${m.nome}">Módulo</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12" th:if="${not #lists.isEmpty(view.availableAddons)}">
+                        <label class="form-label">Add-ons liberados neste plano</label>
+                        <div class="d-flex flex-wrap gap-3">
+                            <div class="form-check" th:each="a : ${view.availableAddons}">
+                                <input class="form-check-input" type="checkbox"
+                                       th:id="'addon_' + ${a.id}"
+                                       name="addonIds"
+                                       th:value="${a.id}" />
+                                <label class="form-check-label" th:for="'addon_' + ${a.id}" th:text="${a.nome}">Addon</label>
                             </div>
                         </div>
                     </div>
@@ -93,22 +137,34 @@
                         <tr>
                             <th>Nome</th>
                             <th>Código</th>
+                            <th>Tier</th>
+                            <th>Limites</th>
                             <th>Módulos</th>
+                            <th>Add-ons</th>
                             <th>Status</th>
                             <th>Criação</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr th:if="${#lists.isEmpty(view.plans)}">
-                            <td colspan="5" class="text-muted">Nenhum plano cadastrado.</td>
+                            <td colspan="8" class="text-muted">Nenhum plano cadastrado.</td>
                         </tr>
                         <tr th:each="plan : ${view.plans}">
                             <td th:text="${plan.nome}">Plano</td>
                             <td><span class="text-muted" th:text="${plan.codigo}">CODIGO</span></td>
+                            <td><span class="badge bg-dark" th:text="${plan.tier}">START</span></td>
+                            <td class="small text-muted"
+                                th:text="${'Users: ' + (plan.maxUsers != null ? plan.maxUsers : 'livre') + ' | Storage: ' + (plan.maxStorageGb != null ? plan.maxStorageGb + 'GB' : 'livre')}">-</td>
                             <td>
                                 <span th:if="${#lists.isEmpty(plan.modules)}" class="text-muted">Nenhum</span>
                                 <div class="d-flex flex-wrap gap-1" th:unless="${#lists.isEmpty(plan.modules)}">
                                     <span class="badge bg-secondary" th:each="m : ${plan.modules}" th:text="${m.nome}">Módulo</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span th:if="${#lists.isEmpty(plan.addons)}" class="text-muted">Nenhum</span>
+                                <div class="d-flex flex-wrap gap-1" th:unless="${#lists.isEmpty(plan.addons)}">
+                                    <span class="badge bg-info text-dark" th:each="a : ${plan.addons}" th:text="${a.nome}">Addon</span>
                                 </div>
                             </td>
                             <td>

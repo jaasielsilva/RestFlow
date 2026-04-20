@@ -27,7 +27,7 @@
             <div class="stat-card">
                 <div class="icon"><i class="fa-solid fa-dollar-sign"></i></div>
                 <h6>Valor Estimado</h6>
-                <h2 th:text="'R$ ' + #numbers.formatDecimal(view.valorTotalEstimado, 1, 'POINT', 2, 'COMMA')">R$ 0,00</h2>
+                <h2 th:text="${'R$ ' + #numbers.formatDecimal(view.valorTotalEstimado, 1, 'POINT', 2, 'COMMA')}">R$ 0,00</h2>
             </div>
             <div class="stat-card">
                 <div class="icon"><i class="fa-solid fa-trophy"></i></div>
@@ -101,7 +101,7 @@
                 <h5 class="modal-title" id="modalNovaOportunidadeLabel">Nova Oportunidade</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
-            <form th:action="@{/app/clientes/oportunidades}" method="post" th:object="${form != null ? form : new com.jaasielsilva.erpcorporativo.app.dto.web.crm.OportunidadeForm()}">
+            <form th:action="@{/app/clientes/oportunidades}" method="post" th:object="${form}">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <div class="modal-body row g-3">
                     <div class="col-12">

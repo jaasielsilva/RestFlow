@@ -44,7 +44,7 @@
     </a>
 
     <div class="sidebar-footer">
-        <a class="nav-link-custom" href="#">
+        <a class="nav-link-custom" th:classappend="${active == 'support'} ? ' active' : ''" th:href="@{/admin/suporte}">
             <i class="fa-solid fa-headset"></i> Suporte
         </a>
         <button type="button" class="nav-link-custom"

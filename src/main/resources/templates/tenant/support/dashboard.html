@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard de Suporte | Portal Cliente</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="/css/auth/home.css" />
+</head>
+<body>
+<div class="layout">
+    <aside th:replace="~{fragments/sidebar-tenant :: sidebar(${activeMenu})}"></aside>
+    <main class="main">
+        <div th:replace="~{fragments/topbar :: topbar(${pageTitle}, ${pageSubtitle}, false)}"></div>
+
+        <form class="d-flex gap-2 mb-3" method="get" th:action="@{/app/suporte/dashboard}">
+            <select class="form-select" style="max-width: 220px;" name="periodDays">
+                <option value="7" th:selected="${periodDays == 7}">Últimos 7 dias</option>
+                <option value="30" th:selected="${periodDays == 30}">Últimos 30 dias</option>
+                <option value="90" th:selected="${periodDays == 90}">Últimos 90 dias</option>
+            </select>
+            <button class="app-btn app-btn-secondary app-btn-sm" type="submit">
+                <i class="fa-solid fa-filter me-2"></i>Aplicar
+            </button>
+            <a class="app-btn app-btn-outline app-btn-sm" th:href="@{/app/suporte}">Voltar para chamados</a>
+        </form>
+
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="icon"><i class="fa-solid fa-layer-group"></i></div>
+                <h6>Backlog</h6>
+                <h2 th:text="${dashboard.totalBacklog}">0</h2>
+            </div>
+            <div class="stat-card">
+                <div class="icon"><i class="fa-solid fa-folder-open"></i></div>
+                <h6>Abertos</h6>
+                <h2 th:text="${dashboard.totalAbertos}">0</h2>
+            </div>
+            <div class="stat-card">
+                <div class="icon"><i class="fa-solid fa-circle-check"></i></div>
+                <h6>Resolvidos no período</h6>
+                <h2 th:text="${dashboard.totalResolvidosPeriodo}">0</h2>
+            </div>
+            <div class="stat-card">
+                <div class="icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                <h6>SLA violado</h6>
+                <h2 th:text="${dashboard.totalViolados}">0</h2>
+            </div>
+        </section>
+
+        <section class="bottom-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+            <div class="card-ui">
+                <div class="card-header-ui"><h4>Tempo médio 1a resposta</h4></div>
+                <h2 th:text="${dashboard.mediaHorasPrimeiraResposta + ' h'}">0 h</h2>
+            </div>
+            <div class="card-ui">
+                <div class="card-header-ui"><h4>Tempo médio resolução</h4></div>
+                <h2 th:text="${dashboard.mediaHorasResolucao + ' h'}">0 h</h2>
+            </div>
+            <div class="card-ui">
+                <div class="card-header-ui"><h4>SLA cumprido</h4></div>
+                <h2 th:text="${dashboard.percentualSlaCumprido + '%'}">0%</h2>
+            </div>
+        </section>
+    </main>
+</div>
+</body>
+</html>

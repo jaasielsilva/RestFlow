@@ -34,7 +34,13 @@ public class SubscriptionPlanAdminApiService {
                 request.nome(),
                 request.descricao(),
                 request.ativo(),
-                request.moduleIds()
+                request.tier(),
+                request.maxUsers(),
+                request.maxStorageGb(),
+                request.annualDiscountEligible(),
+                request.onboardingTemplate(),
+                request.moduleIds(),
+                request.addonIds()
         ));
     }
 
@@ -45,7 +51,13 @@ public class SubscriptionPlanAdminApiService {
                 request.nome(),
                 request.descricao(),
                 request.ativo(),
-                request.moduleIds()
+                request.tier(),
+                request.maxUsers(),
+                request.maxStorageGb(),
+                request.annualDiscountEligible(),
+                request.onboardingTemplate(),
+                request.moduleIds(),
+                request.addonIds()
         ));
     }
 
@@ -67,13 +79,24 @@ public class SubscriptionPlanAdminApiService {
                 .map(m -> new SubscriptionPlanResponse.PlanModuleItem(m.getId(), m.getCodigo(), m.getNome()))
                 .toList();
 
+        List<SubscriptionPlanResponse.PlanAddonItem> addonItems = plan.getAddons().stream()
+                .sorted((a, b) -> a.getNome().compareToIgnoreCase(b.getNome()))
+                .map(a -> new SubscriptionPlanResponse.PlanAddonItem(a.getId(), a.getCodigo(), a.getNome()))
+                .toList();
+
         return new SubscriptionPlanResponse(
                 plan.getId(),
                 plan.getCodigo(),
                 plan.getNome(),
                 plan.getDescricao(),
                 plan.isAtivo(),
+                plan.getTier(),
+                plan.getMaxUsers(),
+                plan.getMaxStorageGb(),
+                plan.isAnnualDiscountEligible(),
+                plan.getOnboardingTemplate(),
                 moduleItems,
+                addonItems,
                 plan.getCreatedAt()
         );
     }

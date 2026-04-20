@@ -2,7 +2,10 @@ package com.jaasielsilva.erpcorporativo.app.dto.api.admin.plan;
 
 import java.util.Set;
 
+import com.jaasielsilva.erpcorporativo.app.model.PlanTier;
+
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public record SubscriptionPlanRequest(
@@ -19,6 +22,20 @@ public record SubscriptionPlanRequest(
 
         boolean ativo,
 
-        Set<Long> moduleIds
+        @NotNull(message = "Tier é obrigatório")
+        PlanTier tier,
+
+        Integer maxUsers,
+
+        Integer maxStorageGb,
+
+        boolean annualDiscountEligible,
+
+        @Size(max = 30, message = "Template de onboarding deve ter no máximo 30 caracteres")
+        String onboardingTemplate,
+
+        Set<Long> moduleIds,
+
+        Set<Long> addonIds
 ) {
 }

@@ -20,6 +20,7 @@ import com.jaasielsilva.erpcorporativo.app.model.TenantRolePermission;
 import com.jaasielsilva.erpcorporativo.app.repository.module.PlatformModuleRepository;
 import com.jaasielsilva.erpcorporativo.app.repository.module.TenantModuleRepository;
 import com.jaasielsilva.erpcorporativo.app.repository.permission.TenantRolePermissionRepository;
+import com.jaasielsilva.erpcorporativo.app.repository.plan.PlanAddonRepository;
 import com.jaasielsilva.erpcorporativo.app.repository.tenant.TenantRepository;
 import com.jaasielsilva.erpcorporativo.app.service.api.v1.admin.SubscriptionPlanAdminApiService;
 import com.jaasielsilva.erpcorporativo.app.usecase.api.v1.admin.TenantRolePermissionUseCase;
@@ -35,6 +36,7 @@ public class AdminPermissionsWebService {
     private final TenantRepository tenantRepository;
     private final TenantModuleRepository tenantModuleRepository;
     private final TenantRolePermissionRepository permissionRepository;
+    private final PlanAddonRepository planAddonRepository;
     private final TenantRolePermissionUseCase tenantRolePermissionUseCase;
 
     public AdminPermissionsViewModel buildViewModel() {
@@ -43,12 +45,13 @@ public class AdminPermissionsWebService {
                 .filter(PlatformModule::isAtivo)
                 .sorted((a, b) -> a.getNome().compareToIgnoreCase(b.getNome()))
                 .toList();
+        var addons = planAddonRepository.findAllByAtivoTrueOrderByNomeAsc();
         List<Tenant> tenants = tenantRepository.findAll().stream()
                 .filter(Tenant::isAtivo)
                 .sorted((a, b) -> a.getNome().compareToIgnoreCase(b.getNome()))
                 .toList();
 
-        return new AdminPermissionsViewModel(plans, modules, tenants);
+        return new AdminPermissionsViewModel(plans, modules, addons, tenants);
     }
 
     public TenantPermissionMatrixViewModel buildMatrix(Long tenantId) {
@@ -79,7 +82,13 @@ public class AdminPermissionsWebService {
                 form.getNome(),
                 form.getDescricao(),
                 form.isAtivo(),
-                form.getModuleIds()
+                form.getTier(),
+                form.getMaxUsers(),
+                form.getMaxStorageGb(),
+                form.isAnnualDiscountEligible(),
+                form.getOnboardingTemplate(),
+                form.getModuleIds(),
+                form.getAddonIds()
         );
         return subscriptionPlanAdminApiService.create(request);
     }

@@ -1,6 +1,8 @@
 package com.jaasielsilva.erpcorporativo.app.config;
 
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
@@ -10,12 +12,17 @@ import org.springframework.util.StringUtils;
 import com.jaasielsilva.erpcorporativo.app.config.properties.AppBootstrapProperties;
 import com.jaasielsilva.erpcorporativo.app.model.ArticleVisibility;
 import com.jaasielsilva.erpcorporativo.app.model.KnowledgeArticle;
+import com.jaasielsilva.erpcorporativo.app.model.PlanAddon;
+import com.jaasielsilva.erpcorporativo.app.model.PlanTier;
 import com.jaasielsilva.erpcorporativo.app.model.PlatformModule;
 import com.jaasielsilva.erpcorporativo.app.model.Role;
+import com.jaasielsilva.erpcorporativo.app.model.SubscriptionPlan;
 import com.jaasielsilva.erpcorporativo.app.model.Tenant;
 import com.jaasielsilva.erpcorporativo.app.model.Usuario;
 import com.jaasielsilva.erpcorporativo.app.repository.knowledge.KnowledgeArticleRepository;
 import com.jaasielsilva.erpcorporativo.app.repository.module.PlatformModuleRepository;
+import com.jaasielsilva.erpcorporativo.app.repository.plan.PlanAddonRepository;
+import com.jaasielsilva.erpcorporativo.app.repository.plan.SubscriptionPlanRepository;
 import com.jaasielsilva.erpcorporativo.app.repository.tenant.TenantRepository;
 import com.jaasielsilva.erpcorporativo.app.repository.usuario.UsuarioRepository;
 
@@ -34,6 +41,8 @@ public class DataInitializer implements CommandLineRunner {
     private final PlatformSettingService platformSettingService;
     private final PlatformModuleRepository platformModuleRepository;
     private final KnowledgeArticleRepository knowledgeArticleRepository;
+    private final SubscriptionPlanRepository subscriptionPlanRepository;
+    private final PlanAddonRepository planAddonRepository;
 
     @Override
     public void run(String... args) {
@@ -41,6 +50,8 @@ public class DataInitializer implements CommandLineRunner {
         ensureSuperAdmin(platformTenant);
         platformSettingService.ensureDefaults();
         ensureDefaultModules();
+        ensureDefaultAddons();
+        ensureDefaultSubscriptionPlans();
         ensureOnboardingArticles();
     }
 
@@ -119,6 +130,7 @@ public class DataInitializer implements CommandLineRunner {
         ensureModule("PEDIDOS",          "Pedidos",           "/app/pedidos",                "Gestão de ordens de serviço");
         ensureModule("RELATORIOS",       "Relatórios",        "/app/modulos/relatorios",     "Relatórios do tenant");
         ensureModule("CLIENTES",         "Clientes",          "/app/clientes",               "CRM e gestão de clientes");
+        ensureModule("SUPORTE",          "Suporte",           "/app/suporte",                "Atendimento e gestão de chamados");
     }
 
     private void ensureModule(String codigo, String nome, String rota, String descricao) {
@@ -131,6 +143,95 @@ public class DataInitializer implements CommandLineRunner {
                         .ativo(true)
                         .build())
         );
+    }
+
+    private void ensureDefaultAddons() {
+        ensureAddon("USERS_EXTRA", "Usuários extras", "Pacote adicional de assentos para usuários.");
+        ensureAddon("STORAGE_EXTRA", "Armazenamento extra", "Ampliação de armazenamento de anexos.");
+        ensureAddon("SUPPORT_PRIORITY", "Suporte prioritário", "Fila de suporte priorizada para o tenant.");
+        ensureAddon("AUTOMATION_PACK", "Pacote de automações", "Regras e automações avançadas de processos.");
+    }
+
+    private void ensureAddon(String codigo, String nome, String descricao) {
+        planAddonRepository.findByCodigoIgnoreCase(codigo)
+                .orElseGet(() -> planAddonRepository.save(PlanAddon.builder()
+                        .codigo(codigo)
+                        .nome(nome)
+                        .descricao(descricao)
+                        .ativo(true)
+                        .build()));
+    }
+
+    private void ensureDefaultSubscriptionPlans() {
+        ensurePlan(
+                "START",
+                "Start",
+                "Plano inicial para operacao comercial e atendimento.",
+                PlanTier.START,
+                10,
+                20,
+                false,
+                "START",
+                Set.of("DASHBOARD", "USUARIOS", "CLIENTES", "CONHECIMENTO", "SUPORTE"),
+                Set.of("USERS_EXTRA", "STORAGE_EXTRA")
+        );
+        ensurePlan(
+                "GROWTH",
+                "Growth",
+                "Plano principal com operacao, relatorios e configuracoes.",
+                PlanTier.GROWTH,
+                40,
+                80,
+                true,
+                "GROWTH",
+                Set.of("DASHBOARD", "USUARIOS", "CLIENTES", "CONHECIMENTO", "SUPORTE", "PEDIDOS", "RELATORIOS", "CONFIGURACOES"),
+                Set.of("USERS_EXTRA", "STORAGE_EXTRA", "SUPPORT_PRIORITY")
+        );
+        ensurePlan(
+                "SCALE",
+                "Scale",
+                "Plano premium com stack completa e add-ons avancados.",
+                PlanTier.SCALE,
+                120,
+                300,
+                true,
+                "SCALE",
+                Set.of("DASHBOARD", "USUARIOS", "CLIENTES", "CONHECIMENTO", "SUPORTE", "PEDIDOS", "RELATORIOS", "CONFIGURACOES", "FINANCEIRO", "ESTOQUE"),
+                Set.of("USERS_EXTRA", "STORAGE_EXTRA", "SUPPORT_PRIORITY", "AUTOMATION_PACK")
+        );
+    }
+
+    private void ensurePlan(
+            String codigo,
+            String nome,
+            String descricao,
+            PlanTier tier,
+            Integer maxUsers,
+            Integer maxStorageGb,
+            boolean annualDiscountEligible,
+            String onboardingTemplate,
+            Set<String> moduleCodes,
+            Set<String> addonCodes
+    ) {
+        SubscriptionPlan plan = subscriptionPlanRepository.findByCodigoIgnoreCase(codigo)
+                .orElseGet(() -> SubscriptionPlan.builder().codigo(codigo).build());
+
+        plan.setNome(nome);
+        plan.setDescricao(descricao);
+        plan.setAtivo(true);
+        plan.setTier(tier);
+        plan.setMaxUsers(maxUsers);
+        plan.setMaxStorageGb(maxStorageGb);
+        plan.setAnnualDiscountEligible(annualDiscountEligible);
+        plan.setOnboardingTemplate(onboardingTemplate);
+        plan.setModules(platformModuleRepository.findAll().stream()
+                .filter(m -> moduleCodes.contains(m.getCodigo()))
+                .collect(Collectors.toSet()));
+        plan.setAddons(planAddonRepository.findAll().stream()
+                .filter(a -> addonCodes.contains(a.getCodigo()))
+                .collect(Collectors.toSet()));
+
+        subscriptionPlanRepository.save(plan);
     }
 
     private void ensureOnboardingArticles() {
@@ -200,6 +301,20 @@ public class DataInitializer implements CommandLineRunner {
                 "- Se possível, tire um print da tela com o erro\n\n" +
                 "Estamos aqui para ajudar!",
                 "Como entrar em contato com o suporte.");
+
+        ensureArticle("Central de chamados do suporte", "Suporte",
+                "O módulo de Suporte permite registrar chamados para atendimento da sua operação.\n\n" +
+                "**Fluxo sugerido:**\n" +
+                "1. Abra um novo chamado com assunto claro e detalhes do problema\n" +
+                "2. Escolha a prioridade e categoria corretas\n" +
+                "3. Vincule o cliente afetado quando aplicável\n" +
+                "4. Acompanhe os comentários e atualizações na timeline\n\n" +
+                "**Boas práticas:**\n" +
+                "- Anexe evidências (prints, documentos ou logs)\n" +
+                "- Use comentários internos para alinhamento da equipe\n" +
+                "- Mantenha o cliente informado com mensagens públicas\n\n" +
+                "Isso melhora o tempo de resposta e o cumprimento de SLA.",
+                "Aprenda como operar a central de chamados do módulo de suporte.");
     }
 
     private void ensureArticle(String titulo, String categoria, String conteudo, String resumo) {

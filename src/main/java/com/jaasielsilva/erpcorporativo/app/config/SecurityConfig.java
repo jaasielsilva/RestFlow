@@ -103,7 +103,7 @@ public class SecurityConfig {
             .headers(headers -> headers
                 .contentSecurityPolicy(csp -> csp.policyDirectives(
                         "default-src 'self'; " +
-                        "connect-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; " +
+                        "connect-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://viacep.com.br; " +
                         "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
                         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; " +
                         "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; " +

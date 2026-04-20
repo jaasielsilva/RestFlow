@@ -31,6 +31,9 @@ public class OportunidadeWebController {
         TenantPortalModuleViewModel module = tenantPortalWebService.requireEnabledModule(authentication, "CLIENTES");
 
         model.addAttribute("view", oportunidadeUseCase.funil(user.getTenantId()));
+        if (!model.containsAttribute("form")) {
+            model.addAttribute("form", new OportunidadeForm());
+        }
         model.addAttribute("statusValues", StatusOportunidade.values());
         model.addAttribute("canWrite", module.canWrite());
         populateCommon(authentication, model, "clientes", "Funil de Oportunidades", "Gestão de oportunidades");

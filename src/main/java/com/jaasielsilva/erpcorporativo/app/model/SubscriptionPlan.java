@@ -6,6 +6,8 @@ import java.util.Set;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -50,6 +52,24 @@ public class SubscriptionPlan {
     @Column(nullable = false)
     private boolean ativo;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private PlanTier tier = PlanTier.START;
+
+    @Column(name = "max_users")
+    private Integer maxUsers;
+
+    @Column(name = "max_storage_gb")
+    private Integer maxStorageGb;
+
+    @Column(name = "annual_discount_eligible", nullable = false)
+    @Builder.Default
+    private boolean annualDiscountEligible = false;
+
+    @Column(name = "onboarding_template", length = 30)
+    private String onboardingTemplate;
+
     @Builder.Default
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -58,6 +78,15 @@ public class SubscriptionPlan {
             inverseJoinColumns = @JoinColumn(name = "module_id")
     )
     private Set<PlatformModule> modules = new HashSet<>();
+
+    @Builder.Default
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "subscription_plan_addons",
+            joinColumns = @JoinColumn(name = "plan_id"),
+            inverseJoinColumns = @JoinColumn(name = "addon_id")
+    )
+    private Set<PlanAddon> addons = new HashSet<>();
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

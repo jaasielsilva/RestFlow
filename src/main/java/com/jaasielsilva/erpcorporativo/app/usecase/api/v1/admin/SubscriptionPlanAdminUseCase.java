@@ -9,17 +9,21 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.jaasielsilva.erpcorporativo.app.exception.ConflictException;
 import com.jaasielsilva.erpcorporativo.app.exception.ResourceNotFoundException;
+import com.jaasielsilva.erpcorporativo.app.model.PlanAddon;
+import com.jaasielsilva.erpcorporativo.app.model.PlanTier;
 import com.jaasielsilva.erpcorporativo.app.model.PlatformModule;
 import com.jaasielsilva.erpcorporativo.app.model.SubscriptionPlan;
 import com.jaasielsilva.erpcorporativo.app.model.Tenant;
 import com.jaasielsilva.erpcorporativo.app.model.TenantModule;
 import com.jaasielsilva.erpcorporativo.app.repository.module.PlatformModuleRepository;
 import com.jaasielsilva.erpcorporativo.app.repository.module.TenantModuleRepository;
+import com.jaasielsilva.erpcorporativo.app.repository.plan.PlanAddonRepository;
 import com.jaasielsilva.erpcorporativo.app.repository.plan.SubscriptionPlanRepository;
 import com.jaasielsilva.erpcorporativo.app.repository.tenant.TenantRepository;
 
 import com.jaasielsilva.erpcorporativo.app.model.AuditAction;
 import com.jaasielsilva.erpcorporativo.app.service.shared.AuditService;
+import com.jaasielsilva.erpcorporativo.app.service.shared.TenantCommercialProvisioningService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -29,9 +33,11 @@ public class SubscriptionPlanAdminUseCase {
 
     private final SubscriptionPlanRepository subscriptionPlanRepository;
     private final PlatformModuleRepository platformModuleRepository;
+    private final PlanAddonRepository planAddonRepository;
     private final TenantRepository tenantRepository;
     private final TenantModuleRepository tenantModuleRepository;
     private final AuditService auditService;
+    private final TenantCommercialProvisioningService tenantCommercialProvisioningService;
 
     @Transactional(readOnly = true)
     public List<SubscriptionPlan> listAll() {
@@ -46,24 +52,56 @@ public class SubscriptionPlanAdminUseCase {
     }
 
     @Transactional
-    public SubscriptionPlan create(String codigo, String nome, String descricao, boolean ativo, Set<Long> moduleIds) {
+    public SubscriptionPlan create(
+            String codigo,
+            String nome,
+            String descricao,
+            boolean ativo,
+            PlanTier tier,
+            Integer maxUsers,
+            Integer maxStorageGb,
+            boolean annualDiscountEligible,
+            String onboardingTemplate,
+            Set<Long> moduleIds,
+            Set<Long> addonIds
+    ) {
         validateCodigo(codigo, null);
 
         Set<PlatformModule> modules = resolveModules(moduleIds);
+        Set<PlanAddon> addons = resolveAddons(addonIds);
 
         SubscriptionPlan plan = SubscriptionPlan.builder()
                 .codigo(codigo.trim())
                 .nome(nome.trim())
                 .descricao(descricao != null && !descricao.isBlank() ? descricao.trim() : null)
                 .ativo(ativo)
+                .tier(tier != null ? tier : PlanTier.START)
+                .maxUsers(maxUsers)
+                .maxStorageGb(maxStorageGb)
+                .annualDiscountEligible(annualDiscountEligible)
+                .onboardingTemplate(onboardingTemplate != null && !onboardingTemplate.isBlank() ? onboardingTemplate.trim() : null)
                 .modules(modules)
+                .addons(addons)
                 .build();
 
         return subscriptionPlanRepository.save(plan);
     }
 
     @Transactional
-    public SubscriptionPlan update(Long id, String codigo, String nome, String descricao, boolean ativo, Set<Long> moduleIds) {
+    public SubscriptionPlan update(
+            Long id,
+            String codigo,
+            String nome,
+            String descricao,
+            boolean ativo,
+            PlanTier tier,
+            Integer maxUsers,
+            Integer maxStorageGb,
+            boolean annualDiscountEligible,
+            String onboardingTemplate,
+            Set<Long> moduleIds,
+            Set<Long> addonIds
+    ) {
         SubscriptionPlan plan = findPlan(id);
         validateCodigo(codigo, id);
 
@@ -71,7 +109,13 @@ public class SubscriptionPlanAdminUseCase {
         plan.setNome(nome.trim());
         plan.setDescricao(descricao != null && !descricao.isBlank() ? descricao.trim() : null);
         plan.setAtivo(ativo);
+        plan.setTier(tier != null ? tier : PlanTier.START);
+        plan.setMaxUsers(maxUsers);
+        plan.setMaxStorageGb(maxStorageGb);
+        plan.setAnnualDiscountEligible(annualDiscountEligible);
+        plan.setOnboardingTemplate(onboardingTemplate != null && !onboardingTemplate.isBlank() ? onboardingTemplate.trim() : null);
         plan.setModules(resolveModules(moduleIds));
+        plan.setAddons(resolveAddons(addonIds));
 
         return subscriptionPlanRepository.save(plan);
     }
@@ -104,6 +148,7 @@ public class SubscriptionPlanAdminUseCase {
         tenant.setSubscriptionPlan(plan);
         tenantRepository.save(tenant);
         provisionTenantModules(tenant, plan);
+        tenantCommercialProvisioningService.ensureProvisionedForPlan(tenant, plan);
         auditService.log(AuditAction.TENANT_PLANO_ATRIBUIDO,
                 "Plano '" + plan.getNome() + "' atribuído ao tenant '" + tenant.getNome() + "'.",
                 "Tenant", tenant.getId(), "SUPER_ADMIN", null);
@@ -150,6 +195,18 @@ public class SubscriptionPlanAdminUseCase {
         }
 
         return modules;
+    }
+
+    private Set<PlanAddon> resolveAddons(Set<Long> addonIds) {
+        if (addonIds == null || addonIds.isEmpty()) {
+            return new HashSet<>();
+        }
+
+        Set<PlanAddon> addons = new HashSet<>(planAddonRepository.findAllById(addonIds));
+        if (addons.size() != addonIds.size()) {
+            throw new ResourceNotFoundException("Um ou mais add-ons informados não foram encontrados.");
+        }
+        return addons;
     }
 
     private SubscriptionPlan findPlan(Long id) {
