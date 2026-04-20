@@ -16,29 +16,23 @@
             <div class="topbar-notifications">
                 <button id="notifToggle" type="button" class="icon-btn topbar-bell-btn" aria-expanded="false" aria-controls="notifMenu">
                     <i class="fa-regular fa-bell"></i>
-                    <span class="notif-badge">5</span>
+                    <span class="notif-badge" id="notifBadge">0</span>
                 </button>
                 <div id="notifMenu" class="notif-menu" hidden>
                     <div class="notif-header">
                         <strong>Notificações</strong>
-                        <button id="notifMarkAll" type="button" class="notif-link-btn">Marcar todas como lidas</button>
+                        <button id="notifMarkAll"
+                                type="button"
+                                class="notif-link-btn"
+                                th:attr="data-csrf-token=${_csrf.token},data-csrf-header=${_csrf.headerName}">
+                            Marcar todas como lidas
+                        </button>
                     </div>
-                    <div class="notif-item">
-                        <p class="notif-title">Tenant criado com sucesso</p>
-                        <small>Empresa Alpha foi adicionada na plataforma.</small>
-                    </div>
-                    <div class="notif-item">
-                        <p class="notif-title">Módulo habilitado</p>
-                        <small>Financeiro foi habilitado para o tenant Beta.</small>
-                    </div>
-                    <div class="notif-item">
-                        <p class="notif-title">Novo usuário ADMIN</p>
-                        <small>Conta admin@empresa.com foi criada.</small>
-                    </div>
-                    <a class="notif-view-all" th:href="@{/admin/notifications}">Ver todas</a>
+                    <div id="notifList"></div>
+                    <a class="notif-view-all" id="notifViewAll" th:href="@{/admin/notifications}">Ver todas</a>
                 </div>
             </div>
-            <button class="icon-btn"><i class="fa-solid fa-gear"></i></button>
+            <button class="icon-btn" type="button" aria-label="Configurações" title="Configurações"><i class="fa-solid fa-gear"></i></button>
             <div class="user-box">
                 <div class="avatar">SA</div>
                 <strong>Super Admin</strong>
@@ -57,8 +51,68 @@
             const toggle = document.getElementById("notifToggle");
             const menu = document.getElementById("notifMenu");
             const markAll = document.getElementById("notifMarkAll");
+            const notifList = document.getElementById("notifList");
+            const badge = document.getElementById("notifBadge");
+            const viewAll = document.getElementById("notifViewAll");
+            const isAdminArea = window.location.pathname.startsWith("/admin");
+            const isTenantArea = window.location.pathname.startsWith("/app");
+            const inSupportedArea = isAdminArea || isTenantArea;
+            const recentUrl = isAdminArea
+                ? "/api/v1/admin/notifications/recent"
+                : "/api/v1/tenant/notifications/recent";
+            const markAllUrl = isAdminArea
+                ? "/api/v1/admin/notifications/mark-all-read"
+                : "/api/v1/tenant/notifications/mark-all-read";
             if (!toggle || !menu) {
                 return;
+            }
+            if (viewAll) {
+                viewAll.href = isAdminArea ? "/admin/notifications" : "/app/notifications";
+            }
+
+            function renderNotifications(feed) {
+                if (!notifList) return;
+                notifList.innerHTML = "";
+
+                if (!feed || !Array.isArray(feed.items) || feed.items.length === 0) {
+                    const empty = document.createElement("div");
+                    empty.className = "notif-item";
+                    empty.innerHTML = "<p class='notif-title'>Sem notificações</p><small>Nenhum evento recente.</small>";
+                    notifList.appendChild(empty);
+                } else {
+                    feed.items.forEach(function (item) {
+                        const div = document.createElement("div");
+                        div.className = "notif-item";
+                        const createdAt = item.createdAt ? new Date(item.createdAt).toLocaleString("pt-BR") : "";
+                        div.innerHTML = "<p class='notif-title'>" + item.title + "</p>" +
+                            "<small>" + item.message + "</small>" +
+                            (createdAt ? "<small>" + createdAt + "</small>" : "");
+                        notifList.appendChild(div);
+                    });
+                }
+
+                if (badge) {
+                    const unread = feed && typeof feed.unreadCount === "number" ? feed.unreadCount : 0;
+                    badge.textContent = String(unread);
+                    badge.hidden = unread <= 0;
+                }
+            }
+
+            async function loadNotifications() {
+                if (!inSupportedArea) {
+                    if (badge) badge.hidden = true;
+                    return;
+                }
+                try {
+                    const response = await fetch(recentUrl, {
+                        headers: { "Accept": "application/json" }
+                    });
+                    if (!response.ok) return;
+                    const body = await response.json();
+                    renderNotifications(body.data);
+                } catch (_) {
+                    // Silently ignore polling failures.
+                }
             }
 
             function closeMenu() {
@@ -83,16 +137,41 @@
             });
 
             if (markAll) {
-                markAll.addEventListener("click", function () {
-                    const badge = document.querySelector(".notif-badge");
-                    if (badge) {
-                        badge.textContent = "0";
+                markAll.addEventListener("click", async function () {
+                    if (!inSupportedArea) {
+                        closeMenu();
+                        return;
                     }
-                    if (window.AppToast) {
-                        window.AppToast.success("Todas as notificações foram marcadas como lidas.");
+                    const csrfHeader = markAll.getAttribute("data-csrf-header");
+                    const csrfToken = markAll.getAttribute("data-csrf-token");
+                    try {
+                        const headers = { "Accept": "application/json" };
+                        if (csrfHeader && csrfToken) {
+                            headers[csrfHeader] = csrfToken;
+                        }
+                        const response = await fetch(markAllUrl, {
+                            method: "POST",
+                            headers: headers
+                        });
+                        if (response.ok) {
+                            await loadNotifications();
+                            if (window.AppToast) {
+                                window.AppToast.success("Todas as notificações foram marcadas como lidas.");
+                            }
+                        }
+                    } catch (_) {
+                        if (window.AppToast) {
+                            window.AppToast.error("Falha ao marcar notificações como lidas.");
+                        }
+                    } finally {
+                        closeMenu();
                     }
-                    closeMenu();
                 });
+            }
+
+            loadNotifications();
+            if (inSupportedArea) {
+                setInterval(loadNotifications, 15000);
             }
         });
     </script>

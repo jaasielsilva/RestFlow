@@ -65,6 +65,9 @@ public class PaymentRecord {
     @Column(name = "provider_payment_id", length = 80)
     private String providerPaymentId;
 
+    @Column(name = "payment_notified_at")
+    private LocalDateTime paymentNotifiedAt;
+
     @Column(name = "checkout_url", length = 500)
     private String checkoutUrl;
 

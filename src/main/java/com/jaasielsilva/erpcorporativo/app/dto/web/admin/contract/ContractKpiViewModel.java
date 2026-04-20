@@ -6,5 +6,7 @@ public record ContractKpiViewModel(
         long totalAtivos,
         long totalVencidos,
         long totalAtrasados,
-        BigDecimal mrrTotal
+        BigDecimal mrrTotal,
+        BigDecimal recebidoMesAtual,
+        BigDecimal aReceberMesAtual
 ) {}

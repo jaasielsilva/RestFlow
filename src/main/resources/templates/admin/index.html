@@ -33,8 +33,18 @@
             </div>
             <div class="stat-card">
                 <div class="icon"><i class="fa-solid fa-wallet"></i></div>
-                <h6>MRR (Contratos)</h6>
+                <h6>MRR Contratado</h6>
                 <h2 th:text="${dashboard.contractKpis != null and dashboard.contractKpis.mrrTotal() != null ? 'R$ ' + #numbers.formatDecimal(dashboard.contractKpis.mrrTotal(), 1, 'POINT', 2, 'COMMA') : 'R$ 0,00'}">R$ 0</h2>
+            </div>
+            <div class="stat-card">
+                <div class="icon"><i class="fa-solid fa-circle-check"></i></div>
+                <h6>Recebido (Mês Atual)</h6>
+                <h2 th:text="${dashboard.contractKpis != null and dashboard.contractKpis.recebidoMesAtual() != null ? 'R$ ' + #numbers.formatDecimal(dashboard.contractKpis.recebidoMesAtual(), 1, 'POINT', 2, 'COMMA') : 'R$ 0,00'}">R$ 0</h2>
+            </div>
+            <div class="stat-card">
+                <div class="icon"><i class="fa-solid fa-hourglass-half"></i></div>
+                <h6>A Receber (Mês Atual)</h6>
+                <h2 th:text="${dashboard.contractKpis != null and dashboard.contractKpis.aReceberMesAtual() != null ? 'R$ ' + #numbers.formatDecimal(dashboard.contractKpis.aReceberMesAtual(), 1, 'POINT', 2, 'COMMA') : 'R$ 0,00'}">R$ 0</h2>
             </div>
         </section>
 
@@ -109,7 +119,7 @@
                         </tr>
                         <tr th:each="t : ${dashboard.restaurantes}">
                             <td>
-                                <a th:href="@{/admin/tenants/{id}(id=${t.id()})}"
+                                <a th:href="@{/admin/tenants(nome=${t.nome()})}"
                                    th:text="${t.nome()}" class="text-decoration-none fw-semibold">Tenant</a>
                             </td>
                             <td class="text-muted small" th:text="${t.plano()}">—</td>
@@ -127,25 +137,25 @@
         </section>
 
         <!-- Ações Rápidas -->
-        <section class="bottom-grid" style="grid-template-columns: 1fr;">
-            <div class="card-ui">
+        <section class="admin-actions-wrap">
+            <div class="card-ui admin-actions-card">
                 <div class="card-header-ui">
                     <h4>Ações Rápidas</h4>
                 </div>
-                <div class="quick-actions">
-                    <a class="quick-btn blue" th:href="@{/admin/tenants/new}">
+                <div class="quick-actions executive">
+                    <a class="quick-btn blue compact" th:href="@{/admin/tenants/new}">
                         <span><i class="fa-solid fa-plus me-2"></i>Novo Tenant</span>
                         <i class="fa-solid fa-chevron-right"></i>
                     </a>
-                    <a class="quick-btn green" th:href="@{/admin/contratos/new}">
+                    <a class="quick-btn green compact" th:href="@{/admin/contratos/new}">
                         <span><i class="fa-solid fa-file-contract me-2"></i>Novo Contrato</span>
                         <i class="fa-solid fa-chevron-right"></i>
                     </a>
-                    <a class="quick-btn yellow" th:href="@{/admin/permissions}">
+                    <a class="quick-btn yellow compact" th:href="@{/admin/permissions}">
                         <span><i class="fa-solid fa-shield-halved me-2"></i>Permissões</span>
                         <i class="fa-solid fa-chevron-right"></i>
                     </a>
-                    <a class="quick-btn red" th:href="@{/admin/reports/audit}">
+                    <a class="quick-btn red compact" th:href="@{/admin/reports/audit}">
                         <span><i class="fa-solid fa-clock-rotate-left me-2"></i>Auditoria</span>
                         <i class="fa-solid fa-chevron-right"></i>
                     </a>

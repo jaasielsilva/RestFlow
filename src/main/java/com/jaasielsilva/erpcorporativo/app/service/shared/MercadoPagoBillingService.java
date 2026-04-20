@@ -8,6 +8,8 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -24,6 +26,8 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class MercadoPagoBillingService {
+
+    private static final Logger log = LoggerFactory.getLogger(MercadoPagoBillingService.class);
 
     private final PlatformSettingService settingService;
     private final PaymentRecordRepository paymentRecordRepository;
@@ -86,8 +90,12 @@ public class MercadoPagoBillingService {
     }
 
     public void processPaymentWebhook(String paymentId) {
+        reconcilePaymentByProviderId(paymentId);
+    }
+
+    public PaymentSyncResult reconcilePaymentByProviderId(String paymentId) {
         if (paymentId == null || paymentId.isBlank()) {
-            return;
+            return PaymentSyncResult.ignored(paymentId, "paymentId ausente.");
         }
         String token = requireAccessToken();
 
@@ -100,28 +108,50 @@ public class MercadoPagoBillingService {
                 .body(Map.class);
 
         if (payment == null) {
-            return;
+            return PaymentSyncResult.ignored(paymentId, "Mercado Pago não retornou payload do pagamento.");
         }
 
         String externalReference = payment.get("external_reference") != null
                 ? String.valueOf(payment.get("external_reference"))
                 : null;
         if (externalReference == null) {
-            return;
+            log.warn("[MercadoPago] pagamento {} sem external_reference, ignorando sincronização.", paymentId);
+            return PaymentSyncResult.ignored(paymentId, "Pagamento sem external_reference.");
         }
 
         PaymentRecord record = paymentRecordRepository.findByExternalReference(externalReference).orElse(null);
         if (record == null) {
-            return;
+            log.warn("[MercadoPago] external_reference '{}' não encontrada localmente.", externalReference);
+            return PaymentSyncResult.ignored(paymentId, "Nenhuma fatura local encontrada para external_reference.");
         }
 
         String status = payment.get("status") != null ? String.valueOf(payment.get("status")) : "";
+        PaymentStatus statusAnterior = record.getStatus();
+        String providerPaymentIdAnterior = record.getProviderPaymentId();
         record.setProviderPaymentId(paymentId);
         record.setStatus(mapPaymentStatus(status));
         if ("approved".equalsIgnoreCase(status)) {
             record.setDataPagamento(LocalDate.now());
         }
-        paymentRecordRepository.save(record);
+        PaymentRecord updated = paymentRecordRepository.save(record);
+        boolean changed = statusAnterior != updated.getStatus()
+                || providerPaymentIdAnterior == null
+                || !providerPaymentIdAnterior.equals(updated.getProviderPaymentId());
+
+        log.info(
+                "[MercadoPago] sincronização concluída paymentId={} externalReference={} recordId={} statusMp={} statusAnterior={} statusAtual={}",
+                paymentId, externalReference, updated.getId(), status, statusAnterior, updated.getStatus()
+        );
+
+        return PaymentSyncResult.synced(
+                paymentId,
+                externalReference,
+                updated.getId(),
+                status,
+                statusAnterior,
+                updated.getStatus(),
+                changed
+        );
     }
 
     public String testCredentials() {
@@ -194,5 +224,43 @@ public class MercadoPagoBillingService {
             return matcher.group(1);
         }
         return null;
+    }
+
+    public record PaymentSyncResult(
+            String paymentId,
+            String externalReference,
+            Long paymentRecordId,
+            String mercadoPagoStatus,
+            PaymentStatus localStatusBefore,
+            PaymentStatus localStatusAfter,
+            boolean changed,
+            boolean synced,
+            String message
+    ) {
+        public static PaymentSyncResult ignored(String paymentId, String message) {
+            return new PaymentSyncResult(paymentId, null, null, null, null, null, false, false, message);
+        }
+
+        public static PaymentSyncResult synced(
+                String paymentId,
+                String externalReference,
+                Long paymentRecordId,
+                String mercadoPagoStatus,
+                PaymentStatus localStatusBefore,
+                PaymentStatus localStatusAfter,
+                boolean changed
+        ) {
+            return new PaymentSyncResult(
+                    paymentId,
+                    externalReference,
+                    paymentRecordId,
+                    mercadoPagoStatus,
+                    localStatusBefore,
+                    localStatusAfter,
+                    changed,
+                    true,
+                    "Sincronização concluída."
+            );
+        }
     }
 }

@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/admin")
 public class AdminPlaceholderWebController {
 
-    @GetMapping("/notifications")
-    public String notifications(Model model) {
+    @GetMapping("/notifications/legacy")
+    public String notificationsLegacy(Model model) {
         model.addAttribute("activeMenu", "home");
         model.addAttribute("pageTitle", "Notificações");
         model.addAttribute("pageSubtitle", "Central de notificações da plataforma");

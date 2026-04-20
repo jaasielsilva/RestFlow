@@ -3,14 +3,15 @@ package com.jaasielsilva.erpcorporativo.app.usecase.web.admin;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.time.format.TextStyle;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.jaasielsilva.erpcorporativo.app.dto.web.admin.AdminDashboardViewModel;
 import com.jaasielsilva.erpcorporativo.app.dto.web.admin.PlatformChartPointViewModel;
@@ -41,6 +42,7 @@ public class BuildAdminDashboardUseCase {
     private final ContractRepository contractRepository;
     private final PaymentRecordRepository paymentRecordRepository;
 
+    @Transactional(readOnly = true)
     public AdminDashboardViewModel execute(Authentication authentication) {
         List<Tenant> restaurants = tenantRepository.findAll().stream()
                 .filter(this::isRestaurantTenant)
@@ -84,31 +86,72 @@ public class BuildAdminDashboardUseCase {
         long totalVencidos = contractRepository.countByStatusAndDataTerminoBefore(ContractStatus.ATIVO, LocalDate.now());
         long totalAtrasados = paymentRecordRepository.countByStatus(PaymentStatus.ATRASADO);
         BigDecimal mrrTotal = contractRepository.sumValorMensalByStatus(ContractStatus.ATIVO);
-        return new ContractKpiViewModel(totalAtivos, totalVencidos, totalAtrasados, mrrTotal);
+        YearMonth mesAtual = YearMonth.now();
+        BigDecimal recebidoMesAtual = paymentRecordRepository
+                .sumValorPagoByStatusAndMesReferencia(PaymentStatus.PAGO, mesAtual);
+        BigDecimal aReceberMesAtual = paymentRecordRepository
+                .sumValorPagoByStatusesAndMesReferencia(
+                        List.of(PaymentStatus.PENDENTE, PaymentStatus.ATRASADO),
+                        mesAtual
+                );
+        return new ContractKpiViewModel(
+                totalAtivos,
+                totalVencidos,
+                totalAtrasados,
+                mrrTotal,
+                recebidoMesAtual,
+                aReceberMesAtual
+        );
     }
 
     private List<ContractAlertViewModel> buildContractAlerts() {
         LocalDate hoje = LocalDate.now();
         LocalDate em30Dias = hoje.plusDays(30);
 
-        List<Contract> vencendo = contractRepository.findByStatusAndDataTerminoBetween(
-                ContractStatus.ATIVO, hoje, em30Dias);
+        List<Contract> contratosAtivos = contractRepository.findAll().stream()
+                .filter(c -> c.getStatus() == ContractStatus.ATIVO)
+                .toList();
 
-        List<ContractAlertViewModel> alerts = new ArrayList<>();
-        for (Contract c : vencendo) {
-            boolean pagamentoAtrasado = paymentRecordRepository
-                    .findFirstByContractIdOrderByMesReferenciaDesc(c.getId())
-                    .map(p -> p.getStatus() == PaymentStatus.ATRASADO)
-                    .orElse(false);
-            alerts.add(new ContractAlertViewModel(
-                    c.getId(),
-                    c.getTenant().getNome(),
-                    c.getDataTermino(),
-                    true,
-                    pagamentoAtrasado
-            ));
+        List<ContractAlertViewModel> alerts = contratosAtivos.stream()
+                .filter(c -> c.getDataTermino() != null)
+                .filter(c -> c.getDataTermino().isBefore(hoje) || !c.getDataTermino().isAfter(em30Dias))
+                .sorted(Comparator.comparing(Contract::getDataTermino))
+                .limit(4)
+                .map(c -> new ContractAlertViewModel(
+                        c.getId(),
+                        c.getTenant().getNome(),
+                        c.getDataTermino(),
+                        !c.getDataTermino().isBefore(hoje) && !c.getDataTermino().isAfter(em30Dias),
+                        isPagamentoAtrasado(c.getId())
+                ))
+                .toList();
+
+        if (!alerts.isEmpty()) {
+            return alerts;
         }
-        return alerts;
+
+        // Fallback executivo: sem vencimentos imediatos, exibe os 4 contratos ativos mais recentes.
+        return contratosAtivos.stream()
+                .sorted(Comparator.comparing(
+                        c -> c.getUpdatedAt() != null ? c.getUpdatedAt() : c.getCreatedAt(),
+                        Comparator.nullsLast(Comparator.reverseOrder())
+                ))
+                .limit(4)
+                .map(c -> new ContractAlertViewModel(
+                        c.getId(),
+                        c.getTenant().getNome(),
+                        c.getDataTermino(),
+                        false,
+                        isPagamentoAtrasado(c.getId())
+                ))
+                .toList();
+    }
+
+    private boolean isPagamentoAtrasado(Long contractId) {
+        return paymentRecordRepository
+                .findFirstByContractIdOrderByMesReferenciaDesc(contractId)
+                .map(p -> p.getStatus() == PaymentStatus.ATRASADO)
+                .orElse(false);
     }
 
     private boolean isRestaurantTenant(Tenant tenant) {
@@ -244,7 +287,7 @@ public class BuildAdminDashboardUseCase {
         LocalDate now = LocalDate.now();
         return java.util.stream.IntStream.rangeClosed(5, 0)
                 .mapToObj(now::minusMonths)
-                .map(date -> date.getMonth().getDisplayName(TextStyle.SHORT, new Locale("pt", "BR")))
+                .map(date -> date.getMonth().getDisplayName(TextStyle.SHORT, Locale.forLanguageTag("pt-BR")))
                 .toList();
     }
 

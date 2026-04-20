@@ -374,6 +374,12 @@
             gap: 12px;
         }
 
+        .quick-actions.executive {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
         .quick-btn {
             border: none;
             border-radius: 14px;
@@ -383,6 +389,28 @@
             align-items: center;
             justify-content: space-between;
             font-weight: 700;
+        }
+
+        .quick-btn.compact {
+            padding: 12px 14px;
+            min-height: 48px;
+            font-size: 13px;
+            border-radius: 12px;
+        }
+
+        .admin-actions-wrap {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .admin-actions-card {
+            width: min(100%, 760px);
+            padding: 18px;
+        }
+
+        .admin-actions-card .card-header-ui {
+            margin-bottom: 12px;
         }
 
         .quick-btn.blue {
@@ -399,6 +427,219 @@
 
         .quick-btn.red {
             background: #ef4444;
+        }
+
+        .permissions-stats .stat-card h2 {
+            font-size: 30px;
+        }
+
+        .permissions-page .stats-grid {
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .permissions-page .stat-card {
+            padding: 16px 18px;
+            border-radius: 14px;
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+            border: 1px solid #e7edf6;
+        }
+
+        .permissions-page .stat-card .icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .permissions-page .stat-card h6 {
+            font-size: 12px;
+        }
+
+        .permissions-page .stat-card h2,
+        .permissions-stats .stat-card h2 {
+            font-size: 24px;
+            line-height: 1.1;
+            margin-top: 6px;
+        }
+
+        .permissions-page .card-ui {
+            padding: 18px;
+            border-radius: 14px;
+            border: 1px solid #e7edf6;
+        }
+
+        .permissions-page .card-header-ui {
+            margin-bottom: 12px;
+        }
+
+        .permissions-page .card-header-ui h4 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .permissions-full-width {
+            grid-template-columns: 1fr;
+        }
+
+        .permissions-workspace {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .permissions-assign-card {
+            align-self: start;
+            position: sticky;
+            top: 18px;
+        }
+
+        .permissions-table-header {
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .permissions-plan-search {
+            width: 300px;
+        }
+
+        #plansTable {
+            min-width: 980px;
+        }
+
+        .permissions-plans-table thead th {
+            font-size: 11px;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            color: #64748b;
+        }
+
+        .permissions-plans-table tbody td {
+            font-size: 13px;
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+
+        .plan-details-panel {
+            background: #f8fbff;
+            border-top: 1px solid #e5edf7;
+        }
+
+        .plan-details-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            padding: 12px 14px;
+        }
+
+        .plan-detail-block h6 {
+            margin-bottom: 6px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            color: #475569;
+        }
+
+        .permissions-save-btn {
+            min-width: 170px;
+        }
+
+        .permissions-catalog {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 10px 12px;
+            background: #fafcff;
+            height: 100%;
+        }
+
+        .permissions-catalog summary {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            list-style: none;
+        }
+
+        .permissions-catalog summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .permissions-checkbox-grid {
+            max-height: 220px;
+            overflow: auto;
+            border: 1px solid #e9eef5;
+            border-radius: 10px;
+            padding: 10px;
+            background: #fff;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(180px, 1fr));
+            gap: 8px 14px;
+        }
+
+        .permission-item {
+            margin-bottom: 0;
+        }
+
+        .permissions-matrix-toolbar {
+            margin-bottom: 10px;
+            max-width: 320px;
+        }
+
+        .notifications-page .card-ui {
+            border: 1px solid #e7edf6;
+        }
+
+        .notifications-filter-card {
+            margin-bottom: 14px;
+        }
+
+        .notifications-timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .notification-item {
+            border: 1px solid #e7edf6;
+            border-radius: 12px;
+            padding: 12px;
+            background: #fff;
+        }
+
+        .notification-item.unread {
+            border-left: 4px solid #2563eb;
+            background: #f8fbff;
+        }
+
+        .notification-item.read {
+            opacity: .95;
+        }
+
+        .notification-item-title-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 4px;
+        }
+
+        .notification-item-message {
+            margin: 0 0 8px;
+            color: #475569;
+        }
+
+        .notification-item-meta {
+            color: #64748b;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .notification-item-footer {
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .bottom-grid {
@@ -649,6 +890,26 @@
             .support-grid {
                 grid-template-columns: 1fr;
             }
+
+            .quick-actions.executive {
+                grid-template-columns: 1fr;
+            }
+
+            .permissions-workspace {
+                grid-template-columns: 1fr;
+            }
+
+            .permissions-assign-card {
+                position: static;
+            }
+
+            .permissions-checkbox-grid {
+                grid-template-columns: repeat(2, minmax(160px, 1fr));
+            }
+
+            .plan-details-content {
+                grid-template-columns: 1fr;
+            }
         }
 
         @media (max-width: 992px) {
@@ -684,6 +945,19 @@
 
         @media (max-width: 768px) {
             .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .permissions-plan-search {
+                width: 100%;
+            }
+
+            .permissions-table-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .permissions-checkbox-grid {
                 grid-template-columns: 1fr;
             }
         }

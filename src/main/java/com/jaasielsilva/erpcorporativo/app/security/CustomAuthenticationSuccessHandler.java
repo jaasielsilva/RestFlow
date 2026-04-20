@@ -48,7 +48,7 @@ public class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         if (authentication.getPrincipal() instanceof AppUserDetails userDetails
                 && userDetails.getRole() == Role.SUPER_ADMIN) {
-            getRedirectStrategy().sendRedirect(request, response, "/home");
+            getRedirectStrategy().sendRedirect(request, response, "/admin");
             return;
         }
 
