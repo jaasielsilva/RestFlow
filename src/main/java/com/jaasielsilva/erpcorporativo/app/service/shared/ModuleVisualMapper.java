@@ -20,6 +20,11 @@ public class ModuleVisualMapper {
             case "conhecimento", "base_conhecimento" -> "fa-solid fa-book-open";
             case "clientes" -> "fa-solid fa-address-book";
             case "suporte" -> "fa-solid fa-headset";
+            case "comercial" -> "fa-solid fa-id-card";
+            case "integracoes" -> "fa-solid fa-plug";
+            case "bi_avancado" -> "fa-solid fa-chart-line";
+            case "automacoes" -> "fa-solid fa-gears";
+            case "compliance" -> "fa-solid fa-shield-halved";
             default -> "fa-solid fa-puzzle-piece";
         };
     }
@@ -37,6 +42,11 @@ public class ModuleVisualMapper {
             case "conhecimento", "base_conhecimento" -> "module-tone-green";
             case "clientes" -> "module-tone-teal";
             case "suporte" -> "module-tone-indigo";
+            case "comercial" -> "module-tone-amber";
+            case "integracoes" -> "module-tone-purple";
+            case "bi_avancado" -> "module-tone-cyan";
+            case "automacoes" -> "module-tone-orange";
+            case "compliance" -> "module-tone-slate";
             default -> "module-tone-indigo";
         };
     }

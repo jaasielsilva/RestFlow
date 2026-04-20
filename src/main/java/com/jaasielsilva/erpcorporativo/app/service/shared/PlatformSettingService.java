@@ -19,6 +19,7 @@ public class PlatformSettingService {
 
     private final PlatformSettingRepository settingRepository;
     private final AuditService auditService;
+    private final SensitiveSettingCryptoService sensitiveSettingCryptoService;
 
     // Chaves padrão
     public static final String PLATFORM_NAME      = "platform.name";
@@ -27,6 +28,12 @@ public class PlatformSettingService {
     public static final String SESSION_TIMEOUT    = "security.session_timeout_minutes";
     public static final String PASSWORD_MIN_LEN   = "security.password_min_length";
     public static final String MAINTENANCE_MODE   = "platform.maintenance_mode";
+    public static final String MP_ACCESS_TOKEN    = "billing.mp.access_token";
+    public static final String MP_PUBLIC_KEY      = "billing.mp.public_key";
+    public static final String MP_WEBHOOK_SECRET  = "billing.mp.webhook_secret";
+    public static final String MP_SUCCESS_URL     = "billing.mp.success_url";
+    public static final String MP_FAILURE_URL     = "billing.mp.failure_url";
+    public static final String MP_PENDING_URL     = "billing.mp.pending_url";
 
     @Transactional(readOnly = true)
     public List<PlatformSetting> findAll() {
@@ -36,13 +43,16 @@ public class PlatformSettingService {
     @Transactional(readOnly = true)
     public Map<String, String> asMap() {
         return settingRepository.findAll().stream()
-                .collect(Collectors.toMap(PlatformSetting::getChave, PlatformSetting::getValor));
+                .collect(Collectors.toMap(
+                        PlatformSetting::getChave,
+                        s -> sensitiveSettingCryptoService.decryptIfSensitive(s.getChave(), s.getValor())
+                ));
     }
 
     @Transactional(readOnly = true)
     public String get(String chave, String defaultValue) {
         return settingRepository.findByChave(chave)
-                .map(PlatformSetting::getValor)
+                .map(s -> sensitiveSettingCryptoService.decryptIfSensitive(chave, s.getValor()))
                 .orElse(defaultValue);
     }
 
@@ -50,10 +60,11 @@ public class PlatformSettingService {
     public void set(String chave, String valor, String executadoPor) {
         PlatformSetting setting = settingRepository.findByChave(chave)
                 .orElseGet(() -> PlatformSetting.builder().chave(chave).descricao(chave).build());
-        setting.setValor(valor);
+        setting.setValor(sensitiveSettingCryptoService.encryptIfSensitive(chave, valor));
         settingRepository.save(setting);
+        String auditValue = sensitiveSettingCryptoService.isSensitive(chave) ? "[PROTEGIDO]" : String.valueOf(valor);
         auditService.log(AuditAction.CONFIGURACAO_ATUALIZADA,
-                "Configuração '" + chave + "' atualizada para '" + valor + "'.", executadoPor);
+                "Configuração '" + chave + "' atualizada para '" + auditValue + "'.", executadoPor);
     }
 
     @Transactional
@@ -70,6 +81,12 @@ public class PlatformSettingService {
         ensureDefault(SESSION_TIMEOUT,    "60",               "Timeout de sessão em minutos");
         ensureDefault(PASSWORD_MIN_LEN,   "8",                "Tamanho mínimo de senha");
         ensureDefault(MAINTENANCE_MODE,   "false",            "Modo de manutenção da plataforma");
+        ensureDefault(MP_ACCESS_TOKEN,    "",                 "Token de acesso Mercado Pago");
+        ensureDefault(MP_PUBLIC_KEY,      "",                 "Chave pública Mercado Pago");
+        ensureDefault(MP_WEBHOOK_SECRET,  "",                 "Segredo de assinatura de webhook Mercado Pago");
+        ensureDefault(MP_SUCCESS_URL,     "http://localhost:8080/app/minha-conta/faturas", "URL de retorno sucesso checkout");
+        ensureDefault(MP_FAILURE_URL,     "http://localhost:8080/app/minha-conta/faturas", "URL de retorno falha checkout");
+        ensureDefault(MP_PENDING_URL,     "http://localhost:8080/app/minha-conta/faturas", "URL de retorno pendente checkout");
     }
 
     private void ensureDefault(String chave, String valor, String descricao) {

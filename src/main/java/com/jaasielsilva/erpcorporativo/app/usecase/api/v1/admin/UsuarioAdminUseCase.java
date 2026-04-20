@@ -23,6 +23,7 @@ import com.jaasielsilva.erpcorporativo.app.model.Usuario;
 import com.jaasielsilva.erpcorporativo.app.repository.tenant.TenantRepository;
 import com.jaasielsilva.erpcorporativo.app.repository.usuario.UsuarioRepository;
 import com.jaasielsilva.erpcorporativo.app.repository.usuario.UsuarioSpecifications;
+import com.jaasielsilva.erpcorporativo.app.service.shared.PlatformSettingService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -34,6 +35,7 @@ public class UsuarioAdminUseCase {
     private final TenantRepository tenantRepository;
     private final UsuarioAdminApiMapper usuarioAdminApiMapper;
     private final PasswordEncoder passwordEncoder;
+    private final PlatformSettingService platformSettingService;
 
     @Transactional(readOnly = true)
     public PageResponse<UsuarioResponse> list(UsuarioFilter filter, int page, int size) {
@@ -270,6 +272,7 @@ public class UsuarioAdminUseCase {
         if (!StringUtils.hasText(password)) {
             throw new ValidationException("Senha é obrigatória para criação de usuário.");
         }
+        validatePasswordPolicy(password);
 
         return passwordEncoder.encode(password);
     }
@@ -278,8 +281,21 @@ public class UsuarioAdminUseCase {
         if (!StringUtils.hasText(password)) {
             return null;
         }
+        validatePasswordPolicy(password);
 
         return passwordEncoder.encode(password);
+    }
+
+    private void validatePasswordPolicy(String password) {
+        int minLength = 8;
+        try {
+            minLength = Integer.parseInt(platformSettingService.get(PlatformSettingService.PASSWORD_MIN_LEN, "8"));
+        } catch (NumberFormatException ignored) {
+            minLength = 8;
+        }
+        if (password.length() < minLength) {
+            throw new ValidationException("Senha deve possuir no mínimo " + minLength + " caracteres.");
+        }
     }
 
     private int normalizeSize(int size) {

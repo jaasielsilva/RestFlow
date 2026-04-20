@@ -55,6 +55,27 @@
         [data-bs-theme="dark"] h4 {
             color: #f1f5f9;
         }
+        .maintenance-switch-size {
+            width: 3em;
+            height: 1.5em;
+            cursor: pointer;
+        }
+        .maintenance-label-size {
+            font-size: 0.95rem;
+        }
+        .unsaved-badge {
+            display: none;
+            margin-left: 8px;
+            font-size: 0.72rem;
+            padding: 3px 8px;
+            border-radius: 999px;
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #f59e0b;
+        }
+        .unsaved-badge.visible {
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
@@ -65,6 +86,8 @@
 
         <div data-app-toast data-toast-type="success"
              th:attr="data-toast-message=${toastSuccess}" th:if="${toastSuccess != null}"></div>
+        <div data-app-toast data-toast-type="error"
+             th:attr="data-toast-message=${toastError}" th:if="${toastError != null}"></div>
 
         <!-- Banner modo manutenção ativo -->
         <div th:if="${settings['platform.maintenance_mode'] == 'true'}"
@@ -82,12 +105,19 @@
                     <div class="nav flex-column nav-pills settings-nav" id="v-pills-tab" role="tablist" aria-orientation="vertical">
                         <button class="nav-link active text-start" id="v-pills-geral-tab" data-bs-toggle="pill" data-bs-target="#v-pills-geral" type="button" role="tab" aria-selected="true">
                             <i class="fa-solid fa-sliders fa-fw me-2"></i> Geral
+                            <span class="unsaved-badge" data-unsaved-badge="geral">Não salvas</span>
                         </button>
                         <button class="nav-link text-start" id="v-pills-smtp-tab" data-bs-toggle="pill" data-bs-target="#v-pills-smtp" type="button" role="tab" aria-selected="false">
                             <i class="fa-solid fa-envelope-open-text fa-fw me-2"></i> Servidor de E-mail (SMTP)
+                            <span class="unsaved-badge" data-unsaved-badge="smtp">Não salvas</span>
+                        </button>
+                        <button class="nav-link text-start" id="v-pills-billing-tab" data-bs-toggle="pill" data-bs-target="#v-pills-billing" type="button" role="tab" aria-selected="false">
+                            <i class="fa-solid fa-credit-card fa-fw me-2"></i> Cobrança (Mercado Pago)
+                            <span class="unsaved-badge" data-unsaved-badge="billing">Não salvas</span>
                         </button>
                         <button class="nav-link text-start" id="v-pills-security-tab" data-bs-toggle="pill" data-bs-target="#v-pills-security" type="button" role="tab" aria-selected="false">
                             <i class="fa-solid fa-shield-cat fa-fw me-2"></i> Segurança e Senhas
+                            <span class="unsaved-badge" data-unsaved-badge="security">Não salvas</span>
                         </button>
                     </div>
                 </div>
@@ -102,14 +132,14 @@
                                 <h4 class="mb-4"><i class="fa-solid fa-building-columns me-2 text-primary"></i>Configurações da Plataforma</h4>
                                 <div class="row g-4">
                                     <div class="col-md-6">
-                                        <label class="form-label fw-semibold">Nome da Plataforma</label>
-                                        <input class="form-control" type="text" name="platform.name" th:value="${settings['platform.name'] ?: 'ERP Corporativo'}" />
+                                        <label class="form-label fw-semibold" for="platformName">Nome da Plataforma</label>
+                                        <input id="platformName" class="form-control" type="text" name="platform.name" data-settings-section="geral" th:value="${settings['platform.name'] ?: 'ERP Corporativo'}" />
                                         <div class="text-muted small mt-1">Exibido globalmente no título do sistema.</div>
                                     </div>
 
                                     <div class="col-md-6">
-                                        <label class="form-label fw-semibold">E-mail de Suporte Público</label>
-                                        <input class="form-control" type="email" name="support.email" th:value="${settings['support.email'] ?: ''}" placeholder="suporte@empresa.com" />
+                                        <label class="form-label fw-semibold" for="supportEmail">E-mail de Suporte Público</label>
+                                        <input id="supportEmail" class="form-control" type="email" name="support.email" data-settings-section="geral" th:value="${settings['support.email'] ?: ''}" placeholder="suporte@empresa.com" />
                                         <div class="text-muted small mt-1">E-mail visível para clientes pedirem ajuda nas telas de login.</div>
                                     </div>
 
@@ -117,18 +147,23 @@
                                         <label class="form-label fw-semibold d-block mb-2">Estado de Acesso à Plataforma</label>
                                         <div class="p-3 border rounded shadow-sm bg-body-tertiary">
                                             <div class="form-check form-switch d-flex align-items-center gap-3 mb-0">
-                                                <input class="form-check-input" type="checkbox" role="switch" id="maintenanceToggle" style="width: 3em; height: 1.5em; cursor: pointer;">
+                                                <input class="form-check-input maintenance-switch-size" type="checkbox" role="switch" id="maintenanceToggle">
                                                 <label class="form-check-label mb-0" for="maintenanceToggle">
-                                                    <span id="maintenanceLabelText" class="fw-medium text-body" style="font-size: 0.95rem;">Modo de Manutenção Desativado</span>
+                                                    <span id="maintenanceLabelText" class="fw-medium text-body maintenance-label-size">Modo de Manutenção Desativado</span>
                                                 </label>
                                             </div>
                                             <!-- Campo Hidden para enviar valor correto -->
-                                            <input type="hidden" name="platform.maintenance_mode" id="maintenanceInput" th:value="${settings['platform.maintenance_mode'] ?: 'false'}" />
+                                            <input type="hidden" name="platform.maintenance_mode" id="maintenanceInput" data-settings-section="geral" th:value="${settings['platform.maintenance_mode'] ?: 'false'}" />
                                             <div class="text-muted small mt-2">
                                                 Ao ativar o modo de manutenção, o acesso é restrito apenas a administradores. Clientes normais verão tela de manutenção.
                                             </div>
                                         </div>
                                     </div>
+                                </div>
+                                <div class="d-flex justify-content-end mt-4 pt-3 border-top">
+                                    <button class="app-btn app-btn-primary" type="submit" name="section" value="geral">
+                                        <i class="fa-solid fa-floppy-disk me-2"></i>Salvar Geral
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -146,22 +181,25 @@
                                 <div class="row g-4">
                                     <div class="col-md-8">
                                         <label class="form-label fw-semibold">Servidor / Host SMTP</label>
-                                        <input class="form-control" type="text" name="smtp.host" th:value="${settings['smtp.host'] ?: ''}" placeholder="ex: smtp.gmail.com ou email-smtp.us-east-1.amazonaws.com" />
+                                        <input class="form-control" type="text" name="smtp.host" data-settings-section="smtp" th:value="${settings['smtp.host'] ?: ''}" placeholder="ex: smtp.gmail.com ou email-smtp.us-east-1.amazonaws.com" />
                                     </div>
 
                                     <div class="col-md-4">
                                         <label class="form-label fw-semibold">Porta</label>
-                                        <input class="form-control" type="number" name="smtp.port" th:value="${settings['smtp.port'] ?: '587'}" placeholder="587, 465..." />
+                                        <input class="form-control" type="number" name="smtp.port" data-settings-section="smtp" th:value="${settings['smtp.port'] ?: '587'}" placeholder="587, 465..." />
                                     </div>
 
                                     <div class="col-md-6">
-                                        <label class="form-label fw-semibold">Usuário de Autenticação</label>
-                                        <input class="form-control" type="text" name="smtp.username" th:value="${settings['smtp.username'] ?: ''}" autocomplete="off" />
+                                        <label class="form-label fw-semibold" for="smtpUsername">Usuário de Autenticação</label>
+                                        <input id="smtpUsername" class="form-control" type="text" name="smtp.username" data-settings-section="smtp" th:value="${settings['smtp.username'] ?: ''}" autocomplete="off" />
                                     </div>
 
                                     <div class="col-md-6">
                                         <label class="form-label fw-semibold">Senha / API Key</label>
-                                        <input class="form-control" type="password" name="smtp.password" th:value="${settings['smtp.password'] ?: ''}" placeholder="••••••••••••" autocomplete="new-password" />
+                                        <input class="form-control" type="password" name="smtp.password" data-settings-section="smtp" value="" placeholder="••••••••••••" autocomplete="new-password" />
+                                        <div class="text-muted small mt-1" th:if="${hasSmtpPassword}">
+                                            Senha SMTP já configurada. Deixe em branco para manter o valor atual.
+                                        </div>
                                     </div>
                                     
                                     <div class="col-12 mt-4 pt-3 border-top">
@@ -170,13 +208,79 @@
 
                                     <div class="col-md-6">
                                         <label class="form-label fw-semibold">E-mail de Retorno (From Address)</label>
-                                        <input class="form-control" type="email" name="smtp.from_address" th:value="${settings['smtp.from_address'] ?: ''}" placeholder="no-reply@suaempresa.com" />
+                                        <input class="form-control" type="email" name="smtp.from_address" data-settings-section="smtp" th:value="${settings['smtp.from_address'] ?: ''}" placeholder="no-reply@suaempresa.com" />
                                     </div>
 
                                     <div class="col-md-6">
                                         <label class="form-label fw-semibold">Nome do Remetente (From Name)</label>
-                                        <input class="form-control" type="text" name="smtp.from_name" th:value="${settings['smtp.from_name'] ?: ''}" placeholder="Ex: Financeiro ERP" />
+                                        <input class="form-control" type="text" name="smtp.from_name" data-settings-section="smtp" th:value="${settings['smtp.from_name'] ?: ''}" placeholder="Ex: Financeiro ERP" />
                                     </div>
+                                </div>
+                                <div class="mt-4 pt-3 border-top">
+                                    <h6 class="fw-semibold">Validação SMTP</h6>
+                                    <div class="row g-2 align-items-end">
+                                        <div class="col-md-8">
+                                            <label class="form-label fw-semibold">E-mail para teste</label>
+                                            <input class="form-control" type="email" name="testEmail" placeholder="seuemail@empresa.com" />
+                                        </div>
+                                        <div class="col-md-4 d-grid">
+                                            <button class="btn btn-outline-primary" type="submit" th:formaction="@{/admin/settings/smtp/test}" formmethod="post">
+                                                <i class="fa-solid fa-paper-plane me-2"></i>Testar SMTP
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-end mt-4 pt-3 border-top">
+                                    <button class="app-btn app-btn-primary" type="submit" name="section" value="smtp">
+                                        <i class="fa-solid fa-floppy-disk me-2"></i>Salvar SMTP
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ABA COBRANCA -->
+                        <div class="tab-pane fade" id="v-pills-billing" role="tabpanel" tabindex="0">
+                            <div class="card-ui mb-4">
+                                <h4 class="mb-4"><i class="fa-solid fa-credit-card me-2 text-primary"></i>Mercado Pago</h4>
+                                <div class="row g-4">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold" for="mpPublicKey">Public Key</label>
+                                        <input id="mpPublicKey" class="form-control" type="text" name="billing.mp.public_key" data-settings-section="billing" th:value="${settings['billing.mp.public_key'] ?: ''}" />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Access Token</label>
+                                        <input class="form-control" type="password" name="billing.mp.access_token" data-settings-section="billing" value="" placeholder="APP_USR-..." autocomplete="new-password" />
+                                        <div class="text-muted small mt-1" th:if="${hasMpAccessToken}">
+                                            Token já configurado. Deixe em branco para manter.
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold" for="mpWebhookSecret">Webhook Secret</label>
+                                        <input id="mpWebhookSecret" class="form-control" type="password" name="billing.mp.webhook_secret" data-settings-section="billing" value="" autocomplete="new-password" />
+                                        <div class="text-muted small mt-1" th:if="${hasMpWebhookSecret}">
+                                            Segredo já configurado. Deixe em branco para manter.
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold" for="mpSuccessUrl">URL Sucesso</label>
+                                        <input id="mpSuccessUrl" class="form-control" type="url" name="billing.mp.success_url" data-settings-section="billing" th:value="${settings['billing.mp.success_url'] ?: ''}" />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold" for="mpFailureUrl">URL Falha</label>
+                                        <input id="mpFailureUrl" class="form-control" type="url" name="billing.mp.failure_url" data-settings-section="billing" th:value="${settings['billing.mp.failure_url'] ?: ''}" />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold" for="mpPendingUrl">URL Pendente</label>
+                                        <input id="mpPendingUrl" class="form-control" type="url" name="billing.mp.pending_url" data-settings-section="billing" th:value="${settings['billing.mp.pending_url'] ?: ''}" />
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-end mt-4 pt-3 border-top gap-2">
+                                    <button class="btn btn-outline-primary" type="submit" th:formaction="@{/admin/settings/billing/test}" formmethod="post">
+                                        <i class="fa-solid fa-satellite-dish me-2"></i>Testar conexão Mercado Pago
+                                    </button>
+                                    <button class="app-btn app-btn-primary" type="submit" name="section" value="billing">
+                                        <i class="fa-solid fa-floppy-disk me-2"></i>Salvar Cobrança
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -187,44 +291,39 @@
                                 <h4 class="mb-4"><i class="fa-solid fa-shield-cat me-2 text-primary"></i>Políticas de Segurança e Planos</h4>
                                 <div class="row g-4">
                                     <div class="col-md-6">
-                                        <label class="form-label fw-semibold">Timeout de Sessão</label>
+                                        <label class="form-label fw-semibold" for="sessionTimeout">Timeout de Sessão</label>
                                         <div class="input-group">
-                                            <input class="form-control" type="number" min="5" max="1440" name="security.session_timeout_minutes" th:value="${settings['security.session_timeout_minutes'] ?: '60'}" />
+                                            <input id="sessionTimeout" class="form-control" type="number" min="5" max="1440" name="security.session_timeout_minutes" data-settings-section="security" th:value="${settings['security.session_timeout_minutes'] ?: '60'}" />
                                             <span class="input-group-text text-muted">minutos</span>
                                         </div>
                                         <div class="text-muted small mt-1">Desloga usuários inativos automaticamente.</div>
                                     </div>
 
                                     <div class="col-md-6">
-                                        <label class="form-label fw-semibold">Cumprimento Mínimo de Senha</label>
+                                        <label class="form-label fw-semibold" for="passwordMinLen">Cumprimento Mínimo de Senha</label>
                                         <div class="input-group">
-                                            <input class="form-control" type="number" min="6" max="32" name="security.password_min_length" th:value="${settings['security.password_min_length'] ?: '8'}" />
+                                            <input id="passwordMinLen" class="form-control" type="number" min="6" max="32" name="security.password_min_length" data-settings-section="security" th:value="${settings['security.password_min_length'] ?: '8'}" />
                                             <span class="input-group-text text-muted">caracteres</span>
                                         </div>
                                         <div class="text-muted small mt-1">Aplicado na redefinição de senhas.</div>
                                     </div>
 
                                     <div class="col-md-6 mt-4">
-                                        <label class="form-label fw-semibold">Máximo Padrão de Usuários (Planos)</label>
+                                        <label class="form-label fw-semibold" for="maxUsersDefault">Máximo Padrão de Usuários (Planos)</label>
                                         <div class="input-group">
-                                            <input class="form-control" type="number" min="1" name="plan.max_users_default" th:value="${settings['plan.max_users_default'] ?: '50'}" />
+                                            <input id="maxUsersDefault" class="form-control" type="number" min="1" name="plan.max_users_default" data-settings-section="security" th:value="${settings['plan.max_users_default'] ?: '50'}" />
                                             <span class="input-group-text text-muted"><i class="fa-solid fa-users"></i></span>
                                         </div>
                                         <div class="text-muted small mt-1">Teto Global caso o Tenant seja contratado sem limitação em contrato explícito.</div>
                                     </div>
                                 </div>
+                                <div class="d-flex justify-content-end mt-4 pt-3 border-top">
+                                    <button class="app-btn app-btn-primary" type="submit" name="section" value="security">
+                                        <i class="fa-solid fa-floppy-disk me-2"></i>Salvar Segurança
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <!-- BARRA DE AÇÕES (Fixa no conteúdo ou em baixo) -->
-                    <div class="d-flex align-items-center justify-content-between p-3 mt-2 bg-body rounded shadow-sm border">
-                        <span class="text-muted small">
-                            <i class="fa-solid fa-clock-rotate-left me-1"></i> As últimas edições realizadas foram guardadas e auditadas em log.
-                        </span>
-                        <button class="app-btn app-btn-primary" type="submit">
-                            <i class="fa-solid fa-floppy-disk me-2"></i>Aplicar Configurações
-                        </button>
                     </div>
 
                 </div>
@@ -280,6 +379,42 @@ document.addEventListener('DOMContentLoaded', () => {
             toggleLbl.textContent = 'Modo de Manutenção Desativado (Acesso Normal)';
             toggleLbl.className = 'fw-medium text-body';
         }
+    }
+
+    const sectionInputs = document.querySelectorAll('[data-settings-section]');
+    const initialValues = new Map();
+    const dirtySections = new Set();
+
+    sectionInputs.forEach((field) => {
+        initialValues.set(field.name + '::' + field.dataset.settingsSection, field.type === 'checkbox' ? String(field.checked) : (field.value ?? ''));
+        field.addEventListener('input', () => handleFieldChange(field));
+        field.addEventListener('change', () => handleFieldChange(field));
+    });
+
+    function handleFieldChange(field) {
+        const section = field.dataset.settingsSection;
+        if (!section) return;
+        const isSectionDirty = [...sectionInputs]
+            .filter((f) => f.dataset.settingsSection === section)
+            .some((f) => {
+                const key = f.name + '::' + section;
+                const original = initialValues.get(key) ?? '';
+                const current = f.type === 'checkbox' ? String(f.checked) : (f.value ?? '');
+                return current !== original;
+            });
+        if (isSectionDirty) {
+            dirtySections.add(section);
+        } else {
+            dirtySections.delete(section);
+        }
+        renderDirtyBadges();
+    }
+
+    function renderDirtyBadges() {
+        document.querySelectorAll('[data-unsaved-badge]').forEach((badge) => {
+            const section = badge.getAttribute('data-unsaved-badge');
+            badge.classList.toggle('visible', dirtySections.has(section));
+        });
     }
 });
 </script>

@@ -54,6 +54,20 @@ public class PaymentRecord {
     @Column(nullable = false, length = 20)
     private PaymentStatus status;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_provider", nullable = false, length = 30)
+    @Builder.Default
+    private PaymentProvider paymentProvider = PaymentProvider.MANUAL;
+
+    @Column(name = "external_reference", length = 120)
+    private String externalReference;
+
+    @Column(name = "provider_payment_id", length = 80)
+    private String providerPaymentId;
+
+    @Column(name = "checkout_url", length = 500)
+    private String checkoutUrl;
+
     @Column(columnDefinition = "TEXT")
     private String observacoes;
 

@@ -18,4 +18,6 @@ public interface TenantRepository extends JpaRepository<Tenant, Long>, JpaSpecif
     boolean existsBySlugIgnoreCase(String slug);
 
     List<Tenant> findAllByOrderByCreatedAtDesc(Pageable pageable);
+
+    List<Tenant> findAllByAtivoTrue();
 }

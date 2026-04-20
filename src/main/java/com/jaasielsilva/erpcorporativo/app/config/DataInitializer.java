@@ -131,6 +131,11 @@ public class DataInitializer implements CommandLineRunner {
         ensureModule("RELATORIOS",       "Relatórios",        "/app/modulos/relatorios",     "Relatórios do tenant");
         ensureModule("CLIENTES",         "Clientes",          "/app/clientes",               "CRM e gestão de clientes");
         ensureModule("SUPORTE",          "Suporte",           "/app/suporte",                "Atendimento e gestão de chamados");
+        ensureModule("COMERCIAL",        "Minha Conta",       "/app/minha-conta",            "Portal comercial e assinatura");
+        ensureModule("INTEGRACOES",      "Integrações",       "/app/integracoes",            "Webhooks e integrações externas");
+        ensureModule("BI_AVANCADO",      "BI Avançado",       "/app/bi-avancado",            "Analytics avançado do tenant");
+        ensureModule("AUTOMACOES",       "Automações",        "/app/automacoes",             "Regras de automação de workflow");
+        ensureModule("COMPLIANCE",       "Compliance",        "/app/compliance",             "LGPD e trilhas de consentimento");
     }
 
     private void ensureModule(String codigo, String nome, String rota, String descricao) {
@@ -150,6 +155,9 @@ public class DataInitializer implements CommandLineRunner {
         ensureAddon("STORAGE_EXTRA", "Armazenamento extra", "Ampliação de armazenamento de anexos.");
         ensureAddon("SUPPORT_PRIORITY", "Suporte prioritário", "Fila de suporte priorizada para o tenant.");
         ensureAddon("AUTOMATION_PACK", "Pacote de automações", "Regras e automações avançadas de processos.");
+        ensureAddon("INTEGRATIONS_PACK", "Pacote de integrações", "Webhooks e conectores externos adicionais.");
+        ensureAddon("BI_ADVANCED", "BI avançado", "Métricas e analytics avançados multi-módulo.");
+        ensureAddon("LGPD_COMPLIANCE", "Compliance LGPD", "Fluxos avançados de privacidade e rastreabilidade.");
     }
 
     private void ensureAddon(String codigo, String nome, String descricao) {
@@ -184,8 +192,8 @@ public class DataInitializer implements CommandLineRunner {
                 80,
                 true,
                 "GROWTH",
-                Set.of("DASHBOARD", "USUARIOS", "CLIENTES", "CONHECIMENTO", "SUPORTE", "PEDIDOS", "RELATORIOS", "CONFIGURACOES"),
-                Set.of("USERS_EXTRA", "STORAGE_EXTRA", "SUPPORT_PRIORITY")
+                Set.of("DASHBOARD", "USUARIOS", "CLIENTES", "CONHECIMENTO", "SUPORTE", "PEDIDOS", "RELATORIOS", "CONFIGURACOES", "COMERCIAL"),
+                Set.of("USERS_EXTRA", "STORAGE_EXTRA", "SUPPORT_PRIORITY", "INTEGRATIONS_PACK")
         );
         ensurePlan(
                 "SCALE",
@@ -196,8 +204,8 @@ public class DataInitializer implements CommandLineRunner {
                 300,
                 true,
                 "SCALE",
-                Set.of("DASHBOARD", "USUARIOS", "CLIENTES", "CONHECIMENTO", "SUPORTE", "PEDIDOS", "RELATORIOS", "CONFIGURACOES", "FINANCEIRO", "ESTOQUE"),
-                Set.of("USERS_EXTRA", "STORAGE_EXTRA", "SUPPORT_PRIORITY", "AUTOMATION_PACK")
+                Set.of("DASHBOARD", "USUARIOS", "CLIENTES", "CONHECIMENTO", "SUPORTE", "PEDIDOS", "RELATORIOS", "CONFIGURACOES", "FINANCEIRO", "ESTOQUE", "COMERCIAL", "INTEGRACOES", "BI_AVANCADO", "AUTOMACOES", "COMPLIANCE"),
+                Set.of("USERS_EXTRA", "STORAGE_EXTRA", "SUPPORT_PRIORITY", "AUTOMATION_PACK", "INTEGRATIONS_PACK", "BI_ADVANCED", "LGPD_COMPLIANCE")
         );
     }
 

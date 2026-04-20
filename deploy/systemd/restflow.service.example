@@ -1,0 +1,16 @@
+[Unit]
+Description=RestFlow SaaS
+After=network.target mysql.service
+
+[Service]
+Type=simple
+User=restflow
+WorkingDirectory=/opt/restflow
+EnvironmentFile=/opt/restflow/.env
+ExecStart=/bin/bash -lc 'java $JAVA_OPTS -jar /opt/restflow/app.jar'
+Restart=always
+RestartSec=5
+SuccessExitStatus=143
+
+[Install]
+WantedBy=multi-user.target

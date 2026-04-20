@@ -16,6 +16,7 @@ import com.jaasielsilva.erpcorporativo.app.security.ApiAuthenticationEntryPoint;
 import com.jaasielsilva.erpcorporativo.app.security.CustomAuthenticationFailureHandler;
 import com.jaasielsilva.erpcorporativo.app.security.CustomAuthenticationSuccessHandler;
 import com.jaasielsilva.erpcorporativo.app.security.LoginThrottleFilter;
+import com.jaasielsilva.erpcorporativo.app.security.MaintenanceModeFilter;
 import com.jaasielsilva.erpcorporativo.app.tenant.TenantRequestFilter;
 
 @Configuration
@@ -27,6 +28,7 @@ public class SecurityConfig {
     private final CustomAuthenticationFailureHandler authenticationFailureHandler;
     private final ApiAuthenticationEntryPoint apiAuthenticationEntryPoint;
     private final ApiAccessDeniedHandler apiAccessDeniedHandler;
+    private final MaintenanceModeFilter maintenanceModeFilter;
 
     public SecurityConfig(
             TenantRequestFilter tenantRequestFilter,
@@ -34,7 +36,8 @@ public class SecurityConfig {
             CustomAuthenticationSuccessHandler authenticationSuccessHandler,
             CustomAuthenticationFailureHandler authenticationFailureHandler,
             ApiAuthenticationEntryPoint apiAuthenticationEntryPoint,
-            ApiAccessDeniedHandler apiAccessDeniedHandler
+            ApiAccessDeniedHandler apiAccessDeniedHandler,
+            MaintenanceModeFilter maintenanceModeFilter
     ) {
         this.tenantRequestFilter = tenantRequestFilter;
         this.loginThrottleFilter = loginThrottleFilter;
@@ -42,6 +45,7 @@ public class SecurityConfig {
         this.authenticationFailureHandler = authenticationFailureHandler;
         this.apiAuthenticationEntryPoint = apiAuthenticationEntryPoint;
         this.apiAccessDeniedHandler = apiAccessDeniedHandler;
+        this.maintenanceModeFilter = maintenanceModeFilter;
     }
 
     @Bean
@@ -57,7 +61,9 @@ public class SecurityConfig {
                     "/js/**",
                     "/img/**",
                     "/favicon.ico",
-                    "/api/v1/system/health"
+                    "/maintenance",
+                    "/api/v1/system/health",
+                    "/api/v1/system/webhooks/mercadopago"
                 ).permitAll()
                 .requestMatchers("/home").hasRole("SUPER_ADMIN")
                 .requestMatchers("/app/conhecimento", "/app/conhecimento/**").hasAnyRole("ADMIN", "USER")
@@ -116,7 +122,8 @@ public class SecurityConfig {
                 .referrerPolicy(referrer -> referrer.policy(ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
             )
             .addFilterBefore(tenantRequestFilter, UsernamePasswordAuthenticationFilter.class)
-            .addFilterBefore(loginThrottleFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(loginThrottleFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterAfter(maintenanceModeFilter, TenantRequestFilter.class);
 
         return http.build();
     }
