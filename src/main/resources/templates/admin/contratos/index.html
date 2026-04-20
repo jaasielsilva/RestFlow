@@ -12,7 +12,7 @@
 <div class="layout">
     <aside th:replace="~{fragments/sidebar :: sidebar('contratos')}"></aside>
     <main class="main">
-        <div th:replace="~{fragments/topbar :: topbar('Contratos', 'Gestão de contratos e assinaturas', false)}"></div>
+        <div th:replace="~{fragments/topbar :: topbar('Contratos', 'Gestão de contratos e assinaturas', true)}"></div>
 
         <div data-app-toast data-toast-type="success" th:attr="data-toast-message=${toastSuccess}" th:if="${toastSuccess != null}"></div>
         <div data-app-toast data-toast-type="error"   th:attr="data-toast-message=${toastError}"   th:if="${toastError != null}"></div>
@@ -129,26 +129,7 @@
                                       th:text="${c.ultimoPagamentoStatus}">—</span>
                             </td>
                             <td>
-                                <div class="d-flex gap-1">
-                                    <a class="app-btn app-btn-outline app-btn-sm"
-                                       th:href="@{/admin/contratos/{id}(id=${c.id})}"
-                                       title="Visualizar">
-                                        <i class="fa-solid fa-eye"></i>
-                                    </a>
-                                    <a class="app-btn app-btn-outline app-btn-sm"
-                                       th:href="@{/admin/contratos/{id}/edit(id=${c.id})}"
-                                       title="Editar">
-                                        <i class="fa-solid fa-pen"></i>
-                                    </a>
-                                    <form th:action="@{/admin/contratos/{id}/delete(id=${c.id})}" method="post"
-                                          onsubmit="return confirm('Confirma a exclusão deste contrato?')" style="margin:0;">
-                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                                        <button class="app-btn app-btn-outline app-btn-sm" type="submit" title="Excluir"
-                                                style="color:#dc3545; border-color:#dc3545;">
-                                            <i class="fa-solid fa-trash"></i>
-                                        </button>
-                                    </form>
-                                </div>
+                                <div th:replace="~{fragments/table-actions :: contractActions(${c.id})}"></div>
                             </td>
                         </tr>
                         </tbody>
@@ -157,19 +138,22 @@
 
                 <!-- Paginação -->
                 <div class="d-flex justify-content-between align-items-center mt-3">
-                    <div class="text-muted small"
-                         th:text="${view.totalElements} + ' registro(s) — Página ' + (${view.currentPage} + 1) + ' de ' + (${view.totalPages} > 0 ? ${view.totalPages} : 1)"></div>
-                    <div class="btn-group" th:if="${view.totalPages > 1}">
-                        <a class="btn btn-outline-secondary btn-sm"
-                           th:classappend="${!view.hasPrev()} ? ' disabled'"
-                           th:href="@{/admin/contratos(page=${view.currentPage - 1}, tenantNome=${param.tenantNome}, status=${param.status}, planoCodigo=${param.planoCodigo})}">
-                            <i class="fa-solid fa-chevron-left me-1"></i>Anterior
-                        </a>
-                        <a class="btn btn-outline-secondary btn-sm"
-                           th:classappend="${!view.hasNext()} ? ' disabled'"
-                           th:href="@{/admin/contratos(page=${view.currentPage + 1}, tenantNome=${param.tenantNome}, status=${param.status}, planoCodigo=${param.planoCodigo})}">
-                            Próxima<i class="fa-solid fa-chevron-right ms-1"></i>
-                        </a>
+                    <div class="text-muted"
+                         th:text="'Página ' + (${view.currentPage} + 1) + ' de ' + (${view.totalPages} > 0 ? ${view.totalPages} : 1)"></div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-muted" th:text="'Total: ' + ${view.totalElements}">Total: 0</span>
+                        <div class="btn-group" th:if="${view.totalPages > 1}">
+                            <a class="btn btn-outline-secondary btn-sm"
+                               th:classappend="${!view.hasPrev()} ? ' disabled'"
+                               th:href="@{/admin/contratos(page=${view.currentPage - 1}, tenantNome=${param.tenantNome}, status=${param.status}, planoCodigo=${param.planoCodigo})}">
+                                Anterior
+                            </a>
+                            <a class="btn btn-outline-secondary btn-sm"
+                               th:classappend="${!view.hasNext()} ? ' disabled'"
+                               th:href="@{/admin/contratos(page=${view.currentPage + 1}, tenantNome=${param.tenantNome}, status=${param.status}, planoCodigo=${param.planoCodigo})}">
+                                Próxima
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>

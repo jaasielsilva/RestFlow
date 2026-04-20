@@ -38,4 +38,8 @@ public interface TenantModuleRepository extends JpaRepository<TenantModule, Long
               and m.ativo = true
             """)
     boolean hasEnabledModuleByCodigo(@Param("tenantId") Long tenantId, @Param("codigo") String codigo);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @Query("delete from TenantModule tm where tm.module.id = :moduleId")
+    void deleteByModuleId(@Param("moduleId") Long moduleId);
 }

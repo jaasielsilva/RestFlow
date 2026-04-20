@@ -35,6 +35,21 @@ public class AdminPlatformModuleWebService {
         return platformModuleAdminUseCase.getTenantModuleStates(tenantId);
     }
 
+    public PlatformModule getModule(Long id) {
+        return platformModuleAdminUseCase.listModules().stream()
+                .filter(m -> m.getId().equals(id))
+                .findFirst()
+                .orElseThrow(() -> new com.jaasielsilva.erpcorporativo.app.exception.ResourceNotFoundException("Módulo não encontrado"));
+    }
+
+    public void update(Long id, AdminModuleCreateForm form) {
+        platformModuleAdminUseCase.updateModule(id, form);
+    }
+
+    public void delete(Long id) {
+        platformModuleAdminUseCase.deleteModule(id);
+    }
+
     public void setTenantModule(Long tenantId, Long moduleId, boolean enabled) {
         platformModuleAdminUseCase.setTenantModule(tenantId, moduleId, enabled);
     }

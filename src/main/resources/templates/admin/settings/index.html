@@ -7,109 +7,281 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
     <link rel="stylesheet" href="/css/auth/home.css" />
+    <style>
+        .settings-nav .nav-link {
+            color: #64748b;
+            font-weight: 500;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            transition: all 0.2s;
+        }
+        .settings-nav .nav-link:hover {
+            background-color: rgba(99, 102, 241, 0.05);
+            color: #4f46e5;
+        }
+        .settings-nav .nav-link.active {
+            background-color: rgba(99, 102, 241, 0.1);
+            color: #4f46e5;
+            font-weight: 600;
+        }
+        
+        .card-ui {
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            background: #fff;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+        }
+        
+        /* Tema Escuro para as abas caso a aplicação use */
+        [data-bs-theme="dark"] .settings-nav .nav-link {
+            color: #94a3b8;
+        }
+        [data-bs-theme="dark"] .settings-nav .nav-link:hover {
+            background-color: rgba(99, 102, 241, 0.1);
+            color: #a5b4fc;
+        }
+        [data-bs-theme="dark"] .settings-nav .nav-link.active {
+            background-color: rgba(99, 102, 241, 0.15);
+            color: #818cf8;
+        }
+        [data-bs-theme="dark"] .card-ui {
+            background: #1e293b;
+            border-color: #334155;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        [data-bs-theme="dark"] h4 {
+            color: #f1f5f9;
+        }
+    </style>
 </head>
 <body>
 <div class="layout">
     <aside th:replace="~{fragments/sidebar :: sidebar('settings')}"></aside>
     <main class="main">
-        <div th:replace="~{fragments/topbar :: topbar('Configurações', 'Parâmetros globais da plataforma', true)}"></div>
+        <div th:replace="~{fragments/topbar :: topbar('Configurações', 'Ajustes globais, SMTP e regras de segurança da plataforma', true)}"></div>
 
         <div data-app-toast data-toast-type="success"
              th:attr="data-toast-message=${toastSuccess}" th:if="${toastSuccess != null}"></div>
 
-        <form th:action="@{/admin/settings}" method="post">
+        <!-- Banner modo manutenção ativo -->
+        <div th:if="${settings['platform.maintenance_mode'] == 'true'}"
+             class="mx-3 mb-3 alert alert-warning d-flex align-items-center gap-2" role="alert">
+            <i class="fa-solid fa-triangle-exclamation fa-lg"></i>
+            <div><strong>Modo de manutenção ativo.</strong> Tenants não conseguem acessar o portal no momento.</div>
+        </div>
+
+        <form th:action="@{/admin/settings}" method="post" id="settingsForm">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
-            <section class="bottom-grid" style="grid-template-columns: 1fr 1fr;">
-
-                <!-- Plataforma -->
-                <div class="card-ui">
-                    <div class="card-header-ui">
-                        <h4><i class="fa-solid fa-building-columns me-2"></i>Plataforma</h4>
-                    </div>
-                    <div class="row g-3">
-                        <div class="col-12">
-                            <label class="form-label">Nome da Plataforma</label>
-                            <input class="form-control" type="text" name="platform.name"
-                                   th:value="${settings['platform.name'] ?: 'ERP Corporativo'}" />
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">E-mail de Suporte</label>
-                            <input class="form-control" type="email" name="support.email"
-                                   th:value="${settings['support.email'] ?: ''}" />
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">Modo de Manutenção</label>
-                            <select class="form-select" name="platform.maintenance_mode">
-                                <option value="false" th:selected="${settings['platform.maintenance_mode'] != 'true'}">Desativado</option>
-                                <option value="true"  th:selected="${settings['platform.maintenance_mode'] == 'true'}">Ativado</option>
-                            </select>
-                            <div class="text-muted small mt-1">Quando ativado, bloqueia acesso de tenants.</div>
-                        </div>
+            <div class="row px-3 mt-2">
+                <!-- MENU LATERAL ABAS -->
+                <div class="col-12 col-md-4 col-lg-3 mb-4">
+                    <div class="nav flex-column nav-pills settings-nav" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                        <button class="nav-link active text-start" id="v-pills-geral-tab" data-bs-toggle="pill" data-bs-target="#v-pills-geral" type="button" role="tab" aria-selected="true">
+                            <i class="fa-solid fa-sliders fa-fw me-2"></i> Geral
+                        </button>
+                        <button class="nav-link text-start" id="v-pills-smtp-tab" data-bs-toggle="pill" data-bs-target="#v-pills-smtp" type="button" role="tab" aria-selected="false">
+                            <i class="fa-solid fa-envelope-open-text fa-fw me-2"></i> Servidor de E-mail (SMTP)
+                        </button>
+                        <button class="nav-link text-start" id="v-pills-security-tab" data-bs-toggle="pill" data-bs-target="#v-pills-security" type="button" role="tab" aria-selected="false">
+                            <i class="fa-solid fa-shield-cat fa-fw me-2"></i> Segurança e Senhas
+                        </button>
                     </div>
                 </div>
 
-                <!-- Segurança -->
-                <div class="card-ui">
-                    <div class="card-header-ui">
-                        <h4><i class="fa-solid fa-shield-halved me-2"></i>Segurança</h4>
+                <!-- CONTEÚDO DAS ABAS -->
+                <div class="col-12 col-md-8 col-lg-9">
+                    <div class="tab-content" id="v-pills-tabContent">
+                        
+                        <!-- ABA GERAL -->
+                        <div class="tab-pane fade show active" id="v-pills-geral" role="tabpanel" tabindex="0">
+                            <div class="card-ui mb-4">
+                                <h4 class="mb-4"><i class="fa-solid fa-building-columns me-2 text-primary"></i>Configurações da Plataforma</h4>
+                                <div class="row g-4">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Nome da Plataforma</label>
+                                        <input class="form-control" type="text" name="platform.name" th:value="${settings['platform.name'] ?: 'ERP Corporativo'}" />
+                                        <div class="text-muted small mt-1">Exibido globalmente no título do sistema.</div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">E-mail de Suporte Público</label>
+                                        <input class="form-control" type="email" name="support.email" th:value="${settings['support.email'] ?: ''}" placeholder="suporte@empresa.com" />
+                                        <div class="text-muted small mt-1">E-mail visível para clientes pedirem ajuda nas telas de login.</div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label class="form-label fw-semibold d-block mb-2">Estado de Acesso à Plataforma</label>
+                                        <div class="p-3 border rounded shadow-sm bg-body-tertiary">
+                                            <div class="form-check form-switch d-flex align-items-center gap-3 mb-0">
+                                                <input class="form-check-input" type="checkbox" role="switch" id="maintenanceToggle" style="width: 3em; height: 1.5em; cursor: pointer;">
+                                                <label class="form-check-label mb-0" for="maintenanceToggle">
+                                                    <span id="maintenanceLabelText" class="fw-medium text-body" style="font-size: 0.95rem;">Modo de Manutenção Desativado</span>
+                                                </label>
+                                            </div>
+                                            <!-- Campo Hidden para enviar valor correto -->
+                                            <input type="hidden" name="platform.maintenance_mode" id="maintenanceInput" th:value="${settings['platform.maintenance_mode'] ?: 'false'}" />
+                                            <div class="text-muted small mt-2">
+                                                Ao ativar o modo de manutenção, o acesso é restrito apenas a administradores. Clientes normais verão tela de manutenção.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ABA SMTP -->
+                        <div class="tab-pane fade" id="v-pills-smtp" role="tabpanel" tabindex="0">
+                            <div class="card-ui mb-4">
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <h4 class="mb-0"><i class="fa-solid fa-envelope-open-text me-2 text-primary"></i>Configuração de E-mail (SMTP)</h4>
+                                </div>
+                                <div class="alert alert-info py-2 small d-flex align-items-center gap-2">
+                                    <i class="fa-solid fa-circle-info"></i> Responsável pelos envios de senhas, faturas e convites da plataforma.
+                                </div>
+                                
+                                <div class="row g-4">
+                                    <div class="col-md-8">
+                                        <label class="form-label fw-semibold">Servidor / Host SMTP</label>
+                                        <input class="form-control" type="text" name="smtp.host" th:value="${settings['smtp.host'] ?: ''}" placeholder="ex: smtp.gmail.com ou email-smtp.us-east-1.amazonaws.com" />
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-semibold">Porta</label>
+                                        <input class="form-control" type="number" name="smtp.port" th:value="${settings['smtp.port'] ?: '587'}" placeholder="587, 465..." />
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Usuário de Autenticação</label>
+                                        <input class="form-control" type="text" name="smtp.username" th:value="${settings['smtp.username'] ?: ''}" autocomplete="off" />
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Senha / API Key</label>
+                                        <input class="form-control" type="password" name="smtp.password" th:value="${settings['smtp.password'] ?: ''}" placeholder="••••••••••••" autocomplete="new-password" />
+                                    </div>
+                                    
+                                    <div class="col-12 mt-4 pt-3 border-top">
+                                        <h6 class="fw-semibold">Identificação do Remetente</h6>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">E-mail de Retorno (From Address)</label>
+                                        <input class="form-control" type="email" name="smtp.from_address" th:value="${settings['smtp.from_address'] ?: ''}" placeholder="no-reply@suaempresa.com" />
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Nome do Remetente (From Name)</label>
+                                        <input class="form-control" type="text" name="smtp.from_name" th:value="${settings['smtp.from_name'] ?: ''}" placeholder="Ex: Financeiro ERP" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ABA SEGURANÇA -->
+                        <div class="tab-pane fade" id="v-pills-security" role="tabpanel" tabindex="0">
+                            <div class="card-ui mb-4">
+                                <h4 class="mb-4"><i class="fa-solid fa-shield-cat me-2 text-primary"></i>Políticas de Segurança e Planos</h4>
+                                <div class="row g-4">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Timeout de Sessão</label>
+                                        <div class="input-group">
+                                            <input class="form-control" type="number" min="5" max="1440" name="security.session_timeout_minutes" th:value="${settings['security.session_timeout_minutes'] ?: '60'}" />
+                                            <span class="input-group-text text-muted">minutos</span>
+                                        </div>
+                                        <div class="text-muted small mt-1">Desloga usuários inativos automaticamente.</div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Cumprimento Mínimo de Senha</label>
+                                        <div class="input-group">
+                                            <input class="form-control" type="number" min="6" max="32" name="security.password_min_length" th:value="${settings['security.password_min_length'] ?: '8'}" />
+                                            <span class="input-group-text text-muted">caracteres</span>
+                                        </div>
+                                        <div class="text-muted small mt-1">Aplicado na redefinição de senhas.</div>
+                                    </div>
+
+                                    <div class="col-md-6 mt-4">
+                                        <label class="form-label fw-semibold">Máximo Padrão de Usuários (Planos)</label>
+                                        <div class="input-group">
+                                            <input class="form-control" type="number" min="1" name="plan.max_users_default" th:value="${settings['plan.max_users_default'] ?: '50'}" />
+                                            <span class="input-group-text text-muted"><i class="fa-solid fa-users"></i></span>
+                                        </div>
+                                        <div class="text-muted small mt-1">Teto Global caso o Tenant seja contratado sem limitação em contrato explícito.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="row g-3">
-                        <div class="col-12">
-                            <label class="form-label">Timeout de Sessão (minutos)</label>
-                            <input class="form-control" type="number" min="5" max="1440"
-                                   name="security.session_timeout_minutes"
-                                   th:value="${settings['security.session_timeout_minutes'] ?: '60'}" />
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">Tamanho Mínimo de Senha</label>
-                            <input class="form-control" type="number" min="6" max="32"
-                                   name="security.password_min_length"
-                                   th:value="${settings['security.password_min_length'] ?: '8'}" />
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">Máximo de Usuários por Plano (padrão)</label>
-                            <input class="form-control" type="number" min="1"
-                                   name="plan.max_users_default"
-                                   th:value="${settings['plan.max_users_default'] ?: '50'}" />
-                        </div>
+                    
+                    <!-- BARRA DE AÇÕES (Fixa no conteúdo ou em baixo) -->
+                    <div class="d-flex align-items-center justify-content-between p-3 mt-2 bg-body rounded shadow-sm border">
+                        <span class="text-muted small">
+                            <i class="fa-solid fa-clock-rotate-left me-1"></i> As últimas edições realizadas foram guardadas e auditadas em log.
+                        </span>
+                        <button class="app-btn app-btn-primary" type="submit">
+                            <i class="fa-solid fa-floppy-disk me-2"></i>Aplicar Configurações
+                        </button>
                     </div>
+
                 </div>
-
-            </section>
-
-            <!-- Configurações customizadas -->
-            <section class="bottom-grid" style="grid-template-columns: 1fr;" th:if="${settings.size() > 6}">
-                <div class="card-ui">
-                    <div class="card-header-ui">
-                        <h4><i class="fa-solid fa-sliders me-2"></i>Todas as Configurações</h4>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table align-middle table-left">
-                            <thead><tr><th>Chave</th><th>Valor</th></tr></thead>
-                            <tbody>
-                            <tr th:each="entry : ${settings}">
-                                <td><code th:text="${entry.key}">chave</code></td>
-                                <td>
-                                    <input class="form-control form-control-sm"
-                                           th:name="${entry.key}" th:value="${entry.value}" />
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <div class="px-3 pb-4">
-                <button class="app-btn app-btn-primary" type="submit">
-                    <i class="fa-solid fa-floppy-disk me-2"></i>Salvar Configurações
-                </button>
             </div>
         </form>
     </main>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="/js/shared/toast.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Restaurar a aba selecionada se a página recarregar
+    let triggerTabList = [].slice.call(document.querySelectorAll('#v-pills-tab button'))
+    
+    // Hash Manager
+    var hash = window.location.hash;
+    if (hash) {
+        var triggerEl = document.querySelector('button[data-bs-target="' + hash + '"]');
+        if (triggerEl) {
+            new bootstrap.Tab(triggerEl).show();
+        }
+    }
+    
+    triggerTabList.forEach(function (triggerEl) {
+        triggerEl.addEventListener('click', function (event) {
+            var target = this.getAttribute('data-bs-target');
+            history.pushState(null, null, target);
+        })
+    });
+
+    // Lógica do Componente Switch (Modo de Manutenção)
+    const hiddenInp = document.getElementById('maintenanceInput');
+    const toggleCb  = document.getElementById('maintenanceToggle');
+    const toggleLbl = document.getElementById('maintenanceLabelText');
+
+    // Estado incial
+    const isMaintenanceOn = (hiddenInp.value === 'true');
+    toggleCb.checked = isMaintenanceOn;
+    updateMaintenanceUI(isMaintenanceOn);
+
+    toggleCb.addEventListener('change', (e) => {
+        const ativado = e.target.checked;
+        hiddenInp.value = ativado ? 'true' : 'false';
+        updateMaintenanceUI(ativado);
+    });
+
+    function updateMaintenanceUI(on) {
+        if (on) {
+            toggleLbl.textContent = 'Atenção! Modo de Manutenção ATIVO (Tenants bloqueados)';
+            toggleLbl.className = 'fw-bold text-danger';
+        } else {
+            toggleLbl.textContent = 'Modo de Manutenção Desativado (Acesso Normal)';
+            toggleLbl.className = 'fw-medium text-body';
+        }
+    }
+});
+</script>
 </body>
 </html>

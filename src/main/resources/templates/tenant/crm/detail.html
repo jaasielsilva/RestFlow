@@ -91,7 +91,11 @@
                 <!-- Excluir -->
                 <div th:if="${canFull}" class="mt-3">
                     <form th:action="@{/app/clientes/{id}/delete(id=${cliente.id})}" method="post"
-                          onsubmit="return confirm('Confirma a exclusão deste cliente?')">
+                          data-confirm
+                          data-confirm-title="Excluir cliente"
+                          data-confirm-message="Esta ação é irreversível. O cliente e todos os seus dados serão removidos."
+                          data-confirm-btn="Excluir"
+                          data-confirm-danger>
                         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                         <button class="app-btn app-btn-sm" style="background:#dc3545;color:#fff;" type="submit">
                             <i class="fa-solid fa-trash me-1"></i>Excluir Cliente
@@ -150,7 +154,12 @@
                          th:text="'Responsável: ' + ${int.responsavelNome}">—</div>
                     <div th:if="${canWrite}" class="mt-1 d-flex gap-2">
                         <form th:action="@{/app/clientes/{cid}/interacoes/{id}/delete(cid=${cliente.id}, id=${int.id})}"
-                              method="post" onsubmit="return confirm('Excluir esta interação?')">
+                              method="post"
+                              data-confirm
+                              data-confirm-title="Excluir interação"
+                              data-confirm-message="A interação será removida permanentemente."
+                              data-confirm-btn="Excluir"
+                              data-confirm-danger>
                             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                             <button class="btn btn-outline-danger btn-sm" type="submit">
                                 <i class="fa-solid fa-trash"></i>

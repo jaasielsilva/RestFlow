@@ -78,6 +78,35 @@ public class PlatformModuleAdminUseCase {
         tenantModuleRepository.save(tenantModule);
     }
 
+    @Transactional
+    public PlatformModule updateModule(Long id, com.jaasielsilva.erpcorporativo.app.dto.web.admin.AdminModuleCreateForm form) {
+        PlatformModule module = platformModuleRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Módulo não encontrado."));
+
+        if (!module.getCodigo().equalsIgnoreCase(form.getCodigo().trim())) {
+            validateCodigo(form.getCodigo());
+        }
+
+        module.setCodigo(form.getCodigo().trim());
+        module.setNome(form.getNome().trim());
+        module.setDescricao(form.getDescricao() != null && !form.getDescricao().isBlank() ? form.getDescricao().trim() : null);
+        module.setRota(form.getRota() != null && !form.getRota().isBlank() ? form.getRota().trim() : null);
+        module.setAtivo(form.isAtivo());
+
+        return platformModuleRepository.save(module);
+    }
+
+    @Transactional
+    public void deleteModule(Long id) {
+        PlatformModule module = platformModuleRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Módulo não encontrado."));
+
+        // Limpa dependências na tabela de join (tenant_modules) para evitar FK Constraint violation
+        tenantModuleRepository.deleteByModuleId(id);
+        
+        platformModuleRepository.delete(module);
+    }
+
     private void validateCodigo(String codigo) {
         if (codigo == null || codigo.isBlank()) {
             throw new ConflictException("Código do módulo é obrigatório.");

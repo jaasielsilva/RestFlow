@@ -61,7 +61,55 @@ public class PlatformModulesWebController {
             return "admin/modules/index";
         }
     }
+    @GetMapping("/{id}/edit")
+    public String edit(@PathVariable("id") Long id, Model model) {
+        PlatformModule module = adminPlatformModuleWebService.getModule(id);
+        AdminModuleCreateForm form = new AdminModuleCreateForm();
+        form.setCodigo(module.getCodigo());
+        form.setNome(module.getNome());
+        form.setDescricao(module.getDescricao());
+        form.setRota(module.getRota());
+        form.setAtivo(module.isAtivo());
 
+        model.addAttribute("form", form);
+        model.addAttribute("module", module);
+        return "admin/modules/edit";
+    }
+
+    @PostMapping("/{id}/edit")
+    public String update(
+            @PathVariable("id") Long id,
+            @Valid @ModelAttribute("form") AdminModuleCreateForm form,
+            BindingResult bindingResult,
+            Model model,
+            RedirectAttributes redirectAttributes
+    ) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("module", adminPlatformModuleWebService.getModule(id));
+            return "admin/modules/edit";
+        }
+
+        try {
+            adminPlatformModuleWebService.update(id, form);
+            redirectAttributes.addFlashAttribute("toastSuccess", "Módulo atualizado com sucesso.");
+            return "redirect:/admin/modulos";
+        } catch (AppException ex) {
+            bindingResult.reject("module.update", ex.getMessage());
+            model.addAttribute("module", adminPlatformModuleWebService.getModule(id));
+            return "admin/modules/edit";
+        }
+    }
+
+    @PostMapping("/{id}/delete")
+    public String delete(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
+        try {
+            adminPlatformModuleWebService.delete(id);
+            redirectAttributes.addFlashAttribute("toastSuccess", "Módulo excluído com sucesso.");
+        } catch (AppException ex) {
+            redirectAttributes.addFlashAttribute("toastError", ex.getMessage());
+        }
+        return "redirect:/admin/modulos";
+    }
     @GetMapping("/tenants/{tenantId}")
     public String tenantModules(@PathVariable("tenantId") Long tenantId, Model model) {
         Tenant tenant = adminPlatformModuleWebService.getTenant(tenantId);

@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 public class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final LoginAttemptService loginAttemptService;
+    private final com.jaasielsilva.erpcorporativo.app.service.shared.PlatformSettingService platformSettingService;
 
     @Override
     public void onAuthenticationSuccess(
@@ -26,6 +27,16 @@ public class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             Authentication authentication
     ) throws IOException, ServletException {
         loginAttemptService.loginSucceeded(SecurityRequestUtils.extractClientKey(request));
+
+        // Aplica o timeout configurado globalmente no banco via painel admin
+        try {
+            int timeoutMinutes = Integer.parseInt(platformSettingService.get(
+                com.jaasielsilva.erpcorporativo.app.service.shared.PlatformSettingService.SESSION_TIMEOUT, "60"
+            ));
+            request.getSession().setMaxInactiveInterval(timeoutMinutes * 60);
+        } catch (NumberFormatException e) {
+            request.getSession().setMaxInactiveInterval(60 * 60);
+        }
 
         if (authentication.getPrincipal() instanceof AppUserDetails userDetails
                 && userDetails.getRole() == Role.SUPER_ADMIN) {

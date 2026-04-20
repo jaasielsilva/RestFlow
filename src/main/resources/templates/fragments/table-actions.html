@@ -14,7 +14,11 @@
             <i class="fa-solid fa-pen"></i>
         </a>
         <form th:action="@{/admin/contratos/{id}/delete(id=${contractId})}" method="post" style="margin:0;"
-              onsubmit="return confirm('Confirma a exclusão deste contrato?')">
+              data-confirm
+              data-confirm-title="Excluir contrato"
+              data-confirm-message="Esta ação é irreversível. O contrato será removido permanentemente."
+              data-confirm-btn="Excluir"
+              data-confirm-danger>
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
             <button class="app-btn app-btn-outline app-btn-sm action-icon" type="submit"
                     title="Excluir" aria-label="Excluir contrato"
@@ -74,21 +78,31 @@
     </div>
 </th:block>
 
-<th:block th:fragment="moduleActions()">
+<th:block th:fragment="moduleActions(moduleId)">
     <div class="table-actions">
         <a class="app-btn app-btn-outline app-btn-sm action-icon action-icon-users"
-           th:href="@{/admin/tenants}" title="Gerenciar tenants do módulo"
-           aria-label="Gerenciar tenants do módulo">
+           th:href="@{/admin/tenants}" title="Gerenciar tenants"
+           aria-label="Gerenciar tenants">
             <i class="fa-solid fa-building"></i>
         </a>
-        <button class="app-btn app-btn-outline app-btn-sm action-icon action-icon-permissions is-disabled"
-                type="button" disabled title="Permissões (em breve)">
-            <i class="fa-solid fa-shield-halved"></i>
-        </button>
-        <button class="app-btn app-btn-outline app-btn-sm action-icon action-icon-rbac is-disabled"
-                type="button" disabled title="RBAC (em breve)">
-            <i class="fa-solid fa-user-lock"></i>
-        </button>
+        <a class="app-btn app-btn-outline app-btn-sm action-icon"
+           th:href="@{/admin/modulos/{id}/edit(id=${moduleId})}"
+           title="Editar" aria-label="Editar módulo">
+            <i class="fa-solid fa-pen"></i>
+        </a>
+        <form th:action="@{/admin/modulos/{id}/delete(id=${moduleId})}" method="post" style="margin:0;"
+              data-confirm
+              data-confirm-title="Excluir Módulo"
+              data-confirm-message="Tem certeza? Se este módulo for excluído, todos os Tenants perderão o acesso a ele instantaneamente."
+              data-confirm-btn="Excluir"
+              data-confirm-danger>
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <button class="app-btn app-btn-outline app-btn-sm action-icon" type="submit"
+                    title="Excluir" aria-label="Excluir módulo"
+                    style="color:#dc3545; border-color:#dc3545;">
+                <i class="fa-solid fa-trash"></i>
+            </button>
+        </form>
     </div>
 </th:block>
 </body>
