@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import com.jaasielsilva.erpcorporativo.app.service.web.auth.LoginWebService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @Controller
@@ -28,7 +29,10 @@ public class LoginWebController {
     }
 
     @GetMapping("/login")
-    public String login(Model model) {
+    public String login(Model model, HttpServletRequest request) {
+        // A view de login é extensa e pode começar a enviar chunks antes do <form>.
+        // Forçamos a sessão aqui para evitar falha tardia na criação do token CSRF.
+        request.getSession(true);
         model.addAttribute("loginForm", loginWebService.createForm());
         return "auth/login";
     }
