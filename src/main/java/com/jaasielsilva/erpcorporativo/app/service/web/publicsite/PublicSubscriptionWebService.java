@@ -2,6 +2,7 @@ package com.jaasielsilva.erpcorporativo.app.service.web.publicsite;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URI;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
@@ -83,13 +84,19 @@ public class PublicSubscriptionWebService {
         validateBotTrap(form);
         validateRateLimitByIp(originIp);
 
+        String normalizedSlug = normalizeSlug(form.getTenantSlug());
+        String normalizedEmail = normalizeEmail(form.getAdminEmail());
+        OnboardingSubscription pending = findPendingOnboarding(normalizedSlug, normalizedEmail);
+        if (pending != null) {
+            return resumePendingOnboarding(pending, baseUrl);
+        }
+
         SubscriptionPlan plan = subscriptionPlanRepository.findById(form.getPlanId())
                 .filter(SubscriptionPlan::isAtivo)
                 .orElseThrow(() -> new ResourceNotFoundException("Plano não encontrado ou inativo."));
 
-        String normalizedSlug = normalizeSlug(form.getTenantSlug());
         ensureSlugAvailable(normalizedSlug);
-        ensureAdminEmailAvailable(form.getAdminEmail());
+        ensureAdminEmailAvailable(normalizedEmail);
 
         BigDecimal entryPrice = resolveEntryPrice();
         Tenant tenant = tenantRepository.save(Tenant.builder()
@@ -126,24 +133,21 @@ public class PublicSubscriptionWebService {
                 .tenantNome(form.getTenantNome().trim())
                 .tenantSlug(normalizedSlug)
                 .adminNome(form.getAdminNome().trim())
-                .adminEmail(form.getAdminEmail().trim().toLowerCase(Locale.ROOT))
+                .adminEmail(normalizedEmail)
                 .status(OnboardingSubscriptionStatus.PENDING_PAYMENT)
                 .originIp(originIp)
                 .userAgent(userAgent)
                 .build());
 
         String externalReference = "onb_" + onboarding.getId() + "_" + UUID.randomUUID();
-        String successUrl = baseUrl + "/assinatura/status?state=success";
-        String failureUrl = baseUrl + "/assinatura/status?state=failure";
-        String pendingUrl = baseUrl + "/assinatura/status?state=pending";
+        MercadoPagoBillingService.CheckoutBackUrls backUrls = resolveBackUrls(baseUrl);
 
-        PaymentRecord updatedPayment = mercadoPagoBillingService.createCheckout(
+        PaymentRecord updatedPayment = ensureCheckoutWithSafeFallback(
                 paymentRecord,
-                "Assinatura de entrada - " + plan.getNome(),
-                "Ativação inicial da plataforma para " + tenant.getNome(),
-                new MercadoPagoBillingService.CheckoutBackUrls(successUrl, failureUrl, pendingUrl),
-                externalReference,
-                false
+                plan.getNome(),
+                tenant.getNome(),
+                backUrls,
+                externalReference
         );
 
         onboarding.setExternalReference(updatedPayment.getExternalReference());
@@ -172,7 +176,8 @@ public class PublicSubscriptionWebService {
                 tenant.getId(),
                 updatedPayment.getId(),
                 updatedPayment.getExternalReference(),
-                updatedPayment.getCheckoutUrl()
+                updatedPayment.getCheckoutUrl(),
+                false
         );
     }
 
@@ -209,6 +214,142 @@ public class PublicSubscriptionWebService {
             throw new ValidationException("Slug inválido. Use letras minúsculas, números e hífen.");
         }
         return normalized;
+    }
+
+    private String normalizeEmail(String rawEmail) {
+        if (rawEmail == null) {
+            throw new ValidationException("E-mail do administrador é obrigatório.");
+        }
+        String normalized = rawEmail.trim().toLowerCase(Locale.ROOT);
+        if (normalized.isBlank()) {
+            throw new ValidationException("E-mail do administrador é obrigatório.");
+        }
+        return normalized;
+    }
+
+    private OnboardingSubscription findPendingOnboarding(String normalizedSlug, String normalizedEmail) {
+        List<OnboardingSubscriptionStatus> pendingStatuses = List.of(OnboardingSubscriptionStatus.PENDING_PAYMENT);
+        return onboardingSubscriptionRepository
+                .findFirstByTenantSlugIgnoreCaseAndStatusInOrderByCreatedAtDesc(normalizedSlug, pendingStatuses)
+                .or(() -> onboardingSubscriptionRepository
+                        .findFirstByAdminEmailIgnoreCaseAndStatusInOrderByCreatedAtDesc(normalizedEmail, pendingStatuses))
+                .orElse(null);
+    }
+
+    private PublicSubscriptionStartResult resumePendingOnboarding(OnboardingSubscription pending, String baseUrl) {
+        PaymentRecord paymentRecord = paymentRecordRepository.findById(pending.getPaymentRecordId())
+                .orElseThrow(() -> new ResourceNotFoundException("Pagamento do onboarding pendente não encontrado."));
+
+        if (paymentRecord.getStatus() == PaymentStatus.PAGO) {
+            throw new ValidationException(
+                    "Pagamento já aprovado para este cadastro. Aguarde a ativação automática ou contate o suporte.");
+        }
+
+        Tenant tenant = tenantRepository.findById(pending.getTenantId())
+                .orElseThrow(() -> new ResourceNotFoundException("Tenant do onboarding pendente não encontrado."));
+        SubscriptionPlan plan = subscriptionPlanRepository.findById(pending.getPlanId())
+                .orElseThrow(() -> new ResourceNotFoundException("Plano do onboarding pendente não encontrado."));
+
+        String externalReference = (pending.getExternalReference() != null && !pending.getExternalReference().isBlank())
+                ? pending.getExternalReference()
+                : "onb_" + pending.getId() + "_" + UUID.randomUUID();
+        MercadoPagoBillingService.CheckoutBackUrls backUrls = resolveBackUrls(baseUrl);
+        PaymentRecord updatedPayment = ensureCheckoutWithSafeFallback(
+                paymentRecord,
+                plan.getNome(),
+                tenant.getNome(),
+                backUrls,
+                externalReference
+        );
+
+        pending.setExternalReference(updatedPayment.getExternalReference());
+        pending.setCheckoutUrl(updatedPayment.getCheckoutUrl());
+        pending.setFailureReason(null);
+        onboardingSubscriptionRepository.save(pending);
+        auditService.log(
+                AuditAction.PAGAMENTO_ATUALIZADO,
+                "Checkout de onboarding regenerado para tenant '" + pending.getTenantNome() + "'.",
+                "PaymentRecord",
+                pending.getPaymentRecordId(),
+                "PUBLIC_ONBOARDING",
+                null
+        );
+
+        return new PublicSubscriptionStartResult(
+                pending.getId(),
+                pending.getTenantId(),
+                pending.getPaymentRecordId(),
+                pending.getExternalReference(),
+                pending.getCheckoutUrl(),
+                true
+        );
+    }
+
+    private MercadoPagoBillingService.CheckoutBackUrls resolveBackUrls(String baseUrl) {
+        String root = normalizeBaseUrl(baseUrl);
+        if (root == null) {
+            root = normalizeBaseUrl(platformSettingService.get(PlatformSettingService.MP_SUCCESS_URL, ""));
+        }
+        if (root == null) {
+            root = "http://localhost:8080";
+        }
+        return new MercadoPagoBillingService.CheckoutBackUrls(
+                root + "/assinatura/status?state=success",
+                root + "/assinatura/status?state=failure",
+                root + "/assinatura/status?state=pending"
+        );
+    }
+
+    private String normalizeBaseUrl(String candidate) {
+        if (candidate == null || candidate.isBlank()) {
+            return null;
+        }
+        try {
+            URI uri = URI.create(candidate.trim());
+            String scheme = uri.getScheme();
+            String authority = uri.getAuthority();
+            if (scheme == null || authority == null || authority.isBlank()) {
+                return null;
+            }
+            return scheme + "://" + authority;
+        } catch (RuntimeException ex) {
+            return null;
+        }
+    }
+
+    private PaymentRecord ensureCheckoutWithSafeFallback(
+            PaymentRecord paymentRecord,
+            String planName,
+            String tenantName,
+            MercadoPagoBillingService.CheckoutBackUrls backUrls,
+            String externalReference
+    ) {
+        try {
+            return mercadoPagoBillingService.createCheckout(
+                    paymentRecord,
+                    "Assinatura de entrada - " + planName,
+                    "Ativação inicial da plataforma para " + tenantName,
+                    backUrls,
+                    externalReference,
+                    true
+            );
+        } catch (ValidationException ex) {
+            String message = ex.getMessage() != null ? ex.getMessage().toLowerCase(Locale.ROOT) : "";
+            boolean autoReturnBackUrlError = message.contains("auto_return")
+                    || message.contains("back_url.success")
+                    || message.contains("back urls");
+            if (!autoReturnBackUrlError) {
+                throw ex;
+            }
+            return mercadoPagoBillingService.createCheckout(
+                    paymentRecord,
+                    "Assinatura de entrada - " + planName,
+                    "Ativação inicial da plataforma para " + tenantName,
+                    backUrls,
+                    externalReference,
+                    false
+            );
+        }
     }
 
     private void ensureSlugAvailable(String slug) {

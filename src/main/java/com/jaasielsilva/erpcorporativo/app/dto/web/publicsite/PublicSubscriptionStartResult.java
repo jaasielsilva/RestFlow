@@ -5,6 +5,7 @@ public record PublicSubscriptionStartResult(
         Long tenantId,
         Long paymentRecordId,
         String externalReference,
-        String checkoutUrl
+        String checkoutUrl,
+        boolean resumed
 ) {
 }

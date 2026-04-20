@@ -19,6 +19,16 @@ public interface OnboardingSubscriptionRepository extends JpaRepository<Onboardi
 
     boolean existsByAdminEmailIgnoreCaseAndStatusIn(String adminEmail, List<OnboardingSubscriptionStatus> statuses);
 
+    Optional<OnboardingSubscription> findFirstByTenantSlugIgnoreCaseAndStatusInOrderByCreatedAtDesc(
+            String tenantSlug,
+            List<OnboardingSubscriptionStatus> statuses
+    );
+
+    Optional<OnboardingSubscription> findFirstByAdminEmailIgnoreCaseAndStatusInOrderByCreatedAtDesc(
+            String adminEmail,
+            List<OnboardingSubscriptionStatus> statuses
+    );
+
     long countByOriginIpAndCreatedAtAfter(String originIp, LocalDateTime createdAt);
 
     List<OnboardingSubscription> findTop20ByOrderByCreatedAtDesc();

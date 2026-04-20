@@ -10,6 +10,7 @@ public record OnboardingSubscriptionSummaryResponse(
         String adminEmail,
         String status,
         String externalReference,
+        String checkoutUrl,
         Long paymentRecordId,
         LocalDateTime createdAt,
         LocalDateTime activatedAt
@@ -21,6 +22,7 @@ public record OnboardingSubscriptionSummaryResponse(
                 subscription.getAdminEmail(),
                 subscription.getStatus().name(),
                 subscription.getExternalReference(),
+                subscription.getCheckoutUrl(),
                 subscription.getPaymentRecordId(),
                 subscription.getCreatedAt(),
                 subscription.getActivatedAt()
