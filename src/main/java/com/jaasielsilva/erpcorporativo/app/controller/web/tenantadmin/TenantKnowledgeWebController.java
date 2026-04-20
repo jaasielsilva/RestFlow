@@ -30,10 +30,10 @@ public class TenantKnowledgeWebController {
     @GetMapping
     public String index(
             Authentication authentication,
-            @RequestParam(required = false) String categoria,
-            @RequestParam(required = false) String busca,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(name = "categoria", required = false) String categoria,
+            @RequestParam(name = "busca", required = false) String busca,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size,
             Model model
     ) {
         AppUserDetails currentUser = SecurityPrincipalUtils.getCurrentUser(authentication);
@@ -54,7 +54,7 @@ public class TenantKnowledgeWebController {
     @GetMapping("/{id}")
     public String view(
             Authentication authentication,
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             Model model
     ) {
         AppUserDetails currentUser = SecurityPrincipalUtils.getCurrentUser(authentication);

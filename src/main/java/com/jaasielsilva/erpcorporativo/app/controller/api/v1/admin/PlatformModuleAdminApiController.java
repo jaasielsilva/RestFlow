@@ -41,15 +41,15 @@ public class PlatformModuleAdminApiController {
     }
 
     @GetMapping("/tenants/{tenantId}")
-    public ApiResponse<List<TenantModuleAccessResponse>> listTenantModules(@PathVariable Long tenantId) {
+    public ApiResponse<List<TenantModuleAccessResponse>> listTenantModules(@PathVariable("tenantId") Long tenantId) {
         return ApiResponse.success(platformModuleAdminApiService.listTenantModules(tenantId));
     }
 
     @PutMapping("/tenants/{tenantId}/{moduleId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void setTenantModule(
-            @PathVariable Long tenantId,
-            @PathVariable Long moduleId,
+            @PathVariable("tenantId") Long tenantId,
+            @PathVariable("moduleId") Long moduleId,
             @RequestBody TenantModuleUpdateRequest request
     ) {
         platformModuleAdminApiService.setTenantModule(tenantId, moduleId, request.enabled());

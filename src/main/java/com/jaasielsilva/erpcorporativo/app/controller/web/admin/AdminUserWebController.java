@@ -20,13 +20,13 @@ public class AdminUserWebController {
 
     @GetMapping
     public String index(
-            @RequestParam(required = false) String nome,
-            @RequestParam(required = false) String email,
-            @RequestParam(required = false) Long tenantId,
-            @RequestParam(required = false) Boolean ativo,
-            @RequestParam(required = false) Role role,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(name = "nome", required = false) String nome,
+            @RequestParam(name = "email", required = false) String email,
+            @RequestParam(name = "tenantId", required = false) Long tenantId,
+            @RequestParam(name = "ativo", required = false) Boolean ativo,
+            @RequestParam(name = "role", required = false) Role role,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size,
             Model model
     ) {
         model.addAttribute("view", adminUserWebService.list(nome, email, tenantId, ativo, role, page, size));

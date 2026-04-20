@@ -32,20 +32,20 @@ public class UsuarioAdminApiController {
 
     @GetMapping
     public ApiResponse<PageResponse<UsuarioResponse>> list(
-            @RequestParam(required = false) String nome,
-            @RequestParam(required = false) String email,
-            @RequestParam(required = false) Long tenantId,
-            @RequestParam(required = false) Boolean ativo,
-            @RequestParam(required = false) Role role,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
+            @RequestParam(name = "nome", required = false) String nome,
+            @RequestParam(name = "email", required = false) String email,
+            @RequestParam(name = "tenantId", required = false) Long tenantId,
+            @RequestParam(name = "ativo", required = false) Boolean ativo,
+            @RequestParam(name = "role", required = false) Role role,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size
     ) {
         UsuarioFilter filter = new UsuarioFilter(nome, email, tenantId, ativo, role);
         return ApiResponse.success(usuarioAdminApiService.list(filter, page, size));
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<UsuarioResponse> getById(@PathVariable Long id) {
+    public ApiResponse<UsuarioResponse> getById(@PathVariable("id") Long id) {
         return ApiResponse.success(usuarioAdminApiService.getById(id));
     }
 
@@ -56,13 +56,13 @@ public class UsuarioAdminApiController {
     }
 
     @PutMapping("/{id}")
-    public ApiResponse<UsuarioResponse> update(@PathVariable Long id, @Valid @RequestBody UsuarioRequest request) {
+    public ApiResponse<UsuarioResponse> update(@PathVariable("id") Long id, @Valid @RequestBody UsuarioRequest request) {
         return ApiResponse.success(usuarioAdminApiService.update(id, request));
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
+    public void delete(@PathVariable("id") Long id) {
         usuarioAdminApiService.delete(id);
     }
 }

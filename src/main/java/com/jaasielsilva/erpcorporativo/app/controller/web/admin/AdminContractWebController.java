@@ -36,11 +36,11 @@ public class AdminContractWebController {
 
     @GetMapping
     public String index(
-            @RequestParam(required = false) String tenantNome,
-            @RequestParam(required = false) ContractStatus status,
-            @RequestParam(required = false) String planoCodigo,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(name = "tenantNome", required = false) String tenantNome,
+            @RequestParam(name = "status", required = false) ContractStatus status,
+            @RequestParam(name = "planoCodigo", required = false) String planoCodigo,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size,
             Model model
     ) {
         model.addAttribute("view", contractUseCase.list(tenantNome, status, planoCodigo, page, size));
@@ -52,7 +52,7 @@ public class AdminContractWebController {
 
     @GetMapping("/new")
     public String newContract(
-            @RequestParam(required = false) Long tenantId,
+            @RequestParam(name = "tenantId", required = false) Long tenantId,
             Model model
     ) {
         ContractForm form = new ContractForm();
@@ -99,7 +99,7 @@ public class AdminContractWebController {
     }
 
     @GetMapping("/{id}")
-    public String detail(@PathVariable Long id, Model model) {
+    public String detail(@PathVariable("id") Long id, Model model) {
         ContractViewModel contract = contractUseCase.getById(id);
         model.addAttribute("contract", contract);
         model.addAttribute("statusValues", ContractStatus.values());
@@ -109,7 +109,7 @@ public class AdminContractWebController {
     }
 
     @GetMapping("/{id}/edit")
-    public String edit(@PathVariable Long id, Model model) {
+    public String edit(@PathVariable("id") Long id, Model model) {
         ContractViewModel contract = contractUseCase.getById(id);
 
         ContractForm form = new ContractForm();
@@ -135,7 +135,7 @@ public class AdminContractWebController {
     @PostMapping("/{id}")
     public String update(
             Authentication authentication,
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @Valid @ModelAttribute("form") ContractForm form,
             BindingResult bindingResult,
             Model model,
@@ -170,8 +170,8 @@ public class AdminContractWebController {
     @PostMapping("/{id}/status")
     public String updateStatus(
             Authentication authentication,
-            @PathVariable Long id,
-            @RequestParam ContractStatus status,
+            @PathVariable("id") Long id,
+            @RequestParam("status") ContractStatus status,
             RedirectAttributes redirectAttributes
     ) {
         try {
@@ -186,7 +186,7 @@ public class AdminContractWebController {
     @PostMapping("/{id}/delete")
     public String delete(
             Authentication authentication,
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             RedirectAttributes redirectAttributes
     ) {
         try {
@@ -201,7 +201,7 @@ public class AdminContractWebController {
     @PostMapping("/{id}/payments")
     public String addPayment(
             Authentication authentication,
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @Valid @ModelAttribute("paymentForm") PaymentRecordForm form,
             BindingResult bindingResult,
             RedirectAttributes redirectAttributes
@@ -222,8 +222,8 @@ public class AdminContractWebController {
     @PostMapping("/{id}/payments/{pid}")
     public String updatePayment(
             Authentication authentication,
-            @PathVariable Long id,
-            @PathVariable Long pid,
+            @PathVariable("id") Long id,
+            @PathVariable("pid") Long pid,
             @Valid @ModelAttribute("paymentForm") PaymentRecordForm form,
             BindingResult bindingResult,
             RedirectAttributes redirectAttributes

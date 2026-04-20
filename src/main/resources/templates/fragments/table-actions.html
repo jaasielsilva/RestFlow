@@ -1,6 +1,30 @@
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
 <body>
+<th:block th:fragment="contractActions(contractId)">
+    <div class="table-actions">
+        <a class="app-btn app-btn-outline app-btn-sm action-icon"
+           th:href="@{/admin/contratos/{id}(id=${contractId})}"
+           title="Visualizar" aria-label="Visualizar contrato">
+            <i class="fa-solid fa-eye"></i>
+        </a>
+        <a class="app-btn app-btn-outline app-btn-sm action-icon"
+           th:href="@{/admin/contratos/{id}/edit(id=${contractId})}"
+           title="Editar" aria-label="Editar contrato">
+            <i class="fa-solid fa-pen"></i>
+        </a>
+        <form th:action="@{/admin/contratos/{id}/delete(id=${contractId})}" method="post" style="margin:0;"
+              onsubmit="return confirm('Confirma a exclusão deste contrato?')">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <button class="app-btn app-btn-outline app-btn-sm action-icon" type="submit"
+                    title="Excluir" aria-label="Excluir contrato"
+                    style="color:#dc3545; border-color:#dc3545;">
+                <i class="fa-solid fa-trash"></i>
+            </button>
+        </form>
+    </div>
+</th:block>
+
 <th:block th:fragment="tenantActions(tenantId)">
     <div class="table-actions">
         <a class="app-btn app-btn-outline app-btn-sm action-icon action-icon-modules"

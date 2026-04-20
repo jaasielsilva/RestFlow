@@ -35,10 +35,10 @@ public class AdminKnowledgeWebController {
 
     @GetMapping
     public String index(
-            @RequestParam(required = false) String categoria,
-            @RequestParam(required = false) String busca,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(name = "categoria", required = false) String categoria,
+            @RequestParam(name = "busca", required = false) String busca,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size,
             Model model
     ) {
         Page<KnowledgeArticle> articles = knowledgeAdminUseCase.list(categoria, busca, page, size);
@@ -94,7 +94,7 @@ public class AdminKnowledgeWebController {
     }
 
     @GetMapping("/{id}/edit")
-    public String edit(@PathVariable Long id, Model model) {
+    public String edit(@PathVariable("id") Long id, Model model) {
         KnowledgeArticle article = knowledgeAdminUseCase.getById(id);
 
         KnowledgeArticleForm form = new KnowledgeArticleForm();
@@ -120,7 +120,7 @@ public class AdminKnowledgeWebController {
 
     @PostMapping("/{id}")
     public String update(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @Valid @ModelAttribute("form") KnowledgeArticleForm form,
             BindingResult bindingResult,
             Model model,
@@ -149,7 +149,7 @@ public class AdminKnowledgeWebController {
     }
 
     @PostMapping("/{id}/toggle")
-    public String toggle(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    public String toggle(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
         try {
             knowledgeAdminUseCase.togglePublicado(id);
             redirectAttributes.addFlashAttribute("toastSuccess", "Status do artigo atualizado.");
@@ -160,7 +160,7 @@ public class AdminKnowledgeWebController {
     }
 
     @PostMapping("/{id}/delete")
-    public String delete(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    public String delete(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
         try {
             knowledgeAdminUseCase.delete(id);
             redirectAttributes.addFlashAttribute("toastSuccess", "Artigo removido.");
@@ -171,7 +171,7 @@ public class AdminKnowledgeWebController {
     }
 
     @GetMapping("/{id}")
-    public String view(@PathVariable Long id, Model model) {
+    public String view(@PathVariable("id") Long id, Model model) {
         KnowledgeArticle article = knowledgeAdminUseCase.getById(id);
         model.addAttribute("article", article);
         model.addAttribute("activeMenu", "knowledge");

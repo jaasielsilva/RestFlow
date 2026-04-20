@@ -33,17 +33,17 @@ public class ContractAdminApiController {
 
     @GetMapping
     public ApiResponse<ContractListViewModel> list(
-            @RequestParam(required = false) String tenantNome,
-            @RequestParam(required = false) ContractStatus status,
-            @RequestParam(required = false) String planoCodigo,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
+            @RequestParam(name = "tenantNome", required = false) String tenantNome,
+            @RequestParam(name = "status", required = false) ContractStatus status,
+            @RequestParam(name = "planoCodigo", required = false) String planoCodigo,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size
     ) {
         return ApiResponse.success(contractUseCase.list(tenantNome, status, planoCodigo, page, size));
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<ContractViewModel> getById(@PathVariable Long id) {
+    public ApiResponse<ContractViewModel> getById(@PathVariable("id") Long id) {
         return ApiResponse.success(contractUseCase.getById(id));
     }
 
@@ -59,7 +59,7 @@ public class ContractAdminApiController {
     @PutMapping("/{id}")
     public ApiResponse<ContractViewModel> update(
             Authentication authentication,
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @Valid @RequestBody ContractForm form
     ) {
         return ApiResponse.success(contractUseCase.update(id, form, authentication.getName()));
@@ -67,7 +67,7 @@ public class ContractAdminApiController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(Authentication authentication, @PathVariable Long id) {
+    public void delete(Authentication authentication, @PathVariable("id") Long id) {
         contractUseCase.delete(id, authentication.getName());
     }
 }

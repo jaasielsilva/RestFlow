@@ -39,11 +39,11 @@ public class OrdemServicoWebController {
     @GetMapping
     public String index(
             Authentication authentication,
-            @RequestParam(required = false) String titulo,
-            @RequestParam(required = false) String cliente,
-            @RequestParam(required = false) OrdemServicoStatus status,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(name = "titulo", required = false) String titulo,
+            @RequestParam(name = "cliente", required = false) String cliente,
+            @RequestParam(name = "status", required = false) OrdemServicoStatus status,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size,
             Model model
     ) {
         AppUserDetails user = SecurityPrincipalUtils.getCurrentUser(authentication);
@@ -107,7 +107,7 @@ public class OrdemServicoWebController {
     }
 
     @GetMapping("/{id}")
-    public String detail(Authentication authentication, @PathVariable Long id, Model model) {
+    public String detail(Authentication authentication, @PathVariable("id") Long id, Model model) {
         AppUserDetails user = SecurityPrincipalUtils.getCurrentUser(authentication);
         TenantPortalModuleViewModel module = tenantPortalWebService.requireEnabledModule(authentication, "PEDIDOS");
 
@@ -121,7 +121,7 @@ public class OrdemServicoWebController {
     }
 
     @GetMapping("/{id}/edit")
-    public String edit(Authentication authentication, @PathVariable Long id, Model model) {
+    public String edit(Authentication authentication, @PathVariable("id") Long id, Model model) {
         AppUserDetails user = SecurityPrincipalUtils.getCurrentUser(authentication);
         TenantPortalModuleViewModel module = tenantPortalWebService.requireEnabledModule(authentication, "PEDIDOS");
 
@@ -156,7 +156,7 @@ public class OrdemServicoWebController {
     @PostMapping("/{id}")
     public String update(
             Authentication authentication,
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @Valid @ModelAttribute("form") OrdemServicoForm form,
             BindingResult bindingResult,
             Model model,
@@ -191,8 +191,8 @@ public class OrdemServicoWebController {
     @PostMapping("/{id}/status")
     public String updateStatus(
             Authentication authentication,
-            @PathVariable Long id,
-            @RequestParam OrdemServicoStatus status,
+            @PathVariable("id") Long id,
+            @RequestParam("status") OrdemServicoStatus status,
             RedirectAttributes redirectAttributes
     ) {
         AppUserDetails user = SecurityPrincipalUtils.getCurrentUser(authentication);
@@ -208,7 +208,7 @@ public class OrdemServicoWebController {
     @PostMapping("/{id}/delete")
     public String delete(
             Authentication authentication,
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             RedirectAttributes redirectAttributes
     ) {
         AppUserDetails user = SecurityPrincipalUtils.getCurrentUser(authentication);

@@ -89,7 +89,7 @@
                             <th>Término</th>
                             <th>Status</th>
                             <th>Último Pgto</th>
-                            <th></th>
+                            <th>Ações</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -98,22 +98,20 @@
                         </tr>
                         <tr th:each="c : ${view.items}">
                             <td>
-                                <a th:href="@{/admin/contratos/{id}(id=${c.id})}"
-                                   th:text="${c.tenantNome}" class="text-decoration-none fw-semibold">Tenant</a>
+                                <span class="fw-semibold" th:text="${c.tenantNome}">Tenant</span>
                             </td>
                             <td class="text-muted small" th:text="${c.subscriptionPlanNome ?: '—'}">—</td>
                             <td th:text="${c.valorMensal != null ? 'R$ ' + #numbers.formatDecimal(c.valorMensal, 1, 'POINT', 2, 'COMMA') : '—'}">—</td>
                             <td class="text-muted small" th:text="${#temporals.format(c.dataInicio, 'dd/MM/yyyy')}">—</td>
                             <td>
                                 <span th:if="${c.dataTermino == null}" class="text-muted small">Indeterminado</span>
-                                <span th:if="${c.dataTermino != null and c.isVencido}" class="badge bg-danger">
-                                    Vencido <span th:text="${#temporals.format(c.dataTermino, 'dd/MM/yyyy')}"></span>
-                                </span>
+                                <span th:if="${c.dataTermino != null and c.isVencido}" class="badge bg-danger"
+                                      th:text="${#temporals.format(c.dataTermino, 'dd/MM/yyyy')}">—</span>
                                 <span th:if="${c.dataTermino != null and c.isVencendoEm30Dias and !c.isVencido}" class="badge bg-warning text-dark">
                                     <i class="fa-solid fa-bell me-1"></i><span th:text="${#temporals.format(c.dataTermino, 'dd/MM/yyyy')}"></span>
                                 </span>
-                                <span th:if="${c.dataTermino != null and !c.isVencido and !c.isVencendoEm30Dias}" class="text-muted small"
-                                      th:text="${#temporals.format(c.dataTermino, 'dd/MM/yyyy')}">—</span>
+                                <span th:if="${c.dataTermino != null and !c.isVencido and !c.isVencendoEm30Dias}"
+                                      class="text-muted small" th:text="${#temporals.format(c.dataTermino, 'dd/MM/yyyy')}">—</span>
                             </td>
                             <td>
                                 <span class="badge"
@@ -131,10 +129,26 @@
                                       th:text="${c.ultimoPagamentoStatus}">—</span>
                             </td>
                             <td>
-                                <a class="app-btn app-btn-outline app-btn-sm"
-                                   th:href="@{/admin/contratos/{id}(id=${c.id})}">
-                                    <i class="fa-solid fa-eye"></i>
-                                </a>
+                                <div class="d-flex gap-1">
+                                    <a class="app-btn app-btn-outline app-btn-sm"
+                                       th:href="@{/admin/contratos/{id}(id=${c.id})}"
+                                       title="Visualizar">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </a>
+                                    <a class="app-btn app-btn-outline app-btn-sm"
+                                       th:href="@{/admin/contratos/{id}/edit(id=${c.id})}"
+                                       title="Editar">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </a>
+                                    <form th:action="@{/admin/contratos/{id}/delete(id=${c.id})}" method="post"
+                                          onsubmit="return confirm('Confirma a exclusão deste contrato?')" style="margin:0;">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                        <button class="app-btn app-btn-outline app-btn-sm" type="submit" title="Excluir"
+                                                style="color:#dc3545; border-color:#dc3545;">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                         </tbody>
@@ -142,15 +156,20 @@
                 </div>
 
                 <!-- Paginação -->
-                <div class="d-flex justify-content-between align-items-center mt-3" th:if="${view.totalPages > 1}">
-                    <div class="text-muted small" th:text="'Página ' + (${view.currentPage} + 1) + ' de ' + ${view.totalPages}"></div>
-                    <div class="btn-group">
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div class="text-muted small"
+                         th:text="${view.totalElements} + ' registro(s) — Página ' + (${view.currentPage} + 1) + ' de ' + (${view.totalPages} > 0 ? ${view.totalPages} : 1)"></div>
+                    <div class="btn-group" th:if="${view.totalPages > 1}">
                         <a class="btn btn-outline-secondary btn-sm"
                            th:classappend="${!view.hasPrev()} ? ' disabled'"
-                           th:href="@{/admin/contratos(page=${view.currentPage - 1}, tenantNome=${param.tenantNome}, status=${param.status}, planoCodigo=${param.planoCodigo})}">Anterior</a>
+                           th:href="@{/admin/contratos(page=${view.currentPage - 1}, tenantNome=${param.tenantNome}, status=${param.status}, planoCodigo=${param.planoCodigo})}">
+                            <i class="fa-solid fa-chevron-left me-1"></i>Anterior
+                        </a>
                         <a class="btn btn-outline-secondary btn-sm"
                            th:classappend="${!view.hasNext()} ? ' disabled'"
-                           th:href="@{/admin/contratos(page=${view.currentPage + 1}, tenantNome=${param.tenantNome}, status=${param.status}, planoCodigo=${param.planoCodigo})}">Próxima</a>
+                           th:href="@{/admin/contratos(page=${view.currentPage + 1}, tenantNome=${param.tenantNome}, status=${param.status}, planoCodigo=${param.planoCodigo})}">
+                            Próxima<i class="fa-solid fa-chevron-right ms-1"></i>
+                        </a>
                     </div>
                 </div>
             </div>

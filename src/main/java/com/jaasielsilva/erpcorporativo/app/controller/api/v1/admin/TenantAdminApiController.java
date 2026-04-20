@@ -31,18 +31,18 @@ public class TenantAdminApiController {
 
     @GetMapping
     public ApiResponse<PageResponse<TenantResponse>> list(
-            @RequestParam(required = false) String nome,
-            @RequestParam(required = false) String slug,
-            @RequestParam(required = false) Boolean ativo,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
+            @RequestParam(name = "nome", required = false) String nome,
+            @RequestParam(name = "slug", required = false) String slug,
+            @RequestParam(name = "ativo", required = false) Boolean ativo,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size
     ) {
         TenantFilter filter = new TenantFilter(nome, slug, ativo);
         return ApiResponse.success(tenantAdminApiService.list(filter, page, size));
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<TenantResponse> getById(@PathVariable Long id) {
+    public ApiResponse<TenantResponse> getById(@PathVariable("id") Long id) {
         return ApiResponse.success(tenantAdminApiService.getById(id));
     }
 
@@ -53,13 +53,13 @@ public class TenantAdminApiController {
     }
 
     @PutMapping("/{id}")
-    public ApiResponse<TenantResponse> update(@PathVariable Long id, @Valid @RequestBody TenantRequest request) {
+    public ApiResponse<TenantResponse> update(@PathVariable("id") Long id, @Valid @RequestBody TenantRequest request) {
         return ApiResponse.success(tenantAdminApiService.update(id, request));
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
+    public void delete(@PathVariable("id") Long id) {
         tenantAdminApiService.delete(id);
     }
 }

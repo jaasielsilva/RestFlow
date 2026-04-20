@@ -58,12 +58,12 @@ public class TenantDashboardWebController {
     @GetMapping("/usuarios")
     public String usuarios(
             Authentication authentication,
-            @RequestParam(required = false) String nome,
-            @RequestParam(required = false) String email,
-            @RequestParam(required = false) Boolean ativo,
-            @RequestParam(required = false) Role role,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(name = "nome", required = false) String nome,
+            @RequestParam(name = "email", required = false) String email,
+            @RequestParam(name = "ativo", required = false) Boolean ativo,
+            @RequestParam(name = "role", required = false) Role role,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size,
             Model model
     ) {
         populateSidebar(authentication, model);
@@ -124,7 +124,7 @@ public class TenantDashboardWebController {
     }
 
     @GetMapping("/usuarios/{id}/edit")
-    public String editUser(Authentication authentication, @PathVariable Long id, Model model) {
+    public String editUser(Authentication authentication, @PathVariable("id") Long id, Model model) {
         populateSidebar(authentication, model);
         TenantPortalModuleViewModel module = tenantPortalWebService.requireEnabledModule(authentication, "USUARIOS");
         UsuarioResponse user = tenantUserWebService.getById(authentication, id);
@@ -147,7 +147,7 @@ public class TenantDashboardWebController {
     @PostMapping("/usuarios/{id}")
     public String updateUser(
             Authentication authentication,
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @Valid @ModelAttribute("form") TenantUserForm form,
             BindingResult bindingResult,
             Model model,
@@ -180,7 +180,7 @@ public class TenantDashboardWebController {
     }
 
     @PostMapping("/usuarios/{id}/toggle-status")
-    public String toggleUserStatus(Authentication authentication, @PathVariable Long id, RedirectAttributes redirectAttributes) {
+    public String toggleUserStatus(Authentication authentication, @PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
         try {
             UsuarioResponse updated = tenantUserWebService.toggleActive(authentication, id);
             String message = updated.ativo() ? "Usuário ativado com sucesso." : "Usuário inativado com sucesso.";
@@ -192,7 +192,7 @@ public class TenantDashboardWebController {
     }
 
     @PostMapping("/usuarios/{id}/reset-password")
-    public String resetUserPassword(Authentication authentication, @PathVariable Long id, RedirectAttributes redirectAttributes) {
+    public String resetUserPassword(Authentication authentication, @PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
         try {
             tenantUserWebService.resetPassword(authentication, id);
             redirectAttributes.addFlashAttribute("toastSuccess", "Senha resetada para: mudar123");
@@ -216,7 +216,7 @@ public class TenantDashboardWebController {
     @GetMapping("/modulos/{codigo}")
     public String modulePage(
             Authentication authentication,
-            @PathVariable String codigo,
+            @PathVariable("codigo") String codigo,
             Model model
     ) {
         populateSidebar(authentication, model);

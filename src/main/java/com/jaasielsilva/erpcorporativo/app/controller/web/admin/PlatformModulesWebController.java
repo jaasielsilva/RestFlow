@@ -63,7 +63,7 @@ public class PlatformModulesWebController {
     }
 
     @GetMapping("/tenants/{tenantId}")
-    public String tenantModules(@PathVariable Long tenantId, Model model) {
+    public String tenantModules(@PathVariable("tenantId") Long tenantId, Model model) {
         Tenant tenant = adminPlatformModuleWebService.getTenant(tenantId);
         List<PlatformModule> modules = adminPlatformModuleWebService.listModules();
         Map<Long, Boolean> states = adminPlatformModuleWebService.getTenantModuleStates(tenantId);
@@ -76,9 +76,9 @@ public class PlatformModulesWebController {
 
     @PostMapping("/tenants/{tenantId}")
     public String setTenantModule(
-            @PathVariable Long tenantId,
-            @RequestParam Long moduleId,
-            @RequestParam boolean enabled,
+            @PathVariable("tenantId") Long tenantId,
+            @RequestParam("moduleId") Long moduleId,
+            @RequestParam("enabled") boolean enabled,
             RedirectAttributes redirectAttributes
     ) {
         adminPlatformModuleWebService.setTenantModule(tenantId, moduleId, enabled);

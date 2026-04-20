@@ -65,8 +65,8 @@ public class AdminPermissionsWebController {
 
     @PostMapping("/tenants/{tenantId}/assign")
     public String assignPlan(
-            @PathVariable Long tenantId,
-            @RequestParam Long planId,
+            @PathVariable("tenantId") Long tenantId,
+            @RequestParam("planId") Long planId,
             RedirectAttributes redirectAttributes
     ) {
         try {
@@ -80,7 +80,7 @@ public class AdminPermissionsWebController {
     }
 
     @GetMapping("/tenants/{tenantId}/matrix")
-    public String matrix(@PathVariable Long tenantId, Model model) {
+    public String matrix(@PathVariable("tenantId") Long tenantId, Model model) {
         model.addAttribute("activeMenu", "permissions");
         model.addAttribute("pageTitle", "Permissões");
         model.addAttribute("pageSubtitle", "Matriz de acesso por role e módulo");
@@ -91,10 +91,10 @@ public class AdminPermissionsWebController {
 
     @PostMapping("/tenants/{tenantId}/matrix")
     public String saveMatrix(
-            @PathVariable Long tenantId,
-            @RequestParam Long moduleId,
-            @RequestParam Role role,
-            @RequestParam AccessLevel accessLevel,
+            @PathVariable("tenantId") Long tenantId,
+            @RequestParam("moduleId") Long moduleId,
+            @RequestParam("role") Role role,
+            @RequestParam("accessLevel") AccessLevel accessLevel,
             RedirectAttributes redirectAttributes
     ) {
         try {

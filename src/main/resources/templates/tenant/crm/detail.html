@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title th:text="${pageTitle} + ' | Portal Cliente'">Cliente | Portal Cliente</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="/css/auth/home.css" />
+</head>
+<body>
+<div class="layout">
+    <aside th:replace="~{fragments/sidebar-tenant :: sidebar(${activeMenu})}"></aside>
+    <main class="main">
+        <div th:replace="~{fragments/topbar :: topbar(${pageTitle}, ${pageSubtitle}, false)}"></div>
+
+        <div data-app-toast data-toast-type="success" th:attr="data-toast-message=${toastSuccess}" th:if="${toastSuccess != null}"></div>
+        <div data-app-toast data-toast-type="error"   th:attr="data-toast-message=${toastError}"   th:if="${toastError != null}"></div>
+
+        <section class="bottom-grid" style="grid-template-columns: 1fr 1fr;">
+
+            <!-- Dados do Cliente -->
+            <div class="card-ui">
+                <div class="card-header-ui d-flex justify-content-between align-items-center">
+                    <h4><i class="fa-solid fa-user me-2"></i>
+                        <span th:text="${cliente.numero}">CLI-0001</span>
+                    </h4>
+                    <div class="d-flex gap-2">
+                        <a th:if="${canWrite}" class="app-btn app-btn-outline app-btn-sm"
+                           th:href="@{/app/clientes/{id}/edit(id=${cliente.id})}">
+                            <i class="fa-solid fa-pen me-1"></i>Editar
+                        </a>
+                        <a class="app-btn app-btn-outline app-btn-sm" th:href="@{/app/clientes}">
+                            <i class="fa-solid fa-arrow-left me-1"></i>Voltar
+                        </a>
+                    </div>
+                </div>
+
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Tipo</dt>
+                    <dd class="col-sm-8" th:text="${cliente.tipo}">—</dd>
+                    <dt class="col-sm-4">Nome</dt>
+                    <dd class="col-sm-8" th:text="${cliente.nome}">—</dd>
+                    <dt class="col-sm-4">CPF/CNPJ</dt>
+                    <dd class="col-sm-8" th:text="${cliente.documento ?: '—'}">—</dd>
+                    <dt class="col-sm-4">E-mail</dt>
+                    <dd class="col-sm-8" th:text="${cliente.email ?: '—'}">—</dd>
+                    <dt class="col-sm-4">Telefone</dt>
+                    <dd class="col-sm-8" th:text="${cliente.telefonePrincipal ?: '—'}">—</dd>
+                    <dt class="col-sm-4">Cidade/UF</dt>
+                    <dd class="col-sm-8"
+                        th:text="${(cliente.cidade != null ? cliente.cidade : '') + (cliente.estado != null ? '/' + cliente.estado : '')}">—</dd>
+                    <dt class="col-sm-4">Status</dt>
+                    <dd class="col-sm-8">
+                        <span class="badge"
+                              th:classappend="${cliente.status.name() == 'ATIVO'} ? ' bg-success' :
+                                              (${cliente.status.name() == 'INATIVO'} ? ' bg-secondary' :
+                                              (${cliente.status.name() == 'PROSPECTO'} ? ' bg-warning text-dark' :
+                                              (${cliente.status.name() == 'BLOQUEADO'} ? ' bg-danger' : ' bg-secondary')))"
+                              th:text="${cliente.status}">Status</span>
+                    </dd>
+                    <dt class="col-sm-4" th:if="${cliente.motivoBloqueio != null}">Motivo Bloqueio</dt>
+                    <dd class="col-sm-8" th:if="${cliente.motivoBloqueio != null}" th:text="${cliente.motivoBloqueio}">—</dd>
+                    <dt class="col-sm-4">Última Interação</dt>
+                    <dd class="col-sm-8"
+                        th:text="${cliente.ultimaInteracaoEm != null ? #temporals.format(cliente.ultimaInteracaoEm, 'dd/MM/yyyy HH:mm') : 'Sem interação'}">—</dd>
+                    <dt class="col-sm-4" th:if="${cliente.observacoes != null}">Observações</dt>
+                    <dd class="col-sm-8" th:if="${cliente.observacoes != null}" th:text="${cliente.observacoes}">—</dd>
+                </dl>
+
+                <!-- Alterar Status -->
+                <div th:if="${canWrite}" class="mt-3">
+                    <form th:action="@{/app/clientes/{id}/status(id=${cliente.id})}" method="post" class="row g-2 align-items-end">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <div class="col-auto">
+                            <select class="form-select form-select-sm" name="status" id="statusAlterarSelect">
+                                <option th:each="s : ${statusValues}" th:value="${s}" th:text="${s}"
+                                        th:selected="${s == cliente.status}"></option>
+                            </select>
+                        </div>
+                        <div class="col-auto" id="campo-motivo-status" style="display:none;">
+                            <input class="form-control form-control-sm" type="text" name="motivoBloqueio"
+                                   placeholder="Motivo do bloqueio" maxlength="500" />
+                        </div>
+                        <div class="col-auto">
+                            <button class="app-btn app-btn-secondary app-btn-sm" type="submit">Alterar Status</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Excluir -->
+                <div th:if="${canFull}" class="mt-3">
+                    <form th:action="@{/app/clientes/{id}/delete(id=${cliente.id})}" method="post"
+                          onsubmit="return confirm('Confirma a exclusão deste cliente?')">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <button class="app-btn app-btn-sm" style="background:#dc3545;color:#fff;" type="submit">
+                            <i class="fa-solid fa-trash me-1"></i>Excluir Cliente
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Oportunidades -->
+            <div class="card-ui">
+                <div class="card-header-ui d-flex justify-content-between align-items-center">
+                    <h4><i class="fa-solid fa-chart-line me-2"></i>Oportunidades</h4>
+                    <a class="app-btn app-btn-outline app-btn-sm" th:href="@{/app/clientes/oportunidades}">
+                        <i class="fa-solid fa-external-link-alt me-1"></i>Ver Funil
+                    </a>
+                </div>
+                <div th:if="${#lists.isEmpty(cliente.oportunidades)}" class="text-muted small">Nenhuma oportunidade.</div>
+                <div th:each="op : ${cliente.oportunidades}" class="d-flex justify-content-between align-items-center border-bottom py-2">
+                    <div>
+                        <span class="fw-semibold" th:text="${op.titulo}">Título</span>
+                        <span class="badge ms-2"
+                              th:classappend="${op.status.name() == 'FECHADO_GANHO'} ? ' bg-success' :
+                                              (${op.status.name() == 'FECHADO_PERDIDO'} ? ' bg-danger' : ' bg-warning text-dark')"
+                              th:text="${op.status}">Status</span>
+                    </div>
+                    <div class="text-muted small"
+                         th:text="${op.valorEstimado != null ? 'R$ ' + #numbers.formatDecimal(op.valorEstimado, 1, 'POINT', 2, 'COMMA') : '—'}">—</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Histórico de Interações -->
+        <section class="bottom-grid" style="grid-template-columns: 1fr;">
+            <div class="card-ui">
+                <div class="card-header-ui d-flex justify-content-between align-items-center">
+                    <h4><i class="fa-solid fa-comments me-2"></i>Histórico de Interações</h4>
+                    <button th:if="${canWrite}" class="app-btn app-btn-primary app-btn-sm"
+                            data-bs-toggle="modal" data-bs-target="#modalNovaInteracao">
+                        <i class="fa-solid fa-plus me-1"></i>Nova Interação
+                    </button>
+                </div>
+
+                <div th:if="${#lists.isEmpty(cliente.interacoes)}" class="text-muted small">Nenhuma interação registrada.</div>
+                <div th:each="int : ${cliente.interacoes}" class="border-bottom py-2">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <span class="badge bg-secondary me-2" th:text="${int.numero}">INT-0001</span>
+                            <span class="badge bg-info text-dark me-2" th:text="${int.tipo}">Tipo</span>
+                            <strong th:text="${int.assunto}">Assunto</strong>
+                        </div>
+                        <div class="text-muted small"
+                             th:text="${#temporals.format(int.dataInteracao, 'dd/MM/yyyy HH:mm')}">—</div>
+                    </div>
+                    <div th:if="${int.descricao != null}" class="text-muted small mt-1" th:text="${int.descricao}">—</div>
+                    <div class="text-muted small mt-1" th:if="${int.responsavelNome != null}"
+                         th:text="'Responsável: ' + ${int.responsavelNome}">—</div>
+                    <div th:if="${canWrite}" class="mt-1 d-flex gap-2">
+                        <form th:action="@{/app/clientes/{cid}/interacoes/{id}/delete(cid=${cliente.id}, id=${int.id})}"
+                              method="post" onsubmit="return confirm('Excluir esta interação?')">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                            <button class="btn btn-outline-danger btn-sm" type="submit">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- Modal Nova Interação -->
+<div class="modal fade" id="modalNovaInteracao" tabindex="-1" aria-labelledby="modalNovaInteracaoLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalNovaInteracaoLabel">Nova Interação</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <form th:action="@{/app/clientes/{id}/interacoes(id=${cliente.id})}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <div class="modal-body row g-3">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">Tipo <span class="text-danger">*</span></label>
+                        <select class="form-select" name="tipo" required>
+                            <option value="LIGACAO">Ligação</option>
+                            <option value="EMAIL">E-mail</option>
+                            <option value="REUNIAO">Reunião</option>
+                            <option value="VISITA">Visita</option>
+                            <option value="OUTRO">Outro</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">Data e Hora <span class="text-danger">*</span></label>
+                        <input class="form-control" type="datetime-local" name="dataInteracao" required />
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Assunto <span class="text-danger">*</span></label>
+                        <input class="form-control" type="text" name="assunto" maxlength="200" required />
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Descrição</label>
+                        <textarea class="form-control" rows="3" name="descricao"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="app-btn app-btn-primary">
+                        <i class="fa-solid fa-check me-1"></i>Registrar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/shared/toast.js"></script>
+<script>
+    (function () {
+        const sel = document.getElementById('statusAlterarSelect');
+        const campo = document.getElementById('campo-motivo-status');
+        if (!sel || !campo) return;
+        sel.addEventListener('change', function () {
+            campo.style.display = sel.value === 'BLOQUEADO' ? '' : 'none';
+        });
+    })();
+</script>
+</body>
+</html>

@@ -35,7 +35,7 @@ public class SubscriptionPlanAdminApiController {
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<SubscriptionPlanResponse> getById(@PathVariable Long id) {
+    public ApiResponse<SubscriptionPlanResponse> getById(@PathVariable("id") Long id) {
         return ApiResponse.success(subscriptionPlanAdminApiService.getById(id));
     }
 
@@ -47,7 +47,7 @@ public class SubscriptionPlanAdminApiController {
 
     @PutMapping("/{id}")
     public ApiResponse<SubscriptionPlanResponse> update(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @Valid @RequestBody SubscriptionPlanRequest request
     ) {
         return ApiResponse.success(subscriptionPlanAdminApiService.update(id, request));
@@ -55,14 +55,14 @@ public class SubscriptionPlanAdminApiController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
+    public void delete(@PathVariable("id") Long id) {
         subscriptionPlanAdminApiService.delete(id);
     }
 
     @PostMapping("/tenants/{tenantId}/assign")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void assignPlanToTenant(
-            @PathVariable Long tenantId,
+            @PathVariable("tenantId") Long tenantId,
             @Valid @RequestBody AssignPlanRequest request
     ) {
         subscriptionPlanAdminApiService.assignPlanToTenant(tenantId, request);
@@ -70,7 +70,7 @@ public class SubscriptionPlanAdminApiController {
 
     @DeleteMapping("/tenants/{tenantId}/assign")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removePlanFromTenant(@PathVariable Long tenantId) {
+    public void removePlanFromTenant(@PathVariable("tenantId") Long tenantId) {
         subscriptionPlanAdminApiService.removePlanFromTenant(tenantId);
     }
 }

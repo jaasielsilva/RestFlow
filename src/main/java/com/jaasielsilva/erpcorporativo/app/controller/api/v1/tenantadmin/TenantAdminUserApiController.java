@@ -34,19 +34,19 @@ public class TenantAdminUserApiController {
     @GetMapping
     public ApiResponse<PageResponse<UsuarioResponse>> list(
             Authentication authentication,
-            @RequestParam(required = false) String nome,
-            @RequestParam(required = false) String email,
-            @RequestParam(required = false) Boolean ativo,
-            @RequestParam(required = false) Role role,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
+            @RequestParam(name = "nome", required = false) String nome,
+            @RequestParam(name = "email", required = false) String email,
+            @RequestParam(name = "ativo", required = false) Boolean ativo,
+            @RequestParam(name = "role", required = false) Role role,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size
     ) {
         UsuarioFilter filter = new UsuarioFilter(nome, email, null, ativo, role);
         return ApiResponse.success(tenantAdminUserApiService.list(authentication, filter, page, size));
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<UsuarioResponse> getById(Authentication authentication, @PathVariable Long id) {
+    public ApiResponse<UsuarioResponse> getById(Authentication authentication, @PathVariable("id") Long id) {
         return ApiResponse.success(tenantAdminUserApiService.getById(authentication, id));
     }
 
@@ -59,7 +59,7 @@ public class TenantAdminUserApiController {
     @PutMapping("/{id}")
     public ApiResponse<UsuarioResponse> update(
             Authentication authentication,
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @Valid @RequestBody UsuarioRequest request
     ) {
         return ApiResponse.success(tenantAdminUserApiService.update(authentication, id, request));
@@ -67,7 +67,7 @@ public class TenantAdminUserApiController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(Authentication authentication, @PathVariable Long id) {
+    public void delete(Authentication authentication, @PathVariable("id") Long id) {
         tenantAdminUserApiService.delete(authentication, id);
     }
 }

@@ -28,11 +28,11 @@ public class AdminTenantWebController {
 
     @GetMapping
     public String index(
-            @RequestParam(required = false) String nome,
-            @RequestParam(required = false) String slug,
-            @RequestParam(required = false) Boolean ativo,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(name = "nome", required = false) String nome,
+            @RequestParam(name = "slug", required = false) String slug,
+            @RequestParam(name = "ativo", required = false) Boolean ativo,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size,
             Model model
     ) {
         model.addAttribute("view", adminTenantWebService.list(nome, slug, ativo, page, size));
@@ -68,7 +68,7 @@ public class AdminTenantWebController {
     }
 
     @PostMapping("/{tenantId}/reset-admin-password")
-    public String resetTenantAdminPassword(@PathVariable Long tenantId, RedirectAttributes redirectAttributes) {
+    public String resetTenantAdminPassword(@PathVariable("tenantId") Long tenantId, RedirectAttributes redirectAttributes) {
         try {
             adminTenantWebService.resetTenantAdminPassword(tenantId);
             redirectAttributes.addFlashAttribute("toastSuccess", "Senha do ADMIN resetada para: mudar123");
@@ -80,7 +80,7 @@ public class AdminTenantWebController {
     }
 
     @GetMapping("/{tenantId}/reset-admin-password")
-    public String resetTenantAdminPasswordGet(@PathVariable Long tenantId, RedirectAttributes redirectAttributes) {
+    public String resetTenantAdminPasswordGet(@PathVariable("tenantId") Long tenantId, RedirectAttributes redirectAttributes) {
         return resetTenantAdminPassword(tenantId, redirectAttributes);
     }
 }

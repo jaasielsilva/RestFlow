@@ -88,11 +88,11 @@ public class AdminReportsWebController {
 
     @GetMapping("/audit")
     public String audit(
-            @RequestParam(required = false) String acao,
-            @RequestParam(required = false) String entidade,
-            @RequestParam(required = false) String executadoPor,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "30") int size,
+            @RequestParam(name = "acao", required = false) String acao,
+            @RequestParam(name = "entidade", required = false) String entidade,
+            @RequestParam(name = "executadoPor", required = false) String executadoPor,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "30") int size,
             Model model
     ) {
         AuditAction auditAction = null;
@@ -112,8 +112,7 @@ public class AdminReportsWebController {
         model.addAttribute("currentPage", logs.getNumber());
         model.addAttribute("totalPages", logs.getTotalPages());
         model.addAttribute("acoes", AuditAction.values());
-        model.addAttribute("activeMenu", "reports");
-        model.addAttribute("pageTitle", "Auditoria");
+        model.addAttribute("activeMenu", "audit");
         model.addAttribute("pageSubtitle", "Log de ações da plataforma");
         return "admin/reports/audit";
     }

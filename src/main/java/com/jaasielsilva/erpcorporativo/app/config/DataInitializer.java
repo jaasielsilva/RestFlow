@@ -118,6 +118,7 @@ public class DataInitializer implements CommandLineRunner {
         ensureModule("ESTOQUE",          "Estoque",           "/app/modulos/estoque",        "Controle de estoque");
         ensureModule("PEDIDOS",          "Pedidos",           "/app/pedidos",                "Gestão de ordens de serviço");
         ensureModule("RELATORIOS",       "Relatórios",        "/app/modulos/relatorios",     "Relatórios do tenant");
+        ensureModule("CLIENTES",         "Clientes",          "/app/clientes",               "CRM e gestão de clientes");
     }
 
     private void ensureModule(String codigo, String nome, String rota, String descricao) {

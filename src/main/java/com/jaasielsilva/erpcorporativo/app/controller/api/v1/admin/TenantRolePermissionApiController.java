@@ -25,13 +25,13 @@ public class TenantRolePermissionApiController {
     private final TenantRolePermissionApiService tenantRolePermissionApiService;
 
     @GetMapping
-    public ApiResponse<List<TenantRolePermissionResponse>> listByTenant(@PathVariable Long tenantId) {
+    public ApiResponse<List<TenantRolePermissionResponse>> listByTenant(@PathVariable("tenantId") Long tenantId) {
         return ApiResponse.success(tenantRolePermissionApiService.listByTenant(tenantId));
     }
 
     @PutMapping
     public ApiResponse<TenantRolePermissionResponse> setPermission(
-            @PathVariable Long tenantId,
+            @PathVariable("tenantId") Long tenantId,
             @Valid @RequestBody TenantRolePermissionRequest request
     ) {
         return ApiResponse.success(tenantRolePermissionApiService.setPermission(tenantId, request));
