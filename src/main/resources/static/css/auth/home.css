@@ -483,6 +483,60 @@
             grid-template-columns: 1fr;
         }
 
+        .permissions-subnav-wrap {
+            margin-bottom: 14px;
+        }
+
+        .permissions-subnav {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            background: #fff;
+            border: 1px solid #e7edf6;
+            border-radius: 12px;
+            padding: 8px;
+        }
+
+        .permissions-subnav-item {
+            text-decoration: none;
+            color: #334155;
+            font-weight: 600;
+            font-size: 13px;
+            padding: 8px 12px;
+            border-radius: 9px;
+        }
+
+        .permissions-subnav-item:hover {
+            background: #f1f5f9;
+            color: #0f172a;
+        }
+
+        .permissions-subnav-item.active {
+            background: #e8f0ff;
+            color: #1d4ed8;
+        }
+
+        .permissions-overview-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .permissions-flow {
+            margin: 0;
+            padding-left: 18px;
+            color: #475569;
+            line-height: 1.7;
+            font-size: 14px;
+        }
+
+        .permissions-quick-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
         .permissions-workspace {
             display: grid;
             grid-template-columns: 2fr 1fr;
@@ -901,6 +955,10 @@
 
             .permissions-assign-card {
                 position: static;
+            }
+
+            .permissions-overview-grid {
+                grid-template-columns: 1fr;
             }
 
             .permissions-checkbox-grid {

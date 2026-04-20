@@ -30,12 +30,31 @@ public class AdminPermissionsWebController {
 
     @GetMapping
     public String index(Model model) {
-        model.addAttribute("activeMenu", "permissions");
-        model.addAttribute("pageTitle", "Permissões");
-        model.addAttribute("pageSubtitle", "Planos de assinatura e controle de acesso por tenant");
+        populateCommon(model, "Permissões", "Governança de planos, atribuições e matriz de acesso");
+        model.addAttribute("view", adminPermissionsWebService.buildViewModel());
+        return "admin/permissions/overview";
+    }
+
+    @GetMapping("/plans")
+    public String plans(Model model) {
+        populateCommon(model, "Planos", "Catálogo de planos e componentes");
+        model.addAttribute("view", adminPermissionsWebService.buildViewModel());
+        return "admin/permissions/plans";
+    }
+
+    @GetMapping("/plans/new")
+    public String newPlan(Model model) {
+        populateCommon(model, "Novo Plano", "Criação de plano de assinatura");
         model.addAttribute("view", adminPermissionsWebService.buildViewModel());
         model.addAttribute("form", new AdminPlanCreateForm());
-        return "admin/permissions/index";
+        return "admin/permissions/plan-form";
+    }
+
+    @GetMapping("/assign")
+    public String assign(Model model) {
+        populateCommon(model, "Atribuições", "Vincule planos aos tenants ativos");
+        model.addAttribute("view", adminPermissionsWebService.buildViewModel());
+        return "admin/permissions/assign";
     }
 
     @PostMapping("/plans")
@@ -46,21 +65,21 @@ public class AdminPermissionsWebController {
             RedirectAttributes redirectAttributes
     ) {
         if (bindingResult.hasErrors()) {
-            model.addAttribute("activeMenu", "permissions");
-            model.addAttribute("pageTitle", "Permissões");
-            model.addAttribute("pageSubtitle", "Planos de assinatura e controle de acesso por tenant");
+            populateCommon(model, "Novo Plano", "Criação de plano de assinatura");
             model.addAttribute("view", adminPermissionsWebService.buildViewModel());
-            return "admin/permissions/index";
+            return "admin/permissions/plan-form";
         }
 
         try {
             adminPermissionsWebService.createPlan(form);
             redirectAttributes.addFlashAttribute("toastSuccess", "Plano criado com sucesso.");
+            return "redirect:/admin/permissions/plans";
         } catch (AppException ex) {
-            redirectAttributes.addFlashAttribute("toastError", ex.getMessage());
+            model.addAttribute("toastError", ex.getMessage());
+            populateCommon(model, "Novo Plano", "Criação de plano de assinatura");
+            model.addAttribute("view", adminPermissionsWebService.buildViewModel());
+            return "admin/permissions/plan-form";
         }
-
-        return "redirect:/admin/permissions";
     }
 
     @PostMapping("/tenants/{tenantId}/assign")
@@ -76,7 +95,7 @@ public class AdminPermissionsWebController {
             redirectAttributes.addFlashAttribute("toastError", ex.getMessage());
         }
 
-        return "redirect:/admin/permissions";
+        return "redirect:/admin/permissions/assign";
     }
 
     @GetMapping("/tenants/{tenantId}/matrix")
@@ -105,5 +124,11 @@ public class AdminPermissionsWebController {
         }
 
         return "redirect:/admin/permissions/tenants/" + tenantId + "/matrix";
+    }
+
+    private void populateCommon(Model model, String title, String subtitle) {
+        model.addAttribute("activeMenu", "permissions");
+        model.addAttribute("pageTitle", title);
+        model.addAttribute("pageSubtitle", subtitle);
     }
 }

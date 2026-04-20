@@ -145,6 +145,12 @@ public class SubscriptionPlanAdminUseCase {
 
         SubscriptionPlan plan = findPlan(planId);
 
+        if (tenant.getSubscriptionPlan() != null
+                && tenant.getSubscriptionPlan().getId() != null
+                && tenant.getSubscriptionPlan().getId().equals(plan.getId())) {
+            throw new ConflictException("Este tenant já está vinculado ao plano '" + plan.getNome() + "'.");
+        }
+
         tenant.setSubscriptionPlan(plan);
         tenantRepository.save(tenant);
         provisionTenantModules(tenant, plan);

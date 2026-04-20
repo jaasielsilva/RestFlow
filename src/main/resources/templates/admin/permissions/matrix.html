@@ -13,6 +13,7 @@
     <aside th:replace="~{fragments/sidebar :: sidebar('permissions')}"></aside>
     <main class="main permissions-page">
         <div th:replace="~{fragments/topbar :: topbar('Permissões', 'Matriz de acesso por role e módulo', true)}"></div>
+        <div th:replace="~{admin/permissions/fragments :: subnav('assign')}"></div>
 
         <div data-app-toast data-toast-type="success"
              th:attr="data-toast-message=${toastSuccess}" th:if="${toastSuccess != null}"></div>

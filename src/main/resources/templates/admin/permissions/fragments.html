@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="subnav(activeTab)">
+    <section class="permissions-subnav-wrap">
+        <div class="permissions-subnav">
+            <a class="permissions-subnav-item"
+               th:classappend="${activeTab == 'overview'} ? ' active'"
+               th:href="@{/admin/permissions}">
+                <i class="fa-solid fa-compass me-1"></i>Visão Geral
+            </a>
+            <a class="permissions-subnav-item"
+               th:classappend="${activeTab == 'plans'} ? ' active'"
+               th:href="@{/admin/permissions/plans}">
+                <i class="fa-solid fa-layer-group me-1"></i>Planos
+            </a>
+            <a class="permissions-subnav-item"
+               th:classappend="${activeTab == 'new-plan'} ? ' active'"
+               th:href="@{/admin/permissions/plans/new}">
+                <i class="fa-solid fa-plus me-1"></i>Novo Plano
+            </a>
+            <a class="permissions-subnav-item"
+               th:classappend="${activeTab == 'assign'} ? ' active'"
+               th:href="@{/admin/permissions/assign}">
+                <i class="fa-solid fa-link me-1"></i>Atribuições
+            </a>
+        </div>
+    </section>
+</th:block>
+</body>
+</html>

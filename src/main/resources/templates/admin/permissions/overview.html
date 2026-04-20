@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Permissões | ERP Corporativo</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="/css/auth/home.css" />
+</head>
+<body>
+<div class="layout">
+    <aside th:replace="~{fragments/sidebar :: sidebar('permissions')}"></aside>
+    <main class="main permissions-page">
+        <div th:replace="~{fragments/topbar :: topbar(${pageTitle}, ${pageSubtitle}, true)}"></div>
+        <div th:replace="~{admin/permissions/fragments :: subnav('overview')}"></div>
+
+        <div data-app-toast data-toast-type="success" th:attr="data-toast-message=${toastSuccess}" th:if="${toastSuccess != null}"></div>
+        <div data-app-toast data-toast-type="error" th:attr="data-toast-message=${toastError}" th:if="${toastError != null}"></div>
+
+        <section class="stats-grid permissions-stats">
+            <div class="stat-card">
+                <div class="icon"><i class="fa-solid fa-layer-group"></i></div>
+                <h6>Planos Cadastrados</h6>
+                <h2 th:text="${#lists.size(view.plans)}">0</h2>
+            </div>
+            <div class="stat-card">
+                <div class="icon"><i class="fa-solid fa-puzzle-piece"></i></div>
+                <h6>Módulos Ativos</h6>
+                <h2 th:text="${#lists.size(view.availableModules)}">0</h2>
+            </div>
+            <div class="stat-card">
+                <div class="icon"><i class="fa-solid fa-plug"></i></div>
+                <h6>Add-ons Ativos</h6>
+                <h2 th:text="${#lists.size(view.availableAddons)}">0</h2>
+            </div>
+            <div class="stat-card">
+                <div class="icon"><i class="fa-solid fa-building"></i></div>
+                <h6>Tenants Ativos</h6>
+                <h2 th:text="${#lists.size(view.tenants)}">0</h2>
+            </div>
+        </section>
+
+        <section class="permissions-overview-grid">
+            <article class="card-ui">
+                <div class="card-header-ui">
+                    <h4>Fluxo recomendado</h4>
+                </div>
+                <ol class="permissions-flow">
+                    <li>Crie e organize os planos em `Planos`.</li>
+                    <li>Defina módulo/add-ons padrão por plano.</li>
+                    <li>Atribua o plano ao tenant em `Atribuições`.</li>
+                    <li>Ajuste exceções por role na `Matriz` do tenant.</li>
+                </ol>
+            </article>
+            <article class="card-ui">
+                <div class="card-header-ui">
+                    <h4>Ações rápidas</h4>
+                </div>
+                <div class="permissions-quick-actions">
+                    <a class="app-btn app-btn-primary" th:href="@{/admin/permissions/plans/new}">
+                        <i class="fa-solid fa-plus me-2"></i>Novo plano
+                    </a>
+                    <a class="app-btn app-btn-outline" th:href="@{/admin/permissions/plans}">
+                        <i class="fa-solid fa-list me-2"></i>Catálogo de planos
+                    </a>
+                    <a class="app-btn app-btn-outline" th:href="@{/admin/permissions/assign}">
+                        <i class="fa-solid fa-link me-2"></i>Atribuir plano
+                    </a>
+                </div>
+            </article>
+        </section>
+
+        <section class="card-ui">
+            <div class="card-header-ui d-flex justify-content-between align-items-center">
+                <h4>Tenants ativos</h4>
+                <small class="text-muted">Atalho para matriz de permissões</small>
+            </div>
+            <div class="table-responsive">
+                <table class="table align-middle table-left">
+                    <thead>
+                    <tr>
+                        <th>Tenant</th>
+                        <th>Status de configuração</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(view.tenants)}">
+                        <td colspan="3" class="text-muted">Nenhum tenant ativo encontrado.</td>
+                    </tr>
+                    <tr th:each="tenant : ${view.tenants}">
+                        <td th:text="${tenant.nome}">Tenant</td>
+                        <td><span class="badge bg-light text-dark">Revisar em Atribuições</span></td>
+                        <td class="text-end">
+                            <a class="app-btn app-btn-outline app-btn-sm"
+                               th:href="@{/admin/permissions/tenants/{id}/matrix(id=${tenant.id})}">
+                                <i class="fa-solid fa-shield-halved me-1"></i>Matriz
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/shared/toast.js"></script>
+</body>
+</html>
