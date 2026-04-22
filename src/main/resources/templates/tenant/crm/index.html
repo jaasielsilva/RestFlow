@@ -14,8 +14,7 @@
     <main class="main">
         <div th:replace="~{fragments/topbar :: topbar(${pageTitle}, ${pageSubtitle}, true)}"></div>
 
-        <div data-app-toast data-toast-type="success" th:attr="data-toast-message=${toastSuccess}" th:if="${toastSuccess != null}"></div>
-        <div data-app-toast data-toast-type="error"   th:attr="data-toast-message=${toastError}"   th:if="${toastError != null}"></div>
+        <th:block th:replace="~{fragments/module-standard :: moduleToasts(${toastSuccess}, ${toastError})}"></th:block>
 
         <!-- KPIs -->
         <section class="stats-grid">
@@ -41,8 +40,8 @@
             </div>
         </section>
 
-        <section class="bottom-grid" style="grid-template-columns: 1fr;">
-            <div class="card-ui">
+        <section class="bottom-grid module-page-grid">
+            <div class="card-ui module-card">
                 <div class="card-header-ui d-flex justify-content-between align-items-center">
                     <h4><i class="fa-solid fa-users me-2"></i>Clientes</h4>
                     <div class="d-flex gap-2">
@@ -56,7 +55,7 @@
                 </div>
 
                 <!-- Filtros -->
-                <form class="row g-2 align-items-end mb-3" method="get" th:action="@{/app/clientes}">
+                <form class="row g-2 align-items-end mb-3 tenant-filter-form module-filter-form" method="get" th:action="@{/app/clientes}">
                     <div class="col-12 col-md-3">
                         <input class="form-control" type="text" name="nome" placeholder="Buscar por nome..."
                                th:value="${param.nome}">
@@ -87,8 +86,8 @@
                 </form>
 
                 <!-- Tabela -->
-                <div class="table-responsive">
-                    <table class="table align-middle table-left">
+                <div class="table-responsive module-table-wrap">
+                    <table class="table align-middle table-left module-table">
                         <thead>
                         <tr>
                             <th>Número</th>
@@ -104,9 +103,9 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr th:if="${#lists.isEmpty(view.items)}">
-                            <td colspan="10" class="text-muted">Nenhum cliente encontrado.</td>
-                        </tr>
+                        <th:block th:if="${#lists.isEmpty(view.items)}">
+                            <tr th:replace="~{fragments/module-standard :: tableEmptyRow(10, 'Nenhum cliente encontrado.')}"></tr>
+                        </th:block>
                         <tr th:each="c : ${view.items}">
                             <td><span class="badge bg-secondary" th:text="${c.numero}">CLI-0001</span></td>
                             <td>
@@ -142,7 +141,7 @@
                 </div>
 
                 <!-- Paginação -->
-                <div class="d-flex justify-content-between align-items-center mt-3" th:if="${view.totalPages > 1}">
+                <div class="d-flex justify-content-between align-items-center mt-3 module-pagination" th:if="${view.totalPages > 1}">
                     <div class="text-muted small" th:text="'Página ' + (${view.currentPage} + 1) + ' de ' + ${view.totalPages}"></div>
                     <div class="btn-group">
                         <a class="btn btn-outline-secondary btn-sm"

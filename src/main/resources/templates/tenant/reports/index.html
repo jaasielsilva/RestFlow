@@ -18,74 +18,69 @@
         <main class="main">
             <!-- Barra superior com título/subtítulo vindos do controller -->
             <div th:replace="~{fragments/topbar :: topbar(${pageTitle}, ${pageSubtitle}, true)}"></div>
+            <th:block th:replace="~{fragments/module-standard :: moduleToasts(${toastSuccess}, ${toastError})}"></th:block>
 
             <!-- Área de conteúdo: use bottom-grid + card-ui como nas outras telas do tenant -->
-            <section class="bottom-grid">
+            <section class="bottom-grid module-page-grid">
+                <div class="card-ui module-card">
+                    <div class="card-header-ui">
+                        <h4><i class="fa-solid fa-chart-column me-2"></i>Resumo de Relatórios</h4>
+                    </div>
 
-                <!-- ================= KPIs ================= -->
-                <div class="row g-3 mb-4">
+                    <!-- ================= KPIs ================= -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <div class="card-ui p-3">
+                                <h6>Faturamento Hoje</h6>
+                                <h4 th:text="${dashboard.faturamentoHoje}"></h4>
+                            </div>
+                        </div>
 
-                    <div class="col-md-4">
-                        <div class="card-ui p-3">
-                            <h6>Faturamento Hoje</h6>
-                            <h4 th:text="${dashboard.faturamentoHoje}"></h4>
+                        <div class="col-md-4">
+                            <div class="card-ui p-3">
+                                <h6>Faturamento Mês</h6>
+                                <h4 th:text="${dashboard.faturamentoMes}"></h4>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card-ui p-3">
+                                <h6>Crescimento</h6>
+                                <h4 th:text="${dashboard.crescimentoPercentual + '%'}"></h4>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="col-md-4">
-                        <div class="card-ui p-3">
-                            <h6>Faturamento Mês</h6>
-                            <h4 th:text="${dashboard.faturamentoMes}"></h4>
+                    <!-- ================= TOP CLIENTES ================= -->
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="card-ui p-3 h-100">
+                                <h5 class="mb-3">Top Clientes</h5>
+                                <ul class="list-unstyled mb-0">
+                                    <li th:each="c : ${dashboard.topClientes}"
+                                        class="d-flex justify-content-between border-bottom py-2">
+                                        <span th:text="${c.nome}"></span>
+                                        <strong th:text="${c.total}"></strong>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- ================= TOP SERVIÇOS ================= -->
+                        <div class="col-md-6">
+                            <div class="card-ui p-3 h-100">
+                                <h5 class="mb-3">Top Serviços</h5>
+                                <ul class="list-unstyled mb-0">
+                                    <li th:each="s : ${dashboard.topServicos}"
+                                        class="d-flex justify-content-between border-bottom py-2">
+                                        <span th:text="${s.nome}"></span>
+                                        <strong th:text="${s.total}"></strong>
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
-
-                    <div class="col-md-4">
-                        <div class="card-ui p-3">
-                            <h6>Crescimento</h6>
-                            <h4 th:text="${dashboard.crescimentoPercentual + '%'}"></h4>
-                        </div>
-                    </div>
-
                 </div>
-
-                <!-- ================= TOP CLIENTES ================= -->
-                <div class="row g-3 mb-4">
-
-                    <div class="col-md-6">
-                        <div class="card-ui p-3 h-100">
-                            <h5 class="mb-3">Top Clientes</h5>
-
-                            <ul class="list-unstyled mb-0">
-                                <li th:each="c : ${dashboard.topClientes}"
-                                    class="d-flex justify-content-between border-bottom py-2">
-
-                                    <span th:text="${c.nome}"></span>
-                                    <strong th:text="${c.total}"></strong>
-                                </li>
-                            </ul>
-
-                        </div>
-                    </div>
-
-                    <!-- ================= TOP SERVIÇOS ================= -->
-                    <div class="col-md-6">
-                        <div class="card-ui p-3 h-100">
-                            <h5 class="mb-3">Top Serviços</h5>
-
-                            <ul class="list-unstyled mb-0">
-                                <li th:each="s : ${dashboard.topServicos}"
-                                    class="d-flex justify-content-between border-bottom py-2">
-
-                                    <span th:text="${s.nome}"></span>
-                                    <strong th:text="${s.total}"></strong>
-                                </li>
-                            </ul>
-
-                        </div>
-                    </div>
-
-                </div>
-
             </section>
 
 

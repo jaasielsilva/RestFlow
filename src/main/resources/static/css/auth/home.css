@@ -813,6 +813,21 @@
             padding: 16px 12px !important;
         }
 
+        .module-empty-state {
+            color: #6b7280;
+            text-align: center;
+            padding: 16px 12px;
+            border: 1px dashed #dbe4f0;
+            border-radius: 10px;
+            background: #fcfdff;
+        }
+
+        .module-article-card {
+            border: 1px solid #e7edf6 !important;
+            border-radius: 10px;
+            box-shadow: none !important;
+        }
+
         .module-pagination {
             border-top: 1px solid #e7edf6;
             padding-top: 10px;

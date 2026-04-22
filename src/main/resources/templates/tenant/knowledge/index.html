@@ -13,14 +13,15 @@
     <aside th:replace="~{fragments/sidebar-tenant :: sidebar(${activeMenu})}"></aside>
     <main class="main">
         <div th:replace="~{fragments/topbar :: topbar(${pageTitle}, ${pageSubtitle}, true)}"></div>
+        <th:block th:replace="~{fragments/module-standard :: moduleToasts(${toastSuccess}, ${toastError})}"></th:block>
 
-        <section class="bottom-grid" style="grid-template-columns: 1fr;">
-            <div class="card-ui">
+        <section class="bottom-grid module-page-grid">
+            <div class="card-ui module-card">
                 <div class="card-header-ui">
                     <h4><i class="fa-solid fa-book-open me-2"></i>Artigos Disponíveis</h4>
                 </div>
 
-                <form class="row g-2 align-items-end mb-3" method="get" th:action="@{/app/conhecimento}">
+                <form class="row g-2 align-items-end mb-3 tenant-filter-form module-filter-form" method="get" th:action="@{/app/conhecimento}">
                     <div class="col-12 col-md-5">
                         <label class="form-label">Buscar</label>
                         <input class="form-control" type="text" name="busca" placeholder="Título do artigo"
@@ -42,13 +43,13 @@
                     </div>
                 </form>
 
-                <div th:if="${#lists.isEmpty(articles)}" class="text-muted py-3">
+                <div th:if="${#lists.isEmpty(articles)}" class="module-empty-state">
                     Nenhum artigo disponível no momento.
                 </div>
 
                 <div class="row g-3" th:unless="${#lists.isEmpty(articles)}">
                     <div class="col-12 col-md-6" th:each="a : ${articles}">
-                        <div class="card h-100 border-0 shadow-sm p-3">
+                        <div class="card h-100 border-0 shadow-sm p-3 module-article-card">
                             <div class="d-flex align-items-center gap-2 mb-2">
                                 <span class="badge bg-secondary" th:text="${a.categoria}">cat</span>
                                 <span class="text-muted small"
@@ -67,7 +68,7 @@
                     </div>
                 </div>
 
-                <div class="d-flex justify-content-between align-items-center mt-3" th:if="${totalPages > 1}">
+                <div class="d-flex justify-content-between align-items-center mt-3 module-pagination" th:if="${totalPages > 1}">
                     <div class="text-muted" th:text="'Página ' + (${currentPage} + 1) + ' de ' + ${totalPages}"></div>
                     <div class="btn-group">
                         <a class="btn btn-outline-secondary btn-sm"
