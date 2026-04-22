@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="moduleToasts(toastSuccess, toastError)">
+    <div data-app-toast
+         data-toast-type="success"
+         th:attr="data-toast-message=${toastSuccess}"
+         th:if="${toastSuccess != null}"></div>
+    <div data-app-toast
+         data-toast-type="error"
+         th:attr="data-toast-message=${toastError}"
+         th:if="${toastError != null}"></div>
+</th:block>
+
+<th:block th:fragment="tableEmptyRow(colspan, message)">
+    <tr>
+        <td th:colspan="${colspan}" class="module-empty-row" th:text="${message}">Nenhum registro encontrado.</td>
+    </tr>
+</th:block>
+</body>
+</html>

@@ -18,22 +18,15 @@
         <main class="main">
             <div th:replace="~{fragments/topbar :: topbar('Tenants', 'Gestão de tenants da plataforma', true)}"></div>
 
-            <section class="bottom-grid" style="grid-template-columns: 1fr;">
-                <div class="card-ui">
+            <section class="bottom-grid module-page-grid">
+                <div class="card-ui module-card">
                     <div class="card-header-ui">
                         <h4>Lista de Tenants</h4>
                     </div>
 
-                    <div data-app-toast
-                         data-toast-type="success"
-                         th:attr="data-toast-message=${toastSuccess}"
-                         th:if="${toastSuccess != null}"></div>
-                    <div data-app-toast
-                         data-toast-type="error"
-                         th:attr="data-toast-message=${toastError}"
-                         th:if="${toastError != null}"></div>
+                    <th:block th:replace="~{fragments/module-standard :: moduleToasts(${toastSuccess}, ${toastError})}"></th:block>
 
-                    <form class="row g-2 align-items-end mb-3 tenant-filter-form" method="get"
+                    <form class="row g-2 align-items-end mb-3 tenant-filter-form module-filter-form" method="get"
                         th:action="@{/admin/tenants}">
                         <div class="col-12 col-md-3">
                             <label class="form-label">Nome</label>
@@ -74,8 +67,8 @@
                         </div>
                     </form>
 
-                    <div class="table-responsive">
-                        <table class="table align-middle table-left">
+                    <div class="table-responsive module-table-wrap">
+                        <table class="table align-middle table-left module-table">
                             <thead>
                                 <tr>
                                     <th>Nome</th>
@@ -89,9 +82,9 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr th:if="${#lists.isEmpty(view.tenants)}">
-                                    <td colspan="8" class="text-muted">Nenhum tenant encontrado.</td>
-                                </tr>
+                                <th:block th:if="${#lists.isEmpty(view.tenants)}">
+                                    <tr th:replace="~{fragments/module-standard :: tableEmptyRow(8, 'Nenhum tenant encontrado.')}"></tr>
+                                </th:block>
                                 <tr th:each="tenant : ${view.tenants}">
                                     <td th:text="${tenant.nome}">Empresa</td>
                                     <td><span class="text-muted" th:text="${tenant.slug}">slug</span></td>
@@ -123,7 +116,7 @@
                         </table>
                     </div>
 
-                    <div class="d-flex justify-content-between align-items-center mt-3" th:if="${view.totalPages > 0}">
+                    <div class="d-flex justify-content-between align-items-center mt-3 module-pagination" th:if="${view.totalPages > 0}">
                         <div class="text-muted" th:text="'Página ' + (${view.page} + 1) + ' de ' + ${view.totalPages}">
                             Página 1 de 1</div>
                         <div class="d-flex align-items-center gap-2">
