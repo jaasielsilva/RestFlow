@@ -105,7 +105,7 @@ public class SecurityConfig {
                 .permitAll()
             )
             .sessionManagement(session -> session
-                .sessionFixation(sessionFixation -> sessionFixation.none())
+                .sessionFixation(sessionFixation -> sessionFixation.migrateSession())
             )
             .securityContext(securityContext -> securityContext
                 .securityContextRepository(new HttpSessionSecurityContextRepository())
