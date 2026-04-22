@@ -607,25 +607,12 @@
 
             <!-- Form -->
             <form id="loginForm" th:action="@{/login}" method="post" class="login-form">
-
                 <div>
                     <label for="email" class="field-label">E-mail</label>
                     <div class="input-wrap">
                         <i class="fa-regular fa-envelope input-icon"></i>
                         <input type="email" id="email" name="email" class="login-input" placeholder="seu@empresa.com"
                             required autofocus autocomplete="email">
-                    </div>
-                </div>
-
-                <div>
-                    <label for="tenantId" class="field-label">Tenant ID (opcional)</label>
-                    <div class="input-wrap">
-                        <i class="fa-solid fa-building input-icon"></i>
-                        <input type="text" id="tenantId" name="tenantId" class="login-input"
-                            th:value="${param.tenantId != null ? param.tenantId[0] : ''}"
-                            placeholder="Ex.: 2"
-                            inputmode="numeric"
-                            autocomplete="off">
                     </div>
                 </div>
 

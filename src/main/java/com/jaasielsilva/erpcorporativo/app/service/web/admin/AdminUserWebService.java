@@ -41,13 +41,19 @@ public class AdminUserWebService {
     }
 
     public UserResetResult resetPassword(Long userId) {
-        String userEmail = usuarioRepository.findById(userId)
-                .map(usuario -> usuario.getEmail())
-                .orElse("-");
+        UserIdentity user = usuarioRepository.findById(userId)
+                .map(usuario -> new UserIdentity(
+                        usuario.getEmail(),
+                        usuario.getTenant() != null ? usuario.getTenant().getId() : null
+                ))
+                .orElse(new UserIdentity("-", null));
         usuarioAdminUseCase.resetUserPassword(userId, DEFAULT_USER_RESET_PASSWORD);
-        return new UserResetResult(userEmail, DEFAULT_USER_RESET_PASSWORD);
+        return new UserResetResult(user.email(), DEFAULT_USER_RESET_PASSWORD, user.tenantId());
     }
 
-    public record UserResetResult(String userEmail, String generatedPassword) {
+    public record UserResetResult(String userEmail, String generatedPassword, Long tenantId) {
+    }
+
+    private record UserIdentity(String email, Long tenantId) {
     }
 }

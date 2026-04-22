@@ -50,6 +50,10 @@ public class TenantPortalWebService {
     public TenantPortalModuleViewModel requireEnabledModule(Authentication authentication, String codigo) {
         AppUserDetails currentUser = SecurityPrincipalUtils.getCurrentUser(authentication);
 
+        if (DASHBOARD_CODE.equalsIgnoreCase(codigo)) {
+            return dashboardModule();
+        }
+
         boolean enabled = tenantModuleRepository.hasEnabledModuleByCodigo(currentUser.getTenantId(), codigo);
         if (!enabled) {
             throw new AccessDeniedException("Módulo não habilitado para este tenant.");

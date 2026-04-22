@@ -3,8 +3,11 @@ package com.jaasielsilva.erpcorporativo.app.security;
 import java.io.IOException;
 
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Component;
 
 import com.jaasielsilva.erpcorporativo.app.model.Role;
@@ -20,6 +23,7 @@ public class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     private final LoginAttemptService loginAttemptService;
     private final com.jaasielsilva.erpcorporativo.app.service.shared.PlatformSettingService platformSettingService;
+    private final SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
 
     @Override
     public void onAuthenticationSuccess(
@@ -30,11 +34,8 @@ public class CustomAuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         loginAttemptService.loginSucceeded(SecurityRequestUtils.extractClientKey(request));
 
         // Garante persistência explícita do contexto de segurança na sessão HTTP.
-        // Em alguns cenários de restart/hot reload, isso evita perda imediata do login no próximo GET.
-        request.getSession(true).setAttribute(
-                HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
-                org.springframework.security.core.context.SecurityContextHolder.getContext()
-        );
+        SecurityContext context = SecurityContextHolder.getContext();
+        securityContextRepository.saveContext(context, request, response);
 
         // Aplica o timeout configurado globalmente no banco via painel admin
         try {

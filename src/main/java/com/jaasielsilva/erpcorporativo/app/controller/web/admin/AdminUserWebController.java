@@ -43,7 +43,12 @@ public class AdminUserWebController {
     public String resetUserPassword(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
         try {
             var result = adminUserWebService.resetPassword(id);
-            log.info("Reset de senha executado para usuario {} com senha temporaria {}", result.userEmail(), result.generatedPassword());
+            log.info(
+                    "Reset de senha executado para usuario {} (tenantId={}) com senha temporaria {}",
+                    result.userEmail(),
+                    result.tenantId(),
+                    result.generatedPassword()
+            );
             redirectAttributes.addFlashAttribute(
                     "toastSuccess",
                     "Senha resetada para: " + result.generatedPassword()

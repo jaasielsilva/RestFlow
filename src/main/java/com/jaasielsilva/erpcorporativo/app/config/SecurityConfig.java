@@ -9,6 +9,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import com.jaasielsilva.erpcorporativo.app.security.ApiAccessDeniedHandler;
@@ -104,7 +105,11 @@ public class SecurityConfig {
                 .permitAll()
             )
             .sessionManagement(session -> session
-                .sessionFixation(sessionFixation -> sessionFixation.migrateSession())
+                .sessionFixation(sessionFixation -> sessionFixation.none())
+            )
+            .securityContext(securityContext -> securityContext
+                .securityContextRepository(new HttpSessionSecurityContextRepository())
+                .requireExplicitSave(false)
             )
             .exceptionHandling(exception -> exception
                 .defaultAuthenticationEntryPointFor(

@@ -67,8 +67,10 @@ public class UsuarioDetailsService implements UserDetailsService {
             return usuarios.get(0);
         }
 
-        // Múltiplos tenants com o mesmo email — não é possível resolver sem tenantId
-        throw new UsernameNotFoundException(
-                "Email vinculado a múltiplos tenants. Informe o tenantId via header X-Tenant-Id.");
+        // Sem tenantId explícito, escolhe de forma determinística o menor id.
+        return usuarios.stream()
+                .sorted(java.util.Comparator.comparing(Usuario::getId))
+                .findFirst()
+                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + email));
     }
 }
