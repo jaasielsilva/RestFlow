@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.jaasielsilva.erpcorporativo.app.dto.web.admin.AdminTenantCreateForm;
+import com.jaasielsilva.erpcorporativo.app.dto.web.admin.AdminTenantUpdateForm;
 import com.jaasielsilva.erpcorporativo.app.exception.AppException;
 import com.jaasielsilva.erpcorporativo.app.service.web.admin.AdminTenantWebService;
 
@@ -65,6 +66,55 @@ public class AdminTenantWebController {
             model.addAttribute("form", form);
             return "admin/tenants/new";
         }
+    }
+
+    @GetMapping("/{tenantId}/edit")
+    public String editTenant(@PathVariable("tenantId") Long tenantId, Model model) {
+        model.addAttribute("form", adminTenantWebService.getUpdateForm(tenantId));
+        model.addAttribute("tenantId", tenantId);
+        model.addAttribute("pageTitle", "Editar Tenant");
+        model.addAttribute("pageSubtitle", "Atualize nome, slug e status do tenant");
+        return "admin/tenants/edit";
+    }
+
+    @PostMapping("/{tenantId}/edit")
+    public String updateTenant(
+            @PathVariable("tenantId") Long tenantId,
+            @Valid @ModelAttribute("form") AdminTenantUpdateForm form,
+            BindingResult bindingResult,
+            Model model,
+            RedirectAttributes redirectAttributes
+    ) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("tenantId", tenantId);
+            model.addAttribute("pageTitle", "Editar Tenant");
+            model.addAttribute("pageSubtitle", "Atualize nome, slug e status do tenant");
+            return "admin/tenants/edit";
+        }
+
+        try {
+            adminTenantWebService.update(tenantId, form);
+            redirectAttributes.addFlashAttribute("toastSuccess", "Tenant atualizado com sucesso.");
+            return "redirect:/admin/tenants";
+        } catch (AppException ex) {
+            bindingResult.reject("tenant.update", ex.getMessage());
+            model.addAttribute("tenantId", tenantId);
+            model.addAttribute("pageTitle", "Editar Tenant");
+            model.addAttribute("pageSubtitle", "Atualize nome, slug e status do tenant");
+            return "admin/tenants/edit";
+        }
+    }
+
+    @PostMapping("/{tenantId}/toggle-status")
+    public String toggleTenantStatus(@PathVariable("tenantId") Long tenantId, RedirectAttributes redirectAttributes) {
+        try {
+            boolean ativo = adminTenantWebService.toggleStatus(tenantId);
+            String message = ativo ? "Tenant ativado com sucesso." : "Tenant inativado com sucesso.";
+            redirectAttributes.addFlashAttribute("toastSuccess", message);
+        } catch (AppException ex) {
+            redirectAttributes.addFlashAttribute("toastError", ex.getMessage());
+        }
+        return "redirect:/admin/tenants";
     }
 
     @PostMapping("/{tenantId}/reset-admin-password")

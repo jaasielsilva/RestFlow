@@ -11,10 +11,15 @@ import com.jaasielsilva.erpcorporativo.app.dto.api.admin.tenant.TenantRequest;
 import com.jaasielsilva.erpcorporativo.app.dto.api.admin.tenant.TenantResponse;
 import com.jaasielsilva.erpcorporativo.app.dto.web.admin.AdminTenantCreateForm;
 import com.jaasielsilva.erpcorporativo.app.dto.web.admin.AdminTenantListItemViewModel;
+import com.jaasielsilva.erpcorporativo.app.dto.web.admin.AdminTenantUpdateForm;
 import com.jaasielsilva.erpcorporativo.app.dto.web.admin.AdminTenantsPageViewModel;
+import com.jaasielsilva.erpcorporativo.app.exception.ConflictException;
+import com.jaasielsilva.erpcorporativo.app.exception.ResourceNotFoundException;
 import com.jaasielsilva.erpcorporativo.app.model.Role;
 import com.jaasielsilva.erpcorporativo.app.service.api.v1.admin.TenantAdminApiService;
 import com.jaasielsilva.erpcorporativo.app.usecase.api.v1.admin.UsuarioAdminUseCase;
+import com.jaasielsilva.erpcorporativo.app.model.Tenant;
+import com.jaasielsilva.erpcorporativo.app.repository.tenant.TenantRepository;
 import com.jaasielsilva.erpcorporativo.app.repository.usuario.UsuarioRepository;
 
 import com.jaasielsilva.erpcorporativo.app.model.ContractStatus;
@@ -29,6 +34,7 @@ public class AdminTenantWebService {
     private static final String DEFAULT_ADMIN_RESET_PASSWORD = "mudar123";
 
     private final TenantAdminApiService tenantAdminApiService;
+    private final TenantRepository tenantRepository;
     private final UsuarioRepository usuarioRepository;
     private final UsuarioAdminUseCase usuarioAdminUseCase;
     private final ContractRepository contractRepository;
@@ -70,12 +76,56 @@ public class AdminTenantWebService {
         return tenantAdminApiService.create(request);
     }
 
+    public AdminTenantUpdateForm getUpdateForm(Long tenantId) {
+        Tenant tenant = findTenant(tenantId);
+        AdminTenantUpdateForm form = new AdminTenantUpdateForm();
+        form.setNome(tenant.getNome());
+        form.setSlug(tenant.getSlug());
+        form.setAtivo(tenant.isAtivo());
+        return form;
+    }
+
+    public void update(Long tenantId, AdminTenantUpdateForm form) {
+        Tenant tenant = findTenant(tenantId);
+        validateUpdatableTenant(tenant);
+
+        tenantRepository.findBySlugIgnoreCase(form.getSlug())
+                .filter(existing -> !existing.getId().equals(tenantId))
+                .ifPresent(existing -> {
+                    throw new ConflictException("Já existe um tenant com o slug informado.");
+                });
+
+        tenant.setNome(form.getNome().trim());
+        tenant.setSlug(form.getSlug().trim());
+        tenant.setAtivo(form.isAtivo());
+        tenantRepository.save(tenant);
+    }
+
+    public boolean toggleStatus(Long tenantId) {
+        Tenant tenant = findTenant(tenantId);
+        validateUpdatableTenant(tenant);
+        tenant.setAtivo(!tenant.isAtivo());
+        tenantRepository.save(tenant);
+        return tenant.isAtivo();
+    }
+
     public TenantAdminResetResult resetTenantAdminPassword(Long tenantId) {
         String adminEmail = usuarioRepository.findFirstByTenantIdAndRoleOrderByIdAsc(tenantId, Role.ADMIN)
                 .map(admin -> admin.getEmail())
                 .orElse("-");
         usuarioAdminUseCase.resetTenantAdminPassword(tenantId, DEFAULT_ADMIN_RESET_PASSWORD);
         return new TenantAdminResetResult(adminEmail, DEFAULT_ADMIN_RESET_PASSWORD);
+    }
+
+    private Tenant findTenant(Long tenantId) {
+        return tenantRepository.findById(tenantId)
+                .orElseThrow(() -> new ResourceNotFoundException("Tenant não encontrado: " + tenantId));
+    }
+
+    private void validateUpdatableTenant(Tenant tenant) {
+        if ("platform".equalsIgnoreCase(tenant.getSlug())) {
+            throw new ConflictException("O tenant da plataforma não pode ser alterado por esta ação.");
+        }
     }
 
     public record TenantAdminResetResult(String adminEmail, String generatedPassword) {

@@ -614,12 +614,54 @@
             margin-bottom: 10px;
         }
 
+        .permissions-plans-catalog {
+            border: 1px solid #e7edf6;
+        }
+
+        .permissions-plans-header {
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .permissions-plans-total {
+            font-size: 12px;
+            font-weight: 700;
+            border: 1px solid #e2e8f0;
+        }
+
+        .permissions-plans-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .permissions-plans-filters {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .permissions-plans-search {
+            width: 320px;
+            max-width: 100%;
+        }
+
+        .permissions-plans-table-wrap {
+            border: 1px solid #e7edf6;
+            border-radius: 10px;
+        }
+
         .permissions-plan-search {
             width: 300px;
         }
 
         #plansTable {
-            min-width: 980px;
+            min-width: 760px;
         }
 
         .permissions-plans-table thead th {
@@ -638,6 +680,19 @@
         .plan-details-panel {
             background: #f8fbff;
             border-top: 1px solid #e5edf7;
+        }
+
+        .permissions-plans-details-btn {
+            min-width: 110px;
+        }
+
+        .permissions-plans-chip-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            max-height: 140px;
+            overflow: auto;
+            padding-right: 4px;
         }
 
         .plan-details-content {
@@ -940,6 +995,16 @@
             border-color: #ddd6fe;
         }
 
+        .table-actions .action-icon-edit {
+            background: #eef2ff;
+            color: #3730a3;
+            border-color: #c7d2fe;
+        }
+
+        .table-actions .action-icon-edit:hover {
+            background: #e0e7ff;
+        }
+
         .table-actions .action-icon-reset {
             background: #fef3c7;
             color: #92400e;
@@ -948,6 +1013,16 @@
 
         .table-actions .action-icon-reset:hover {
             background: #fde68a;
+        }
+
+        .table-actions .action-icon-toggle {
+            background: #ecfeff;
+            color: #0e7490;
+            border-color: #a5f3fc;
+        }
+
+        .table-actions .action-icon-toggle:hover {
+            background: #cffafe;
         }
 
         .module-icon-chip {
@@ -1165,6 +1240,22 @@
             .permissions-table-header {
                 flex-direction: column;
                 align-items: flex-start;
+            }
+
+            .permissions-plans-search {
+                width: 100%;
+            }
+
+            .permissions-plans-toolbar {
+                align-items: stretch;
+            }
+
+            .permissions-plans-filters {
+                width: 100%;
+            }
+
+            .permissions-plans-filters > div {
+                flex: 1 1 100%;
             }
 
             .permissions-checkbox-grid {

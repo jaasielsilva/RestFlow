@@ -15,22 +15,55 @@
         <div th:replace="~{fragments/topbar :: topbar(${pageTitle}, ${pageSubtitle}, true)}"></div>
         <div th:replace="~{admin/permissions/fragments :: subnav('plans')}"></div>
 
-        <div data-app-toast data-toast-type="success" th:attr="data-toast-message=${toastSuccess}" th:if="${toastSuccess != null}"></div>
-        <div data-app-toast data-toast-type="error" th:attr="data-toast-message=${toastError}" th:if="${toastError != null}"></div>
+        <th:block th:replace="~{fragments/module-standard :: moduleToasts(${toastSuccess}, ${toastError})}"></th:block>
 
-        <section class="card-ui">
-            <div class="card-header-ui permissions-table-header">
-                <h4><i class="fa-solid fa-list me-2"></i>Planos Cadastrados</h4>
+        <section class="card-ui permissions-plans-catalog">
+            <div class="card-header-ui permissions-plans-header">
+                <div>
+                    <h4><i class="fa-solid fa-list me-2"></i>Catálogo de Planos</h4>
+                    <p class="text-muted mb-0 small">Resumo rápido dos planos e acesso aos detalhes completos.</p>
+                </div>
+                <span class="badge bg-light text-dark permissions-plans-total"
+                      th:text="${#lists.size(view.plans)} + ' planos'">0 planos</span>
+            </div>
+
+            <div class="permissions-plans-toolbar">
+                <div class="permissions-plans-filters">
+                    <div>
+                        <label class="visually-hidden" for="planSearch">Buscar plano</label>
+                        <input class="form-control form-control-sm permissions-plans-search" id="planSearch"
+                               type="text" placeholder="Buscar por nome, código ou tier..." aria-label="Buscar plano" />
+                    </div>
+                    <div>
+                        <label class="visually-hidden" for="planTierFilter">Filtrar por tier</label>
+                        <select id="planTierFilter" class="form-select form-select-sm" aria-label="Filtrar por tier">
+                            <option value="">Todos os tiers</option>
+                            <option value="START">START</option>
+                            <option value="GROWTH">GROWTH</option>
+                            <option value="SCALE">SCALE</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="visually-hidden" for="planStatusFilter">Filtrar por status</label>
+                        <select id="planStatusFilter" class="form-select form-select-sm" aria-label="Filtrar por status">
+                            <option value="">Todos os status</option>
+                            <option value="ATIVO">Ativo</option>
+                            <option value="INATIVO">Inativo</option>
+                        </select>
+                    </div>
+                    <button id="planFiltersReset" type="button" class="btn btn-outline-secondary btn-sm">
+                        Limpar
+                    </button>
+                </div>
                 <div class="d-flex align-items-center gap-2">
-                    <label class="visually-hidden" for="planSearch">Buscar plano</label>
-                    <input class="form-control form-control-sm permissions-plan-search" id="planSearch" type="text" placeholder="Buscar plano..." aria-label="Buscar plano" />
+                    <span id="plansVisibleCount" class="text-muted small">Mostrando 0</span>
                     <a class="app-btn app-btn-primary app-btn-sm" th:href="@{/admin/permissions/plans/new}">
-                        <i class="fa-solid fa-plus me-1"></i>Novo
+                        <i class="fa-solid fa-plus me-1"></i>Novo plano
                     </a>
                 </div>
             </div>
 
-            <div class="table-responsive">
+            <div class="table-responsive permissions-plans-table-wrap">
                 <table class="table table-hover align-middle table-left permissions-plans-table" id="plansTable">
                     <thead>
                     <tr>
@@ -38,41 +71,28 @@
                         <th>Código</th>
                         <th>Tier</th>
                         <th>Limites</th>
-                        <th>Módulos</th>
-                        <th>Add-ons</th>
                         <th>Status</th>
                         <th>Criação</th>
-                        <th></th>
+                        <th class="text-end">Ações</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr th:if="${#lists.isEmpty(view.plans)}">
-                        <td colspan="9" class="text-muted">Nenhum plano cadastrado.</td>
-                    </tr>
+                    <th:block th:if="${#lists.isEmpty(view.plans)}">
+                        <tr th:replace="~{fragments/module-standard :: tableEmptyRow(7, 'Nenhum plano cadastrado.')}"></tr>
+                    </th:block>
                     <th:block th:each="plan : ${view.plans}">
                         <tr class="plan-row"
-                            th:attr="data-search=${#strings.toLowerCase(plan.nome + ' ' + plan.codigo + ' ' + plan.tier)}">
-                            <td th:text="${plan.nome}">Plano</td>
+                            th:attr="data-search=${#strings.toLowerCase(plan.nome + ' ' + plan.codigo + ' ' + plan.tier)},
+                                     data-tier=${plan.tier},
+                                     data-status=${plan.ativo} ? 'ATIVO' : 'INATIVO'">
+                            <td>
+                                <div class="fw-semibold" th:text="${plan.nome}">Plano</div>
+                                <div class="text-muted small" th:text="${plan.descricao != null && !plan.descricao.isBlank() ? plan.descricao : 'Sem descrição'}">Sem descrição</div>
+                            </td>
                             <td><span class="text-muted" th:text="${plan.codigo}">CODIGO</span></td>
                             <td><span class="badge bg-dark" th:text="${plan.tier}">START</span></td>
                             <td class="small text-muted"
-                                th:text="${'Users: ' + (plan.maxUsers != null ? plan.maxUsers : 'livre') + ' | Storage: ' + (plan.maxStorageGb != null ? plan.maxStorageGb + 'GB' : 'livre')}">-</td>
-                            <td>
-                                <span th:if="${#lists.isEmpty(plan.modules)}" class="text-muted">Nenhum</span>
-                                <div class="d-flex flex-wrap gap-1" th:unless="${#lists.isEmpty(plan.modules)}">
-                                    <span class="badge bg-secondary" th:each="m, iter : ${plan.modules}" th:if="${iter.index < 3}" th:text="${m.nome}">Módulo</span>
-                                    <span class="badge bg-light text-dark" th:if="${#lists.size(plan.modules) > 3}"
-                                          th:text="'+' + (${#lists.size(plan.modules)} - 3) + '...'">+0</span>
-                                </div>
-                            </td>
-                            <td>
-                                <span th:if="${#lists.isEmpty(plan.addons)}" class="text-muted">Nenhum</span>
-                                <div class="d-flex flex-wrap gap-1" th:unless="${#lists.isEmpty(plan.addons)}">
-                                    <span class="badge bg-info text-dark" th:each="a, iter : ${plan.addons}" th:if="${iter.index < 3}" th:text="${a.nome}">Addon</span>
-                                    <span class="badge bg-light text-dark" th:if="${#lists.size(plan.addons) > 3}"
-                                          th:text="'+' + (${#lists.size(plan.addons)} - 3) + '...'">+0</span>
-                                </div>
-                            </td>
+                                th:text="${'U:' + (plan.maxUsers != null ? plan.maxUsers : 'livre') + ' | S:' + (plan.maxStorageGb != null ? plan.maxStorageGb + 'GB' : 'livre')}">-</td>
                             <td>
                                 <span class="badge-status"
                                       th:classappend="${plan.ativo} ? ' badge-success' : ' badge-warning'"
@@ -80,17 +100,17 @@
                             </td>
                             <td th:text="${plan.createdAt != null ? #temporals.format(plan.createdAt, 'dd/MM/yyyy') : '-'}">-</td>
                             <td class="text-end">
-                                <button class="btn btn-outline-secondary btn-sm"
+                                <button class="btn btn-outline-secondary btn-sm permissions-plans-details-btn"
                                         type="button"
                                         data-bs-toggle="collapse"
                                         th:attr="data-bs-target=${'#planDetails_' + plan.id},aria-controls=${'planDetails_' + plan.id}"
                                         aria-expanded="false">
-                                    Detalhes <i class="fa-solid fa-chevron-down ms-1"></i>
+                                    Ver detalhes
                                 </button>
                             </td>
                         </tr>
                         <tr class="plan-details-row">
-                            <td colspan="9" class="p-0 border-0">
+                            <td colspan="7" class="p-0 border-0">
                                 <div class="collapse plan-details-panel" th:id="${'planDetails_' + plan.id}">
                                     <div class="plan-details-content">
                                         <div class="plan-detail-block">
@@ -100,15 +120,15 @@
                                             </p>
                                         </div>
                                         <div class="plan-detail-block">
-                                            <h6>Módulos deste plano</h6>
-                                            <div class="d-flex flex-wrap gap-1" th:if="${!#lists.isEmpty(plan.modules)}">
+                                            <h6>Módulos (<span th:text="${#lists.size(plan.modules)}">0</span>)</h6>
+                                            <div class="permissions-plans-chip-list" th:if="${!#lists.isEmpty(plan.modules)}">
                                                 <span class="badge bg-secondary" th:each="m : ${plan.modules}" th:text="${m.nome}">Módulo</span>
                                             </div>
                                             <p class="text-muted mb-0" th:if="${#lists.isEmpty(plan.modules)}">Nenhum módulo vinculado.</p>
                                         </div>
                                         <div class="plan-detail-block">
-                                            <h6>Add-ons deste plano</h6>
-                                            <div class="d-flex flex-wrap gap-1" th:if="${!#lists.isEmpty(plan.addons)}">
+                                            <h6>Add-ons (<span th:text="${#lists.size(plan.addons)}">0</span>)</h6>
+                                            <div class="permissions-plans-chip-list" th:if="${!#lists.isEmpty(plan.addons)}">
                                                 <span class="badge bg-info text-dark" th:each="a : ${plan.addons}" th:text="${a.nome}">Add-on</span>
                                             </div>
                                             <p class="text-muted mb-0" th:if="${#lists.isEmpty(plan.addons)}">Nenhum add-on vinculado.</p>
@@ -130,25 +150,69 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const planSearch = document.getElementById('planSearch');
+        const tierFilter = document.getElementById('planTierFilter');
+        const statusFilter = document.getElementById('planStatusFilter');
+        const resetButton = document.getElementById('planFiltersReset');
+        const visibleCount = document.getElementById('plansVisibleCount');
         const rows = document.querySelectorAll('#plansTable .plan-row');
-        if (planSearch && rows.length) {
-            planSearch.addEventListener('input', function () {
-                const term = planSearch.value.toLowerCase().trim();
-                rows.forEach(function (row) {
-                    const search = row.getAttribute('data-search') || '';
-                    const visible = search.includes(term);
-                    row.style.display = visible ? '' : 'none';
-                    const detailsRow = row.nextElementSibling;
-                    if (detailsRow && detailsRow.classList.contains('plan-details-row')) {
-                        detailsRow.style.display = visible ? '' : 'none';
-                        if (!visible) {
-                            detailsRow.querySelectorAll('.collapse.show').forEach(function (panel) {
-                                panel.classList.remove('show');
-                            });
-                        }
+
+        function applyFilters() {
+            const term = (planSearch?.value || '').toLowerCase().trim();
+            const tier = tierFilter?.value || '';
+            const status = statusFilter?.value || '';
+            let count = 0;
+
+            rows.forEach(function (row) {
+                const search = row.getAttribute('data-search') || '';
+                const rowTier = row.getAttribute('data-tier') || '';
+                const rowStatus = row.getAttribute('data-status') || '';
+
+                const matchesSearch = search.includes(term);
+                const matchesTier = !tier || rowTier === tier;
+                const matchesStatus = !status || rowStatus === status;
+                const visible = matchesSearch && matchesTier && matchesStatus;
+
+                row.style.display = visible ? '' : 'none';
+                const detailsRow = row.nextElementSibling;
+                if (detailsRow && detailsRow.classList.contains('plan-details-row')) {
+                    detailsRow.style.display = visible ? '' : 'none';
+                    if (!visible) {
+                        detailsRow.querySelectorAll('.collapse.show').forEach(function (panel) {
+                            panel.classList.remove('show');
+                        });
                     }
-                });
+                }
+
+                if (visible) {
+                    count += 1;
+                }
             });
+
+            if (visibleCount) {
+                visibleCount.textContent = 'Mostrando ' + count;
+            }
+        }
+
+        if (rows.length) {
+            planSearch?.addEventListener('input', applyFilters);
+            tierFilter?.addEventListener('change', applyFilters);
+            statusFilter?.addEventListener('change', applyFilters);
+            resetButton?.addEventListener('click', function () {
+                if (planSearch) {
+                    planSearch.value = '';
+                }
+                if (tierFilter) {
+                    tierFilter.value = '';
+                }
+                if (statusFilter) {
+                    statusFilter.value = '';
+                }
+                applyFilters();
+            });
+
+            applyFilters();
+        } else if (visibleCount) {
+            visibleCount.textContent = 'Mostrando 0';
         }
     });
 </script>
