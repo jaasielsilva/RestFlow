@@ -1,6 +1,7 @@
 package com.jaasielsilva.erpcorporativo.app.security;
 
 import java.io.IOException;
+import java.text.Normalizer;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
@@ -36,8 +37,7 @@ public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationF
         String redirectUrl;
         if (loginAttemptService.isBlocked(clientKey)) {
             redirectUrl = "/login?blocked=true" + tenantQuery;
-        } else if (exception.getMessage() != null
-                && exception.getMessage().contains("múltiplos tenants")) {
+        } else if (isMultipleTenantMessage(exception.getMessage())) {
             redirectUrl = "/login?erro="
                     + URLEncoder.encode("Informe o tenantId para autenticar este e-mail.", StandardCharsets.UTF_8)
                     + tenantQuery;
@@ -46,5 +46,15 @@ public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationF
         }
 
         getRedirectStrategy().sendRedirect(request, response, redirectUrl);
+    }
+
+    private boolean isMultipleTenantMessage(String message) {
+        if (!StringUtils.hasText(message)) {
+            return false;
+        }
+        String normalized = Normalizer.normalize(message, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "")
+                .toLowerCase();
+        return normalized.contains("multiplos tenants");
     }
 }

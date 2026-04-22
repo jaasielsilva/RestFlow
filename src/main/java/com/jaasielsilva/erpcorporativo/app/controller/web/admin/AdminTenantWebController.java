@@ -73,7 +73,7 @@ public class AdminTenantWebController {
             var result = adminTenantWebService.resetTenantAdminPassword(tenantId);
             redirectAttributes.addFlashAttribute(
                     "toastSuccess",
-                    "Senha do ADMIN (" + result.adminEmail() + ") resetada para: " + result.generatedPassword()
+                    "Senha resetada para: " + result.generatedPassword()
             );
             return "redirect:/admin/tenants";
         } catch (AppException ex) {
