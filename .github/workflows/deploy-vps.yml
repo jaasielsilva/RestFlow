@@ -1,0 +1,102 @@
+name: Deploy VPS
+
+on:
+  push:
+    branches: [dev, main]
+
+jobs:
+  build-jar:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Make mvnw executable
+        run: chmod +x mvnw
+
+      - name: Run tests
+        run: ./mvnw -B verify
+
+      - name: Build artifact
+        run: ./mvnw -B -DskipTests package
+
+      - name: Upload jar artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-jar
+          path: target/app-0.0.1-SNAPSHOT.jar
+          if-no-files-found: error
+
+  deploy-homolog:
+    if: github.ref == 'refs/heads/dev'
+    needs: build-jar
+    runs-on: ubuntu-latest
+    environment: homologacao
+
+    steps:
+      - name: Download jar artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-jar
+          path: dist
+
+      - name: Configure SSH key
+        shell: bash
+        run: |
+          install -m 700 -d ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -p "${{ secrets.SSH_PORT }}" "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Upload jar to VPS
+        shell: bash
+        run: |
+          scp -P "${{ secrets.SSH_PORT }}" dist/app-0.0.1-SNAPSHOT.jar \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.APP_DIR }}/app.jar"
+
+      - name: Restart app service
+        shell: bash
+        run: |
+          ssh -p "${{ secrets.SSH_PORT }}" "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
+            "sudo systemctl restart ${{ secrets.SYSTEMD_SERVICE }} && sudo systemctl status ${{ secrets.SYSTEMD_SERVICE }} --no-pager"
+
+  deploy-prod:
+    if: github.ref == 'refs/heads/main'
+    needs: build-jar
+    runs-on: ubuntu-latest
+    environment: producao
+
+    steps:
+      - name: Download jar artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-jar
+          path: dist
+
+      - name: Configure SSH key
+        shell: bash
+        run: |
+          install -m 700 -d ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -p "${{ secrets.SSH_PORT }}" "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Upload jar to VPS
+        shell: bash
+        run: |
+          scp -P "${{ secrets.SSH_PORT }}" dist/app-0.0.1-SNAPSHOT.jar \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.APP_DIR }}/app.jar"
+
+      - name: Restart app service
+        shell: bash
+        run: |
+          ssh -p "${{ secrets.SSH_PORT }}" "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
+            "sudo systemctl restart ${{ secrets.SYSTEMD_SERVICE }} && sudo systemctl status ${{ secrets.SYSTEMD_SERVICE }} --no-pager"

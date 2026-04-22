@@ -22,6 +22,15 @@
                     <h4>Lista de Usuários</h4>
                 </div>
 
+                <div data-app-toast
+                     data-toast-type="success"
+                     th:attr="data-toast-message=${toastSuccess}"
+                     th:if="${toastSuccess != null}"></div>
+                <div data-app-toast
+                     data-toast-type="error"
+                     th:attr="data-toast-message=${toastError}"
+                     th:if="${toastError != null}"></div>
+
                 <form class="row g-2 align-items-end mb-3 tenant-filter-form" method="get" th:action="@{/admin/users}">
                     <div class="col-12 col-md-3">
                         <label class="form-label">Nome</label>
@@ -87,7 +96,7 @@
                                       th:text="${usuario.ativo} ? 'Ativo' : 'Inativo'">Ativo</span>
                             </td>
                             <td>
-                                <div th:replace="~{fragments/table-actions :: userActions(${usuario.tenantId})}"></div>
+                                <div th:replace="~{fragments/table-actions :: userActions(${usuario.id}, ${usuario.tenantId}, ${usuario.role})}"></div>
                             </td>
                         </tr>
                         </tbody>

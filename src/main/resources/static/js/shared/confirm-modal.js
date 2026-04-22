@@ -55,9 +55,20 @@
                 const message = form.dataset.confirmMessage || 'Tem certeza que deseja continuar?';
                 const btnText = form.dataset.confirmBtn     || 'Confirmar';
                 const danger  = 'confirmDanger' in form.dataset;
+                const hasBootstrapModal = typeof window.bootstrap !== 'undefined'
+                    && window.bootstrap.Modal
+                    && typeof window.bootstrap.Modal.getOrCreateInstance === 'function';
+
+                if (!hasBootstrapModal) {
+                    const confirmed = window.confirm(message);
+                    if (confirmed) {
+                        form.submit();
+                    }
+                    return;
+                }
 
                 const modalEl  = getOrCreateModal();
-                const bsModal  = bootstrap.Modal.getOrCreateInstance(modalEl);
+                const bsModal  = window.bootstrap.Modal.getOrCreateInstance(modalEl);
                 const confirmBtn = document.getElementById(MODAL_ID + 'Confirm');
 
                 modalEl.querySelector('.modal-title').textContent = title;

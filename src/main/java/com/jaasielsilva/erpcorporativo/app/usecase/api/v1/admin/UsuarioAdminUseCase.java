@@ -185,6 +185,21 @@ public class UsuarioAdminUseCase {
         usuarioRepository.save(usuario);
     }
 
+    @Transactional
+    public void resetUserPassword(Long userId, String newPassword) {
+        if (!StringUtils.hasText(newPassword)) {
+            throw new ValidationException("Senha de reset é obrigatória.");
+        }
+
+        Usuario usuario = findUsuario(userId);
+        if (usuario.getRole() == Role.SUPER_ADMIN) {
+            throw new ConflictException("O SUPER ADMIN não pode ter a senha resetada por este fluxo.");
+        }
+        usuario.setPassword(passwordEncoder.encode(newPassword));
+        usuario.setAtivo(true);
+        usuarioRepository.save(usuario);
+    }
+
     private Usuario findUsuario(Long id) {
         return usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado: " + id));
