@@ -13,35 +13,37 @@
         </div>
     </a>
 
-    <div class="menu-title">Menu</div>
+    <div class="sidebar-nav">
+        <div class="menu-title">Menu</div>
 
-    <a class="nav-link-custom" th:classappend="${active == 'home'} ? ' active' : ''" th:href="@{/home}">
-        <i class="fa-solid fa-house"></i> Dashboard
-    </a>
-    <a class="nav-link-custom" th:classappend="${active == 'tenants'} ? ' active' : ''" th:href="@{/admin/tenants}">
-        <i class="fa-solid fa-building"></i> Tenants
-    </a>
-    <a class="nav-link-custom" th:classappend="${active == 'modules'} ? ' active' : ''" th:href="@{/admin/modulos}">
-        <i class="fa-solid fa-puzzle-piece"></i> Módulos
-    </a>
-    <a class="nav-link-custom" th:classappend="${active == 'users'} ? ' active' : ''" th:href="@{/admin/users}">
-        <i class="fa-solid fa-users"></i> Usuários
-    </a>
-    <a class="nav-link-custom" th:classappend="${active == 'permissions'} ? ' active' : ''" th:href="@{/admin/permissions}">
-        <i class="fa-solid fa-shield-halved"></i> Permissões
-    </a>
-    <a class="nav-link-custom" th:classappend="${active == 'settings'} ? ' active' : ''" th:href="@{/admin/settings}">
-        <i class="fa-solid fa-gear"></i> Configurações
-    </a>
-    <a class="nav-link-custom" th:classappend="${active == 'reports'} ? ' active' : ''" th:href="@{/admin/reports}">
-        <i class="fa-solid fa-chart-column"></i> Relatórios
-    </a>
-    <a class="nav-link-custom" th:classappend="${active == 'audit'} ? ' active' : ''" th:href="@{/admin/reports/audit}">
-        <i class="fa-solid fa-clock-rotate-left"></i> Auditoria
-    </a>
-    <a class="nav-link-custom" th:classappend="${active == 'contratos'} ? ' active' : ''" th:href="@{/admin/contratos}">
-        <i class="fa-solid fa-file-contract"></i> Contratos
-    </a>
+        <a class="nav-link-custom" th:classappend="${active == 'home'} ? ' active' : ''" th:href="@{/home}">
+            <i class="fa-solid fa-house"></i> Dashboard
+        </a>
+        <a class="nav-link-custom" th:classappend="${active == 'tenants'} ? ' active' : ''" th:href="@{/admin/tenants}">
+            <i class="fa-solid fa-building"></i> Tenants
+        </a>
+        <a class="nav-link-custom" th:classappend="${active == 'modules'} ? ' active' : ''" th:href="@{/admin/modulos}">
+            <i class="fa-solid fa-puzzle-piece"></i> Módulos
+        </a>
+        <a class="nav-link-custom" th:classappend="${active == 'users'} ? ' active' : ''" th:href="@{/admin/users}">
+            <i class="fa-solid fa-users"></i> Usuários
+        </a>
+        <a class="nav-link-custom" th:classappend="${active == 'permissions'} ? ' active' : ''" th:href="@{/admin/permissions}">
+            <i class="fa-solid fa-shield-halved"></i> Permissões
+        </a>
+        <a class="nav-link-custom" th:classappend="${active == 'settings'} ? ' active' : ''" th:href="@{/admin/settings}">
+            <i class="fa-solid fa-gear"></i> Configurações
+        </a>
+        <a class="nav-link-custom" th:classappend="${active == 'reports'} ? ' active' : ''" th:href="@{/admin/reports}">
+            <i class="fa-solid fa-chart-column"></i> Relatórios
+        </a>
+        <a class="nav-link-custom" th:classappend="${active == 'audit'} ? ' active' : ''" th:href="@{/admin/reports/audit}">
+            <i class="fa-solid fa-clock-rotate-left"></i> Auditoria
+        </a>
+        <a class="nav-link-custom" th:classappend="${active == 'contratos'} ? ' active' : ''" th:href="@{/admin/contratos}">
+            <i class="fa-solid fa-file-contract"></i> Contratos
+        </a>
+    </div>
 
     <div class="sidebar-footer">
         <a class="nav-link-custom" th:classappend="${active == 'support'} ? ' active' : ''" th:href="@{/admin/suporte}">

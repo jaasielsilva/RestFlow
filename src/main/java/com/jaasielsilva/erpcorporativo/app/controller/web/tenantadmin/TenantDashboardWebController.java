@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.jaasielsilva.erpcorporativo.app.dto.web.tenantadmin.TenantPortalModuleViewModel;
+import com.jaasielsilva.erpcorporativo.app.dto.web.tenantadmin.TenantPasswordChangeForm;
 import com.jaasielsilva.erpcorporativo.app.dto.web.tenantadmin.TenantUserForm;
 import com.jaasielsilva.erpcorporativo.app.dto.api.admin.user.UsuarioResponse;
 import com.jaasielsilva.erpcorporativo.app.exception.AppException;
@@ -84,6 +85,7 @@ public class TenantDashboardWebController {
         model.addAttribute("pageSubtitle", "Criar usuário para o tenant");
         model.addAttribute("form", new TenantUserForm());
         model.addAttribute("isEdit", false);
+        populateRolePermissions(authentication, model);
         return "tenant/users/form";
     }
 
@@ -105,6 +107,7 @@ public class TenantDashboardWebController {
             model.addAttribute("pageTitle", "Novo Usuário");
             model.addAttribute("pageSubtitle", "Criar usuário para o tenant");
             model.addAttribute("isEdit", false);
+            populateRolePermissions(authentication, model);
             return "tenant/users/form";
         }
 
@@ -119,6 +122,7 @@ public class TenantDashboardWebController {
             model.addAttribute("pageTitle", "Novo Usuário");
             model.addAttribute("pageSubtitle", "Criar usuário para o tenant");
             model.addAttribute("isEdit", false);
+            populateRolePermissions(authentication, model);
             return "tenant/users/form";
         }
     }
@@ -141,6 +145,7 @@ public class TenantDashboardWebController {
         model.addAttribute("form", form);
         model.addAttribute("userId", id);
         model.addAttribute("isEdit", true);
+        populateRolePermissions(authentication, model);
         return "tenant/users/form";
     }
 
@@ -160,6 +165,7 @@ public class TenantDashboardWebController {
             model.addAttribute("pageSubtitle", "Atualizar dados do usuário");
             model.addAttribute("userId", id);
             model.addAttribute("isEdit", true);
+            populateRolePermissions(authentication, model);
             return "tenant/users/form";
         }
 
@@ -175,6 +181,7 @@ public class TenantDashboardWebController {
             model.addAttribute("pageSubtitle", "Atualizar dados do usuário");
             model.addAttribute("userId", id);
             model.addAttribute("isEdit", true);
+            populateRolePermissions(authentication, model);
             return "tenant/users/form";
         }
     }
@@ -209,8 +216,24 @@ public class TenantDashboardWebController {
         model.addAttribute("activeMenu", module.activeKey());
         model.addAttribute("pageTitle", "Configurações");
         model.addAttribute("pageSubtitle", "Preferências e regras do tenant");
-        model.addAttribute("moduleName", "Configurações");
-        return "tenant/placeholder/index";
+        model.addAttribute("passwordMinLength", tenantUserWebService.resolvePasswordMinLength());
+        model.addAttribute("passwordForm", new TenantPasswordChangeForm());
+        return "tenant/settings/index";
+    }
+
+    @PostMapping("/configuracoes/alterar-senha")
+    public String changeOwnPassword(
+            Authentication authentication,
+            @ModelAttribute("passwordForm") TenantPasswordChangeForm form,
+            RedirectAttributes redirectAttributes
+    ) {
+        try {
+            tenantUserWebService.changeOwnPassword(authentication, form);
+            redirectAttributes.addFlashAttribute("toastSuccess", "Senha alterada com sucesso.");
+        } catch (AppException ex) {
+            redirectAttributes.addFlashAttribute("toastError", ex.getMessage());
+        }
+        return "redirect:/app/configuracoes";
     }
 
     @GetMapping("/modulos/{codigo}")
@@ -230,5 +253,10 @@ public class TenantDashboardWebController {
 
     private void populateSidebar(Authentication authentication, Model model) {
         model.addAttribute("tenantModules", tenantPortalWebService.listEnabledModules(authentication));
+    }
+
+    private void populateRolePermissions(Authentication authentication, Model model) {
+        AppUserDetails currentUser = SecurityPrincipalUtils.getCurrentUser(authentication);
+        model.addAttribute("canAssignAdminRole", currentUser.getRole() != Role.USER);
     }
 }

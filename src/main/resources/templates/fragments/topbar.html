@@ -16,7 +16,7 @@
             <div class="topbar-notifications">
                 <button id="notifToggle" type="button" class="icon-btn topbar-bell-btn" aria-expanded="false" aria-controls="notifMenu">
                     <i class="fa-regular fa-bell"></i>
-                    <span class="notif-badge" id="notifBadge">0</span>
+                    <span class="notif-badge" id="notifBadge" hidden>0</span>
                 </button>
                 <div id="notifMenu" class="notif-menu" hidden>
                     <div class="notif-header">
@@ -32,10 +32,18 @@
                     <a class="notif-view-all" id="notifViewAll" th:href="@{/admin/notifications}">Ver todas</a>
                 </div>
             </div>
-            <button class="icon-btn" type="button" aria-label="Configurações" title="Configurações"><i class="fa-solid fa-gear"></i></button>
+            <a id="topbarConfigLink"
+               class="icon-btn"
+               th:href="@{/admin/settings}"
+               aria-label="Configurações"
+               title="Configurações">
+                <i class="fa-solid fa-gear"></i>
+            </a>
             <div class="user-box">
-                <div class="avatar">SA</div>
-                <strong>Super Admin</strong>
+                <div class="avatar"
+                     th:classappend="' ' + ${topbarAvatarRoleClass}"
+                     th:text="${topbarUserInitials}">U</div>
+                <strong th:text="${topbarUserName}">Usuário</strong>
             </div>
         </div>
     </div>
@@ -54,6 +62,7 @@
             const notifList = document.getElementById("notifList");
             const badge = document.getElementById("notifBadge");
             const viewAll = document.getElementById("notifViewAll");
+            const configLink = document.getElementById("topbarConfigLink");
             const isAdminArea = window.location.pathname.startsWith("/admin");
             const isTenantArea = window.location.pathname.startsWith("/app");
             const inSupportedArea = isAdminArea || isTenantArea;
@@ -68,6 +77,9 @@
             }
             if (viewAll) {
                 viewAll.href = isAdminArea ? "/admin/notifications" : "/app/notifications";
+            }
+            if (configLink) {
+                configLink.href = isAdminArea ? "/admin/settings" : "/app/configuracoes";
             }
 
             function renderNotifications(feed) {

@@ -24,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 public class TenantPortalWebService {
 
     private static final String DASHBOARD_CODE    = "DASHBOARD";
+    private static final String SETTINGS_CODE     = "CONFIGURACOES";
 
     private final TenantModuleRepository tenantModuleRepository;
     private final TenantRolePermissionRepository permissionRepository;
@@ -52,6 +53,9 @@ public class TenantPortalWebService {
 
         if (DASHBOARD_CODE.equalsIgnoreCase(codigo)) {
             return dashboardModule();
+        }
+        if (SETTINGS_CODE.equalsIgnoreCase(codigo)) {
+            return fallbackModule(SETTINGS_CODE, AccessLevel.FULL);
         }
 
         boolean enabled = tenantModuleRepository.hasEnabledModuleByCodigo(currentUser.getTenantId(), codigo);

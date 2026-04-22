@@ -12,7 +12,7 @@
 <div class="layout">
     <aside th:replace="~{fragments/sidebar :: sidebar('knowledge')}"></aside>
     <main class="main">
-        <div th:replace="~{fragments/topbar :: topbar('Base de Conhecimento', ${isEdit} ? 'Editar artigo' : 'Novo artigo', false)}"></div>
+        <div th:replace="~{fragments/topbar :: topbar(${pageTitle}, ${pageSubtitle}, true)}"></div>
 
         <section class="bottom-grid" style="grid-template-columns: 1fr;">
             <div class="card-ui">

@@ -12,7 +12,7 @@
 <div class="layout">
     <aside th:replace="~{fragments/sidebar-tenant :: sidebar(${activeMenu})}"></aside>
     <main class="main">
-        <div th:replace="~{fragments/topbar :: topbar(${pageTitle}, ${pageSubtitle}, false)}"></div>
+        <div th:replace="~{fragments/topbar :: topbar(${pageTitle}, ${pageSubtitle}, true)}"></div>
 
         <form class="d-flex gap-2 mb-3" method="get" th:action="@{/app/suporte/dashboard}">
             <select class="form-select" style="max-width: 220px;" name="periodDays">

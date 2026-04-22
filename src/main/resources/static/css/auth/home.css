@@ -2,6 +2,7 @@
         @import url("/css/shared/toast.css");
 
         :root {
+            --sidebar-width: 230px;
             --sidebar: #132238;
             --sidebar-hover: #1b2d47;
             --primary: #2f5da8;
@@ -36,7 +37,7 @@
         }
 
         .sidebar {
-            width: 270px;
+            width: var(--sidebar-width);
             background: linear-gradient(180deg, #16283f 0%, #102033 100%);
             color: #fff;
             display: flex;
@@ -46,6 +47,47 @@
             left: 0;
             bottom: 0;
             padding: 24px 18px;
+            overflow: hidden;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding-right: 4px;
+            margin-right: -4px;
+            overscroll-behavior: contain;
+            scrollbar-width: thin;
+            scrollbar-color: transparent transparent;
+            transition: scrollbar-color .18s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar-nav::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar-nav::-webkit-scrollbar-thumb {
+            background-color: transparent;
+            border-radius: 999px;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+            transition: background-color .18s ease;
+        }
+
+        .sidebar-nav::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(148, 163, 184, .62);
+        }
+
+        .sidebar-nav:hover {
+            scrollbar-color: rgba(148, 163, 184, .45) transparent;
+        }
+
+        .sidebar-nav:hover::-webkit-scrollbar-thumb {
+            background-color: rgba(148, 163, 184, .45);
         }
 
         .brand {
@@ -120,14 +162,15 @@
         }
 
         .sidebar-footer {
-            margin-top: auto;
+            flex-shrink: 0;
             padding-top: 18px;
             border-top: 1px solid rgba(255, 255, 255, .12);
+            background: linear-gradient(180deg, rgba(16, 32, 51, 0) 0%, rgba(16, 32, 51, .98) 24%);
         }
 
         .main {
-            margin-left: 270px;
-            width: calc(100% - 270px);
+            margin-left: var(--sidebar-width);
+            width: calc(100% - var(--sidebar-width));
             padding: 24px;
         }
 
@@ -187,6 +230,10 @@
             border-radius: 14px;
             background: #f3f6fb;
             color: #334155;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
         }
 
         .topbar-notifications {
@@ -298,6 +345,18 @@
             align-items: center;
             justify-content: center;
             font-weight: 700;
+        }
+
+        .avatar.avatar-role-super-admin {
+            background: linear-gradient(135deg, #5b21b6, #a78bfa);
+        }
+
+        .avatar.avatar-role-admin {
+            background: linear-gradient(135deg, #0f766e, #2dd4bf);
+        }
+
+        .avatar.avatar-role-user {
+            background: linear-gradient(135deg, #1d4ed8, #60a5fa);
         }
 
         .stats-grid {
@@ -975,6 +1034,7 @@
                 position: relative;
                 width: 100%;
                 height: auto;
+                max-height: 52vh;
             }
 
             .main {
@@ -998,6 +1058,27 @@
 
             .search-box input {
                 width: 100%;
+            }
+        }
+
+        @media (max-height: 820px) and (min-width: 993px) {
+            .sidebar {
+                padding: 16px 12px;
+            }
+
+            .brand {
+                margin-bottom: 14px;
+            }
+
+            .menu-title {
+                margin-top: 10px;
+            }
+
+            .nav-link-custom {
+                padding: 10px 12px;
+                margin-bottom: 6px;
+                border-radius: 10px;
+                font-size: 14px;
             }
         }
 

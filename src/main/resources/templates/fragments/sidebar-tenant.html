@@ -13,22 +13,24 @@
         </div>
     </a>
 
-    <div class="menu-title">Menu</div>
+    <div class="sidebar-nav">
+        <div class="menu-title">Menu</div>
 
-    <a class="nav-link-custom"
-       th:each="module : ${tenantModules}"
-       th:classappend="${active == module.activeKey} ? ' active' : ''"
-       th:href="${module.path}">
-        <span class="module-nav-icon" th:classappend="' ' + ${module.toneClass}">
-            <i th:class="${module.iconClass}"></i>
-        </span>
-        <span th:text="${module.nome}">Módulo</span>
-    </a>
+        <a class="nav-link-custom"
+           th:each="module : ${tenantModules}"
+           th:classappend="${active == module.activeKey} ? ' active' : ''"
+           th:href="${module.path}">
+            <span class="module-nav-icon" th:classappend="' ' + ${module.toneClass}">
+                <i th:class="${module.iconClass}"></i>
+            </span>
+            <span th:text="${module.nome}">Módulo</span>
+        </a>
 
-    <p class="text-muted" style="font-size:0.85rem; margin: 10px 6px 0;"
-       th:if="${#lists.isEmpty(tenantModules)}">
-        Nenhum módulo habilitado para este tenant.
-    </p>
+        <p class="text-muted" style="font-size:0.85rem; margin: 10px 6px 0;"
+           th:if="${#lists.isEmpty(tenantModules)}">
+            Nenhum módulo habilitado para este tenant.
+        </p>
+    </div>
 
     <div class="sidebar-footer">
         <button type="button" class="nav-link-custom"

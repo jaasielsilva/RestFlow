@@ -12,7 +12,7 @@
 <div class="layout">
     <aside th:replace="~{fragments/sidebar-tenant :: sidebar(${activeMenu})}"></aside>
     <main class="main">
-        <div th:replace="~{fragments/topbar :: topbar(${pageTitle}, ${pageSubtitle}, false)}"></div>
+        <div th:replace="~{fragments/topbar :: topbar(${pageTitle}, ${pageSubtitle}, true)}"></div>
         <div data-app-toast data-toast-type="success" th:attr="data-toast-message=${toastSuccess}" th:if="${toastSuccess != null}"></div>
 
         <section class="bottom-grid" style="grid-template-columns: 1fr;">
